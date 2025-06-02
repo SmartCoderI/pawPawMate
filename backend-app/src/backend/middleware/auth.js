@@ -1,25 +1,37 @@
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-//Auth middleware for Firebase or Cognito
+const protect = async (req, res, next) => {
+  try {
+    let token;
 
+    // Check for token in Authorization header
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
 
-const admin = require('firebase-admin');
-const serviceAccount = require('../../path/to/firebaseServiceAccountKey.json'); // Replace with actual path
-
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
-
-const verifyToken = async (req, res, next) => {
-    const token = req.headers.authorization?.split('Bearer ')[1];
-    if (!token) return res.status(401).json({ error: 'Missing auth token' });
+    if (!token) {
+      return res.status(401).json({ error: 'Not authorized to access this route' });
+    }
 
     try {
-        const decoded = await admin.auth().verifyIdToken(token);
-        req.user = decoded;
-        next();
-    } catch (err) {
-        res.status(403).json({ error: 'Invalid token' });
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // Get user from token
+      const user = await User.findById(decoded.uid).select('-password');
+      if (!user) {
+        return res.status(401).json({ error: 'User not found' });
+      }
+
+      req.user = user;
+      next();
+    } catch (error) {
+      return res.status(401).json({ error: 'Not authorized to access this route' });
     }
+  } catch (error) {
+    res.status(500).json({ error: 'Error authenticating user' });
+  }
 };
 
-module.exports = verifyToken;
+module.exports = protect; 
