@@ -1,72 +1,82 @@
-/*
-this file contains the logic behind each route - what to do when someone uploads a photo, creates a memory page, or calls the API
- */
+const Pet = require("../models/Pet");
 
-const Pet = require("../models/Pet.js");
-const Memory = require("../models/Pet");
-const axios = require("axios");
-
-// Generate AI-based memory story
-const generateMemoryStory = async (req, res) => {
-  const { petName, notes } = req.body;
+// Create a new pet
+exports.createPet = async (req, res) => {
   try {
-    const prompt = `Write a warm, emotional story about a pet named ${petName}. Include these memories: "${notes}".`;
-    const response = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        model: "gpt-4",
-        messages: [{ role: "user", content: prompt }],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-      }
-    );
-    const story = response.data.choices[0].message.content;
-    res.json({ story });
-  } catch (err) {
-    res.status(500).json({ error: "AI generation failed", detail: err.message });
-  }
-};
+    const { owner, name, species, breed, gender, birthDate, profileImage, personalityTraits, notes } = req.body;
 
-// Upload photo to S3 (handled by multer in middleware)
-const uploadPhoto = async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-  res.json({ url: req.file.location });
-};
-
-// Create memory page in DB
-const createMemory = async (req, res) => {
-  const { petName, story, photos, locationVisits } = req.body;
-  try {
-    const memory = await Memory.create({
-      userId: req.user.uid,
-      petName,
-      story,
-      photos,
-      locationVisits,
-      createdAt: new Date(),
+    const newPet = await Pet.create({
+      owner,
+      name,
+      species,
+      breed,
+      gender,
+      birthDate,
+      profileImage,
+      personalityTraits,
+      notes,
     });
-    res.status(201).json(memory);
+
+    res.status(201).json(newPet);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Get all memories for the logged-in user
-const getUserMemories = async (req, res) => {
+// Get all pets
+exports.getAllPets = async (req, res) => {
   try {
-    const memories = await Memory.find({ userId: req.user.uid }).sort({ createdAt: -1 });
-    res.json(memories);
+    const pets = await Pet.find();
+    res.status(200).json(pets);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch memories" });
+    res.status(500).json({ error: err.message });
   }
 };
 
-module.exports = {
-  generateMemoryStory,
-  uploadPhoto,
-  createMemory,
-  getUserMemories,
+// Get pet by ID
+exports.getPetById = async (req, res) => {
+  try {
+    const pet = await Pet.findById(req.params.id);
+    if (!pet) return res.status(404).json({ error: "Pet not found" });
+    res.status(200).json(pet);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update pet
+exports.updatePet = async (req, res) => {
+  try {
+    const updatedPet = await Pet.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!updatedPet) return res.status(404).json({ error: "Pet not found" });
+    res.status(200).json(updatedPet);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// Delete pet
+exports.deletePet = async (req, res) => {
+  try {
+    const deletedPet = await Pet.findByIdAndDelete(req.params.id);
+    if (!deletedPet) return res.status(404).json({ error: "Pet not found" });
+    res.status(200).json({ message: "Pet deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+//upload pet photo
+exports.uploadPetPhoto = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    return res.status(200).json({ imageUrl: req.file.location });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 };
