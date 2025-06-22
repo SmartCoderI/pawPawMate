@@ -1,0 +1,21 @@
+{
+  "name": "pawpawmate-backend",
+  "version": "1.0.0",
+  "description": "Backend server for PawPawMate",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1692.0",
+    "axios": "^1.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "firebase-admin": "^13.4.0",
+    "mongoose": "^7.5.0",
+    "multer": "^2.0.1",
+    "multer-s3": "^3.0.1",
+    "socket.io": "^4.8.1"
+  }
+}
