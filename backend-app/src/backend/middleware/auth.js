@@ -29,4 +29,4 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
-module.exports = protect; 
+module.exports = verifyToken; 
