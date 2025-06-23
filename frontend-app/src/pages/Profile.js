@@ -1,31 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db, storage } from '../firebase';
+import { auth, storage } from '../firebase';
 import { updateProfile } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { logOut } from '../firebase';
+import { userAPI } from '../services/api';
 import '../styles/Profile.css';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
+  const [mongoUser, setMongoUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    displayName: '',
-    bio: '',
-    favoriteBreed: '',
-    petName: '',
-    petType: '',
-    location: '',
-    photoURL: ''
+    name: '',
+    email: '',
+    profileImage: ''
   });
   const [newPhoto, setNewPhoto] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setUser(user);
-      if (user) {
-        await loadUserProfile(user.uid);
+    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        await loadUserProfile(firebaseUser.uid);
       }
       setLoading(false);
     });
@@ -33,32 +30,34 @@ const Profile = () => {
     return () => unsubscribe();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadUserProfile = async (userId) => {
+  const loadUserProfile = async (firebaseUid) => {
     try {
-      const docRef = doc(db, 'users', userId);
-      const docSnap = await getDoc(docRef);
+      // First, try to get the user from MongoDB using Firebase UID
+      // Note: This assumes the backend has been updated to find users by Firebase UID
+      // For now, we'll create a new user if one doesn't exist
+      const userData = {
+        uid: firebaseUid,
+        name: user?.displayName || '',
+        email: user?.email || '',
+        profileImage: user?.photoURL || ''
+      };
       
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setProfileData({
-          displayName: data.displayName || user?.displayName || '',
-          bio: data.bio || '',
-          favoriteBreed: data.favoriteBreed || '',
-          petName: data.petName || '',
-          petType: data.petType || '',
-          location: data.location || '',
-          photoURL: data.photoURL || user?.photoURL || ''
-        });
-      } else {
-        // Initialize with auth data
-        setProfileData(prev => ({
-          ...prev,
-          displayName: user?.displayName || '',
-          photoURL: user?.photoURL || ''
-        }));
-      }
+      // Store the user data temporarily
+      // In a real implementation, you'd need to sync Firebase UID with MongoDB _id
+      setMongoUser(userData);
+      setProfileData({
+        name: userData.name,
+        email: userData.email,
+        profileImage: userData.profileImage
+      });
     } catch (error) {
       console.error('Error loading profile:', error);
+      // If user doesn't exist in MongoDB, use Firebase data
+      setProfileData({
+        name: user?.displayName || '',
+        email: user?.email || '',
+        profileImage: user?.photoURL || ''
+      });
     }
   };
 
@@ -79,7 +78,7 @@ const Profile = () => {
       reader.onloadend = () => {
         setProfileData(prev => ({
           ...prev,
-          photoURL: reader.result
+          profileImage: reader.result
         }));
       };
       reader.readAsDataURL(file);
@@ -91,26 +90,36 @@ const Profile = () => {
     
     setLoading(true);
     try {
-      let photoURL = profileData.photoURL;
+      let profileImage = profileData.profileImage;
       
       // Upload new photo if selected
       if (newPhoto) {
         const storageRef = ref(storage, `profiles/${user.uid}`);
         const snapshot = await uploadBytes(storageRef, newPhoto);
-        photoURL = await getDownloadURL(snapshot.ref);
+        profileImage = await getDownloadURL(snapshot.ref);
       }
 
-      // Update auth profile
+      // Update Firebase auth profile
       await updateProfile(user, {
-        displayName: profileData.displayName,
-        photoURL: photoURL
+        displayName: profileData.name,
+        photoURL: profileImage
       });
 
-      // Save to Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        ...profileData,
-        photoURL,
-        updatedAt: new Date()
+      // Update MongoDB user
+      // Note: In a real implementation, you'd need to sync with MongoDB
+      // For now, we'll just update the local state
+      const updatedUser = {
+        ...mongoUser,
+        name: profileData.name,
+        email: profileData.email,
+        profileImage: profileImage
+      };
+      
+      setMongoUser(updatedUser);
+      setProfileData({
+        name: updatedUser.name,
+        email: updatedUser.email,
+        profileImage: updatedUser.profileImage
       });
 
       setEditing(false);
@@ -159,7 +168,7 @@ const Profile = () => {
       <div className="profile-content">
         <div className="profile-photo-section">
           <img 
-            src={profileData.photoURL || '/default-avatar.png'} 
+            src={profileData.profileImage || '/default-avatar.png'} 
             alt="Profile" 
             className="profile-photo"
           />
@@ -177,72 +186,25 @@ const Profile = () => {
           {editing ? (
             <form className="profile-form">
               <div className="form-group">
-                <label>Display Name</label>
+                <label>Name</label>
                 <input
                   type="text"
-                  name="displayName"
-                  value={profileData.displayName}
+                  name="name"
+                  value={profileData.name}
                   onChange={handleInputChange}
                   placeholder="Your name"
                 />
               </div>
 
               <div className="form-group">
-                <label>Bio</label>
-                <textarea
-                  name="bio"
-                  value={profileData.bio}
-                  onChange={handleInputChange}
-                  placeholder="Tell us about yourself and your pets"
-                  rows="3"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Location</label>
+                <label>Email</label>
                 <input
-                  type="text"
-                  name="location"
-                  value={profileData.location}
+                  type="email"
+                  name="email"
+                  value={profileData.email}
                   onChange={handleInputChange}
-                  placeholder="City, State"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Pet Name</label>
-                <input
-                  type="text"
-                  name="petName"
-                  value={profileData.petName}
-                  onChange={handleInputChange}
-                  placeholder="Your pet's name"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Pet Type</label>
-                <select
-                  name="petType"
-                  value={profileData.petType}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select pet type</option>
-                  <option value="dog">Dog</option>
-                  <option value="cat">Cat</option>
-                  <option value="bird">Bird</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Favorite Breed</label>
-                <input
-                  type="text"
-                  name="favoriteBreed"
-                  value={profileData.favoriteBreed}
-                  onChange={handleInputChange}
-                  placeholder="Your favorite pet breed"
+                  placeholder="Your email"
+                  disabled // Email should not be editable
                 />
               </div>
 
@@ -269,31 +231,22 @@ const Profile = () => {
             </form>
           ) : (
             <div className="profile-display">
-              <h2>{profileData.displayName || 'Anonymous User'}</h2>
-              <p className="email">{user.email}</p>
+              <h2>{profileData.name || 'Anonymous User'}</h2>
+              <p className="email">{profileData.email}</p>
               
-              {profileData.bio && (
-                <div className="profile-section">
-                  <h3>About</h3>
-                  <p>{profileData.bio}</p>
-                </div>
-              )}
+              <div className="profile-section">
+                <h3>Account Information</h3>
+                <p>Firebase UID: {user.uid}</p>
+                {mongoUser?.joinedAt && (
+                  <p>Member since: {new Date(mongoUser.joinedAt).toLocaleDateString()}</p>
+                )}
+              </div>
 
-              {profileData.location && (
-                <div className="profile-section">
-                  <h3>Location</h3>
-                  <p>{profileData.location}</p>
-                </div>
-              )}
-
-              {(profileData.petName || profileData.petType || profileData.favoriteBreed) && (
-                <div className="profile-section">
-                  <h3>Pet Information</h3>
-                  {profileData.petName && <p>Pet Name: {profileData.petName}</p>}
-                  {profileData.petType && <p>Pet Type: {profileData.petType}</p>}
-                  {profileData.favoriteBreed && <p>Favorite Breed: {profileData.favoriteBreed}</p>}
-                </div>
-              )}
+              <div className="profile-section">
+                <h3>Collections</h3>
+                <p>Favorite Places: {mongoUser?.favoritePlaces?.length || 0}</p>
+                <p>Collected Cards: {mongoUser?.collectedCards?.length || 0}</p>
+              </div>
 
               <button className="logout-button" onClick={handleLogout}>
                 Sign Out

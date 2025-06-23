@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import LostPets from './pages/LostPets';
 import Profile from './pages/Profile';
+import Pets from './pages/Pets';
 import Login from './pages/Login';
 import './App.css';
 
@@ -45,12 +46,20 @@ function Navigation() {
               Lost Pets
             </Link>
             {user && (
-              <Link 
-                to="/dashboard" 
-                className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link 
+                  to="/pets" 
+                  className={`nav-link ${location.pathname === '/pets' ? 'active' : ''}`}
+                >
+                  My Pets
+                </Link>
+                <Link 
+                  to="/dashboard" 
+                  className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
+                >
+                  Dashboard
+                </Link>
+              </>
             )}
           </div>
 
@@ -95,6 +104,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/lost-pets" element={<LostPets />} />
+            <Route path="/pets" element={<Pets />} />
             <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
