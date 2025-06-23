@@ -1,33 +1,42 @@
-import express from 'express';
-import { registerPet, findNearbyPets } from '../controllers/petController.js';
-
-
 /*
-defines HTTP endpoints related to pets and their memory pages.
-Route incoming requests to the corresponding controller functions.
- */
+Defines HTTP endpoints related to pets.
+Routes incoming requests to the corresponding controller functions.
+*/
 
-const express = require('express');
-const router = express.Router();
-const petController = require('../controllers/petController');
-const verifyToken = require('../middleware/auth');
-const upload = require('../utils/upload');
+const express = require("express");
+const petRouter = express.Router();
+const {
+  createPet,
+  getAllPets,
+  getPetById,
+  updatePet,
+  deletePet,
+  uploadPetPhoto,
+} = require("../controllers/petController");
+const upload = require("../utils/upload");
+const verifyToken = require("../middleware/auth");
 
-// Memory generation via AI (authenticated)
-//calls Gemini to generate a story from notes and photos
-router.post('/generate-memory', verifyToken, petController.generateMemoryStory);
+// Create a new pet
+petRouter.post("/", createPet); //dev only
+// petRouter.post("/", verifyToken, createPet);
 
-// Upload pet photo (authenticated)
-//upload a photo to AWS S3 using multer and returns a URL
-router.post('/upload-photo', verifyToken, upload.single('photo'), petController.uploadPhoto);
+// Get all pets for the authenticated user
+petRouter.get("/", getAllPets); //dev only
+// petRouter.get("/", verifyToken, getAllPets);
 
-// Create a memory page entry
-//stores the memory record in MongoDB
-router.post('/create', verifyToken, petController.createMemory);
+// Get a specific pet by ID
+petRouter.get("/:id", getPetById); //dev only
+// petRouter.get("/:id", verifyToken, getPetById);
 
-// Get all memory pages for a user
-// get all stored memory pages for the current user
-router.get('/memories', verifyToken, petController.getUserMemories);
+// Update a pet
+petRouter.put("/:id", updatePet); //dev only
+// petRouter.put("/:id", verifyToken, updatePet);
 
-module.exports = router;
+// Delete a pet
+petRouter.delete("/:id", deletePet); //dev only
+// petRouter.delete("/:id", verifyToken, deletePet);
 
+// Upload photos
+petRouter.post("/upload-photo", upload.single("photo"), uploadPetPhoto);
+
+module.exports = petRouter;

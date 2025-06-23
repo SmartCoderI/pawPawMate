@@ -2,14 +2,19 @@
 //but it doesn't start the server
 
 //express: web framework
-const express = require('express');
+const express = require("express");
 //cors: allows frontend running on a different port to access this backend
-const cors = require('cors');
+const cors = require("cors");
 
 //imports route handler modules that map HTTP requests to controller logic
-const petRoutes = require('./routes/petRoutes');
-const resourceRoutes = require('./routes/resourceRoutes');
-const lostPetRoutes = require('./routes/lostPetRoutes');
+const userRoutes = require("./routes/userRoutes");
+const petRoutes = require("./routes/petRoutes");
+const placeRoutes = require("./routes/placeRoutes");
+const cardRoutes = require("./routes/cardRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+
+//////////////// test /////////////////
+// const testDbRoute = require("./routes/testDbRoute");
 
 //initialize the Express app instance
 const app = express();
@@ -19,8 +24,14 @@ app.use(cors());
 // Parse incoming JSON request bodies
 app.use(express.json());
 // Register route handlers
-app.use('/api/pets', petRoutes); //handle pet-related routes
-app.use('/api/resources', resourceRoutes); //handle resource locations
-app.use('/api/lostpets', lostPetRoutes); //handle lost pet reports and alerts
+app.use("/api/users", userRoutes);
+app.use("/api/pets", petRoutes);
+app.use("/api/places", placeRoutes);
+app.use("/api/cards", cardRoutes);
+app.use("/api/reviews", reviewRoutes);
+
+// //////////////// test /////////////////
+// app.use("/api/test-db", testDbRoute);
+
 // Export app to be used by server.js
 module.exports = app;
