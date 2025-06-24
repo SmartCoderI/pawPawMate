@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { auth } from '../firebase';
+import { useUser } from '../contexts/UserContext';
 import { petAPI } from '../services/api';
 import '../styles/Pets.css';
 
 const Pets = () => {
-  const [user, setUser] = useState(null);
+  const { firebaseUser, mongoUser, mongoUserId } = useUser();
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -22,25 +22,24 @@ const Pets = () => {
   const [newTraitInput, setNewTraitInput] = useState('');
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setUser(user);
-      if (user) {
-        await loadUserPets();
-      }
+    if (mongoUserId) {
+      loadUserPets();
+    } else {
       setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }
+  }, [mongoUserId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadUserPets = async () => {
     try {
-      // Note: This assumes the backend filters pets by authenticated user
-      const petsData = await petAPI.getAllPets();
+      setLoading(true);
+      // Get pets filtered by MongoDB user ID
+      const petsData = await petAPI.getAllPets(mongoUserId);
       setPets(petsData);
     } catch (error) {
       console.error('Error loading pets:', error);
       setPets([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,27 +72,35 @@ const Pets = () => {
     const file = e.target.files[0];
     if (file) {
       try {
-        const response = await petAPI.uploadPetPhoto(file);
-        setFormData(prev => ({
-          ...prev,
-          profileImage: response.imageUrl
-        }));
+        // For now, we'll create a preview URL
+        // In production, you'd upload to a storage service
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFormData(prev => ({
+            ...prev,
+            profileImage: reader.result
+          }));
+        };
+        reader.readAsDataURL(file);
       } catch (error) {
-        console.error('Error uploading photo:', error);
-        alert('Error uploading photo. Please try again.');
+        console.error('Error handling photo:', error);
+        alert('Error handling photo. Please try again.');
       }
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user) return;
+    if (!mongoUserId) {
+      alert('Please complete your profile first');
+      return;
+    }
 
     setLoading(true);
     try {
       const petData = {
         ...formData,
-        owner: user.uid // This needs to be the MongoDB user ID in real implementation
+        owner: mongoUserId // Use MongoDB user ID
       };
 
       if (editingPet) {
@@ -172,7 +179,7 @@ const Pets = () => {
     return <div className="loading">Loading...</div>;
   }
 
-  if (!user) {
+  if (!firebaseUser || !mongoUser) {
     return (
       <div className="pets-container">
         <div className="auth-prompt">

@@ -5,10 +5,13 @@ Routes incoming requests to the corresponding controller functions.
 
 const express = require("express");
 const router = express.Router();
-const { createUser, getUserById, updateUser, deleteUser } = require("../controllers/userController");
+const { createUser, getUserById, getUserByFirebaseUid, updateUser, deleteUser } = require("../controllers/userController");
 
 // Create a new user
 router.post("/", createUser);
+
+// Get user by Firebase UID
+router.get("/firebase/:uid", getUserByFirebaseUid);
 
 // Get user by ID
 router.get("/:id", getUserById);

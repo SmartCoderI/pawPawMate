@@ -1,115 +1,191 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { auth } from './firebase';
+import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { UserProvider, useUser } from './contexts/UserContext';
+import { logOut } from './firebase';
 import Home from './pages/Home';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import LostPets from './pages/LostPets';
 import Profile from './pages/Profile';
-import Pets from './pages/Pets';
-import Login from './pages/Login';
 import './App.css';
 
-function Navigation() {
-  const [user, setUser] = useState(null);
+// Navigation component that uses UserContext
+const Navigation = () => {
+  const { firebaseUser, mongoUser, loading } = useUser();
   const [showLogin, setShowLogin] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef(null);
 
+  // Debug logging
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
+    console.log('Navigation - User state changed:', {
+      hasFirebaseUser: !!firebaseUser,
+      hasMongoUser: !!mongoUser,
+      loading,
+      firebaseUserEmail: firebaseUser?.email
     });
+  }, [firebaseUser, mongoUser, loading]);
 
-    return () => unsubscribe();
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
+
+  // Close login modal when user becomes authenticated
+  useEffect(() => {
+    if (firebaseUser && showLogin) {
+      console.log('Navigation - User authenticated, closing login modal');
+      setShowLogin(false);
+    }
+  }, [firebaseUser, showLogin]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      setShowUserMenu(false);
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  // Show loading state while authentication is being determined
+  if (loading) {
+    return (
+      <nav className="navbar">
+        <div className="nav-container">
+          <Link to="/" className="nav-logo">
+            🐾 PawPawMate
+          </Link>
+          <ul className="nav-menu">
+            <li className="nav-item">
+              <Link to="/" className="nav-link">Home</Link>
+            </li>
+            <li className="nav-item">
+              <span className="nav-link">Loading...</span>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <>
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="nav-logo">
-            <span className="logo-icon">🐾</span>
-            PawPawMate
+            🐾 PawPawMate
           </Link>
-          
-          <div className="nav-menu">
-            <Link 
-              to="/" 
-              className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
-            >
-              Map
-            </Link>
-            <Link 
-              to="/lost-pets" 
-              className={`nav-link ${location.pathname === '/lost-pets' ? 'active' : ''}`}
-            >
-              Lost Pets
-            </Link>
-            {user && (
+          <ul className="nav-menu">
+            <li className="nav-item">
+              <Link to="/" className="nav-link">Home</Link>
+            </li>
+            {firebaseUser && (
               <>
-                <Link 
-                  to="/pets" 
-                  className={`nav-link ${location.pathname === '/pets' ? 'active' : ''}`}
-                >
-                  My Pets
-                </Link>
-                <Link 
-                  to="/dashboard" 
-                  className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
-                >
-                  Dashboard
-                </Link>
+                <li className="nav-item">
+                  <Link to="/dashboard" className="nav-link">Dashboard</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/lost-pets" className="nav-link">Lost Pets</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/profile" className="nav-link">Profile</Link>
+                </li>
               </>
             )}
-          </div>
-
-          <div className="nav-auth">
-            {user ? (
-              <div 
-                className="user-menu clickable"
-                onClick={() => navigate('/profile')}
-                title="Go to Profile"
+            {firebaseUser ? (
+              <li className="nav-item">
+                <div className="user-menu-container" ref={userMenuRef}>
+                  <button 
+                    className="user-menu-button"
+                    onClick={() => setShowUserMenu(!showUserMenu)}
               >
                 <img 
-                  src={user.photoURL || '/default-avatar.png'} 
+                      src={mongoUser?.profileImage || firebaseUser?.photoURL || '/default-avatar.png'} 
                   alt="Profile" 
-                  className="nav-avatar"
+                      className="user-avatar"
                 />
-                <span className="user-name">{user.displayName || 'User'}</span>
+                    <span className="user-name">
+                      {mongoUser?.name || firebaseUser?.displayName || 'User'}
+                    </span>
+                    <span className="dropdown-arrow">▼</span>
+                  </button>
+                  {showUserMenu && (
+                    <div className="user-dropdown">
+                      <Link 
+                        to="/profile" 
+                        className="dropdown-item"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        View Profile
+                      </Link>
+                      <button 
+                        className="dropdown-item logout-item"
+                        onClick={handleLogout}
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
               </div>
+              </li>
             ) : (
+              <li className="nav-item">
               <button 
-                className="login-button"
-                onClick={() => setShowLogin(true)}
+                  className="nav-link signin-button" 
+                  onClick={() => {
+                    console.log('Opening sign-in modal');
+                    setShowLogin(true);
+                  }}
               >
                 Sign In
               </button>
+              </li>
             )}
-          </div>
+          </ul>
         </div>
       </nav>
 
-      <Login isOpen={showLogin} onClose={() => setShowLogin(false)} />
+      {showLogin && (
+        <Login 
+          isOpen={showLogin} 
+          onClose={() => {
+            console.log('Closing sign-in modal');
+            setShowLogin(false);
+          }} 
+        />
+      )}
     </>
   );
-}
+};
 
 function App() {
   return (
+    <UserProvider>
     <Router>
       <div className="App">
         <Navigation />
+
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/lost-pets" element={<LostPets />} />
-            <Route path="/pets" element={<Pets />} />
             <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
       </div>
     </Router>
+    </UserProvider>
   );
 }
 

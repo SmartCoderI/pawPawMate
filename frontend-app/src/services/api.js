@@ -1,6 +1,12 @@
 import axios from 'axios';
+import { auth } from '../firebase';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+console.log('API Configuration:', {
+  'process.env.REACT_APP_API_URL': process.env.REACT_APP_API_URL,
+  'API_BASE_URL': API_BASE_URL
+});
 
 // Create axios instance with default config
 const api = axios.create({
@@ -12,10 +18,16 @@ const api = axios.create({
 
 // Add auth token to requests if available
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
+  async (config) => {
+    try {
+      // Get Firebase ID token
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
       config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error('Error getting auth token:', error);
     }
     return config;
   },
@@ -38,6 +50,31 @@ export const userAPI = {
     return response.data;
   },
 
+  // Get user by Firebase UID
+  getUserByFirebaseUid: async (uid) => {
+    try {
+      console.log('API: Looking for user with Firebase UID:', uid);
+      
+      // Use the new direct endpoint
+      const response = await api.get(`/users/firebase/${uid}`);
+      console.log('API: Found user with matching UID:', response.data);
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 404) {
+        console.log('API: No user found with UID:', uid);
+        return null;
+      }
+      console.error('Error finding user by Firebase UID:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      return null;
+    }
+  },
+
   // Update user profile
   updateUser: async (userId, userData) => {
     const response = await api.put(`/users/${userId}`, userData);
@@ -49,6 +86,19 @@ export const userAPI = {
     const response = await api.delete(`/users/${userId}`);
     return response.data;
   },
+
+  // Helper function to update existing user's UID
+  updateUserUid: async (userId, newUid) => {
+    try {
+      console.log('API: Updating user UID:', { userId, newUid });
+      const response = await api.put(`/users/${userId}`, { uid: newUid });
+      console.log('API: Successfully updated user UID:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating user UID:', error);
+      throw error;
+    }
+  },
 };
 
 // Pet API calls
@@ -59,10 +109,19 @@ export const petAPI = {
     return response.data;
   },
 
-  // Get all pets (for a user)
-  getAllPets: async () => {
-    const response = await api.get('/pets');
+  // Get all pets (filtered by owner)
+  getAllPets: async (ownerId) => {
+    try {
+      let url = '/pets';
+      if (ownerId) {
+        url += `?owner=${ownerId}`;
+      }
+      const response = await api.get(url);
     return response.data;
+    } catch (error) {
+      console.error('Error fetching pets:', error);
+      return [];
+    }
   },
 
   // Get pet by ID
@@ -146,15 +205,37 @@ export const reviewAPI = {
 
 // Card API calls
 export const cardAPI = {
+  // Get all cards
+  getAllCards: async () => {
+    try {
+      const response = await api.get('/cards');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+      return [];
+    }
+  },
+
   // Get user's cards
   getUserCards: async (userId) => {
-    const response = await api.get(`/cards/user/${userId}`);
-    return response.data;
+    try {
+      const response = await api.get(`/cards/user/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user cards:', error);
+      return [];
+    }
   },
 
   // Create a card
   createCard: async (cardData) => {
     const response = await api.post('/cards', cardData);
+    return response.data;
+  },
+
+  // Get card by ID
+  getCardById: async (cardId) => {
+    const response = await api.get(`/cards/${cardId}`);
     return response.data;
   },
 };
