@@ -334,7 +334,7 @@ const Home = () => {
           ))}
         </div>
 
-        {loading && <div className="loading-indicator">Loading locations...</div>}
+        {/* {loading && <div className="loading-indicator">Loading locations...</div>} */}
       </div>
 
       <div className="map-wrapper">
