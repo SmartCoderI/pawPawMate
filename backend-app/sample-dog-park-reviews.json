@@ -1,0 +1,270 @@
+{
+  "sampleReviews": [
+    {
+      "placeId": "64f8a1b2c3d4e5f6a7b8c9d0",
+      "rating": 5,
+      "comment": "Excellent dog park! Very clean, well-maintained, and the community is amazing. My dog loves it here.",
+      "tags": ["clean", "friendly", "well-maintained", "spacious"],
+      "dogParkReview": {
+        "accessAndLocation": {
+          "parkingDifficulty": "easy",
+          "handicapFriendly": true,
+          "parkingToParkDistance": "close"
+        },
+        "hoursOfOperation": {
+          "is24Hours": false,
+          "dawnToDusk": true,
+          "specificHours": "6 AM - 10 PM"
+        },
+        "safetyLevel": {
+          "fencingCondition": "fully_enclosed",
+          "doubleGated": true,
+          "nightIllumination": true,
+          "firstAidStation": true,
+          "emergencyContact": true,
+          "surveillanceCameras": true,
+          "noSharpEdges": true
+        },
+        "sizeAndLayout": {
+          "separateAreas": "yes_small_large",
+          "runningSpace": "enough",
+          "drainagePerformance": "excellent"
+        },
+        "amenitiesAndFacilities": {
+          "seatingLevel": "bench",
+          "shadeAndCover": "trees",
+          "wasteStation": true,
+          "biodegradableBags": true,
+          "restroom": true,
+          "waterAccess": "drinking_fountain"
+        },
+        "maintenanceAndCleanliness": {
+          "overallCleanliness": "good",
+          "trashLevel": "clean",
+          "odorLevel": "none",
+          "equipmentCondition": "good"
+        },
+        "crowdAndSocialDynamics": {
+          "peakDays": ["saturday", "sunday"],
+          "peakHours": "5-7 PM",
+          "socialEvents": ["dog_meet_events", "training_classes"],
+          "ownerCulture": "excellent",
+          "wastePickup": "always",
+          "ownerFriendliness": "very_friendly"
+        },
+        "rulesPoliciesAndCommunity": {
+          "leashPolicy": "off_leash_allowed",
+          "vaccinationRequired": true,
+          "aggressiveDogPolicy": "strict",
+          "otherRules": "Dogs must be supervised at all times. No aggressive behavior tolerated.",
+          "communityEnforcement": "strict"
+        }
+      }
+    },
+    {
+      "placeId": "64f8a1b2c3d4e5f6a7b8c9d0",
+      "rating": 4,
+      "comment": "Great park overall, but could use more shade during summer months.",
+      "tags": ["good", "needs-shade", "friendly"],
+      "dogParkReview": {
+        "accessAndLocation": {
+          "parkingDifficulty": "moderate",
+          "handicapFriendly": true,
+          "parkingToParkDistance": "moderate"
+        },
+        "hoursOfOperation": {
+          "is24Hours": false,
+          "dawnToDusk": true,
+          "specificHours": "7 AM - 9 PM"
+        },
+        "safetyLevel": {
+          "fencingCondition": "fully_enclosed",
+          "doubleGated": true,
+          "nightIllumination": false,
+          "firstAidStation": false,
+          "emergencyContact": true,
+          "surveillanceCameras": false,
+          "noSharpEdges": true
+        },
+        "sizeAndLayout": {
+          "separateAreas": "yes_small_large",
+          "runningSpace": "enough",
+          "drainagePerformance": "good"
+        },
+        "amenitiesAndFacilities": {
+          "seatingLevel": "bench",
+          "shadeAndCover": "trees",
+          "wasteStation": true,
+          "biodegradableBags": true,
+          "restroom": false,
+          "waterAccess": "fire_hydrant"
+        },
+        "maintenanceAndCleanliness": {
+          "overallCleanliness": "good",
+          "trashLevel": "moderate",
+          "odorLevel": "mild",
+          "equipmentCondition": "fair"
+        },
+        "crowdAndSocialDynamics": {
+          "peakDays": ["friday", "saturday", "sunday"],
+          "peakHours": "6-8 PM",
+          "socialEvents": ["dog_meet_events"],
+          "ownerCulture": "good",
+          "wastePickup": "usually",
+          "ownerFriendliness": "friendly"
+        },
+        "rulesPoliciesAndCommunity": {
+          "leashPolicy": "off_leash_allowed",
+          "vaccinationRequired": true,
+          "aggressiveDogPolicy": "moderate",
+          "otherRules": "Standard dog park rules apply",
+          "communityEnforcement": "moderate"
+        }
+      }
+    },
+    {
+      "placeId": "64f8a1b2c3d4e5f6a7b8c9d0",
+      "rating": 3,
+      "comment": "Decent park but needs better maintenance. Some areas are muddy after rain.",
+      "tags": ["needs-maintenance", "muddy", "okay"],
+      "dogParkReview": {
+        "accessAndLocation": {
+          "parkingDifficulty": "difficult",
+          "handicapFriendly": false,
+          "parkingToParkDistance": "far"
+        },
+        "hoursOfOperation": {
+          "is24Hours": false,
+          "dawnToDusk": false,
+          "specificHours": "8 AM - 8 PM"
+        },
+        "safetyLevel": {
+          "fencingCondition": "partially_enclosed",
+          "doubleGated": false,
+          "nightIllumination": false,
+          "firstAidStation": false,
+          "emergencyContact": false,
+          "surveillanceCameras": false,
+          "noSharpEdges": false
+        },
+        "sizeAndLayout": {
+          "separateAreas": "no",
+          "runningSpace": "limited",
+          "drainagePerformance": "poor"
+        },
+        "amenitiesAndFacilities": {
+          "seatingLevel": "no_seat",
+          "shadeAndCover": "none",
+          "wasteStation": true,
+          "biodegradableBags": false,
+          "restroom": false,
+          "waterAccess": "none"
+        },
+        "maintenanceAndCleanliness": {
+          "overallCleanliness": "neutral",
+          "trashLevel": "moderate",
+          "odorLevel": "mild",
+          "equipmentCondition": "poor"
+        },
+        "crowdAndSocialDynamics": {
+          "peakDays": ["saturday", "sunday"],
+          "peakHours": "4-6 PM",
+          "socialEvents": ["none"],
+          "ownerCulture": "fair",
+          "wastePickup": "sometimes",
+          "ownerFriendliness": "neutral"
+        },
+        "rulesPoliciesAndCommunity": {
+          "leashPolicy": "mixed_areas",
+          "vaccinationRequired": false,
+          "aggressiveDogPolicy": "lenient",
+          "otherRules": "Basic rules posted but not enforced",
+          "communityEnforcement": "lenient"
+        }
+      }
+    },
+    {
+      "placeId": "64f8a1b2c3d4e5f6a7b8c9d0",
+      "rating": 2,
+      "comment": "Not impressed. Poor maintenance and some aggressive dogs. Would not recommend.",
+      "tags": ["poor-maintenance", "aggressive-dogs", "not-recommended"],
+      "dogParkReview": {
+        "accessAndLocation": {
+          "parkingDifficulty": "difficult",
+          "handicapFriendly": false,
+          "parkingToParkDistance": "far"
+        },
+        "hoursOfOperation": {
+          "is24Hours": false,
+          "dawnToDusk": false,
+          "specificHours": "9 AM - 6 PM"
+        },
+        "safetyLevel": {
+          "fencingCondition": "not_enclosed",
+          "doubleGated": false,
+          "nightIllumination": false,
+          "firstAidStation": false,
+          "emergencyContact": false,
+          "surveillanceCameras": false,
+          "noSharpEdges": false
+        },
+        "sizeAndLayout": {
+          "separateAreas": "no",
+          "runningSpace": "tight",
+          "drainagePerformance": "poor"
+        },
+        "amenitiesAndFacilities": {
+          "seatingLevel": "no_seat",
+          "shadeAndCover": "none",
+          "wasteStation": false,
+          "biodegradableBags": false,
+          "restroom": false,
+          "waterAccess": "none"
+        },
+        "maintenanceAndCleanliness": {
+          "overallCleanliness": "bad",
+          "trashLevel": "dirty",
+          "odorLevel": "strong",
+          "equipmentCondition": "poor"
+        },
+        "crowdAndSocialDynamics": {
+          "peakDays": ["saturday"],
+          "peakHours": "3-5 PM",
+          "socialEvents": ["none"],
+          "ownerCulture": "poor",
+          "wastePickup": "rarely",
+          "ownerFriendliness": "unfriendly"
+        },
+        "rulesPoliciesAndCommunity": {
+          "leashPolicy": "leash_required",
+          "vaccinationRequired": false,
+          "aggressiveDogPolicy": "none",
+          "otherRules": "Rules exist but completely ignored",
+          "communityEnforcement": "none"
+        }
+      }
+    }
+  ],
+  "testCases": {
+    "minimalReview": {
+      "placeId": "64f8a1b2c3d4e5f6a7b8c9d0",
+      "rating": 4,
+      "comment": "Good park"
+    },
+    "partialDogParkReview": {
+      "placeId": "64f8a1b2c3d4e5f6a7b8c9d0",
+      "rating": 4,
+      "comment": "Good park with some amenities",
+      "dogParkReview": {
+        "accessAndLocation": {
+          "parkingDifficulty": "easy",
+          "handicapFriendly": true
+        },
+        "amenitiesAndFacilities": {
+          "wasteStation": true,
+          "waterAccess": "drinking_fountain"
+        }
+      }
+    }
+  }
+} 

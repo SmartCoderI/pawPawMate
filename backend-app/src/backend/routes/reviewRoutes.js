@@ -5,7 +5,7 @@ Handles posting and retrieving reviews.
 
 const express = require("express");
 const reviewRouter = express.Router();
-const { addReview, getReviewsForPlace } = require("../controllers/reviewController");
+const { addReview, getReviewsForPlace, getDogParkReviewStats } = require("../controllers/reviewController");
 const verifyToken = require("../middleware/auth");
 
 // Add a new review to a place
@@ -13,5 +13,8 @@ reviewRouter.post("/", verifyToken, addReview);
 
 // Get all reviews for a place
 reviewRouter.get("/:placeId", getReviewsForPlace);
+
+// Get dog park specific review statistics
+reviewRouter.get("/:placeId/dog-park-stats", getDogParkReviewStats);
 
 module.exports = reviewRouter;
