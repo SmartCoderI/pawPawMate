@@ -2,7 +2,7 @@ const Card = require("../models/Card");
 
 exports.createCard = async (req, res) => {
   try {
-    const card = await Card.create({ ...req.body, user: req.user.uid });
+    const card = await Card.create(req.body);
     res.status(201).json(card);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -11,10 +11,24 @@ exports.createCard = async (req, res) => {
 
 exports.getCards = async (req, res) => {
   try {
-    const query = req.query.place ? { place: req.query.place } : { user: req.user.uid };
-    const cards = await Card.find(query);
+    const cards = await Card.find().populate('place').populate('createdBy', 'name email');
     res.json(cards);
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get cards by user ID
+exports.getCardsByUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    console.log('Backend: Getting cards for user:', userId);
+    
+    const cards = await Card.find({ createdBy: userId }).populate('place');
+    console.log('Backend: Found cards for user:', cards.length);
+    res.status(200).json(cards);
+  } catch (err) {
+    console.error('Backend: Error getting cards by user:', err);
     res.status(500).json({ error: err.message });
   }
 };
