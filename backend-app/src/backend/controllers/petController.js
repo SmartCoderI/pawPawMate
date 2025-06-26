@@ -23,12 +23,37 @@ exports.createPet = async (req, res) => {
   }
 };
 
-// Get all pets
+// Get all pets (with optional owner filter)
 exports.getAllPets = async (req, res) => {
   try {
-    const pets = await Pet.find();
+    const { owner } = req.query;
+    let query = {};
+    
+    if (owner) {
+      query.owner = owner;
+    }
+    
+    console.log('Backend: Getting pets with query:', query);
+    const pets = await Pet.find(query).populate('owner', 'name email');
+    console.log('Backend: Found pets:', pets.length);
     res.status(200).json(pets);
   } catch (err) {
+    console.error('Backend: Error getting pets:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get pets by owner ID
+exports.getPetsByOwner = async (req, res) => {
+  try {
+    const ownerId = req.params.ownerId;
+    console.log('Backend: Getting pets for owner:', ownerId);
+    
+    const pets = await Pet.find({ owner: ownerId }).populate('owner', 'name email');
+    console.log('Backend: Found pets for owner:', pets.length);
+    res.status(200).json(pets);
+  } catch (err) {
+    console.error('Backend: Error getting pets by owner:', err);
     res.status(500).json({ error: err.message });
   }
 };

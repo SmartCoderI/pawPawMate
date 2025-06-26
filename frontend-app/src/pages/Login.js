@@ -1,62 +1,63 @@
-import React, { useState } from 'react';
-import { signInWithGoogle, auth } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import { signIn, signUp, signInWithGoogle, auth } from '../firebase';
+import { userAPI } from '../services/api';
+import { useUser } from '../contexts/UserContext';
 import '../styles/Auth.css';
 
 const Login = ({ isOpen, onClose }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { firebaseUser, loading: userLoading } = useUser();
 
-  const handleEmailAuth = async (e) => {
+  useEffect(() => {
+    console.log('Login modal - firebaseUser changed:', firebaseUser?.email);
+    console.log('Login modal - isOpen:', isOpen);
+    
+    // If user logs in successfully, close the modal
+    if (firebaseUser && isOpen && !userLoading) {
+      console.log('User authenticated, closing modal');
+      onClose();
+    }
+  }, [firebaseUser, isOpen, onClose, userLoading]);
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setEmail('');
+      setPassword('');
+      setDisplayName('');
+      setError('');
+      setIsSignUp(false);
+      setLoading(false);
+    }
+  }, [isOpen]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
+      console.log('Attempting authentication...');
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        // Sign up new user
+        console.log('Signing up new user:', email);
+        await signUp(email, password, displayName);
+        // UserContext will automatically create MongoDB user
+        // Modal will close via useEffect
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        // Sign in existing user
+        console.log('Signing in user:', email);
+        await signIn(email, password);
+        // Modal will close via useEffect
       }
-      onClose();
     } catch (error) {
-      // Handle specific Firebase auth errors
-      let errorMessage = 'An error occurred. Please try again.';
-      
-      switch (error.code) {
-        case 'auth/invalid-email':
-          errorMessage = 'Invalid email address.';
-          break;
-        case 'auth/user-disabled':
-          errorMessage = 'This account has been disabled.';
-          break;
-        case 'auth/user-not-found':
-          errorMessage = 'No account found with this email.';
-          break;
-        case 'auth/wrong-password':
-          errorMessage = 'Incorrect password.';
-          break;
-        case 'auth/email-already-in-use':
-          errorMessage = 'An account already exists with this email.';
-          break;
-        case 'auth/weak-password':
-          errorMessage = 'Password should be at least 6 characters.';
-          break;
-        case 'auth/operation-not-allowed':
-          errorMessage = 'Email/password accounts are not enabled. Please contact support.';
-          break;
-        case 'auth/invalid-api-key':
-          errorMessage = 'Invalid API key. Please check Firebase configuration.';
-          break;
-        default:
-          errorMessage = error.message;
-      }
-      
-      setError(errorMessage);
-    } finally {
+      console.error('Authentication error:', error);
+      setError(error.message);
       setLoading(false);
     }
   };
@@ -64,26 +65,15 @@ const Login = ({ isOpen, onClose }) => {
   const handleGoogleSignIn = async () => {
     setError('');
     setLoading(true);
-    
+
     try {
+      console.log('Attempting Google sign-in...');
       await signInWithGoogle();
-      onClose();
+      // UserContext will handle MongoDB sync
+      // Modal will close via useEffect
     } catch (error) {
-      // Handle Google sign-in specific errors
-      let errorMessage = 'Failed to sign in with Google.';
-      
-      if (error.code === 'auth/popup-closed-by-user') {
-        errorMessage = 'Sign-in popup was closed.';
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        errorMessage = 'Only one popup request is allowed at a time.';
-      } else if (error.code === 'auth/popup-blocked') {
-        errorMessage = 'Sign-in popup was blocked by the browser.';
-      } else if (error.code === 'auth/operation-not-allowed') {
-        errorMessage = 'Google sign-in is not enabled. Please contact support.';
-      }
-      
-      setError(errorMessage);
-    } finally {
+      console.error('Google sign-in error:', error);
+      setError(error.message);
       setLoading(false);
     }
   };
@@ -102,8 +92,22 @@ const Login = ({ isOpen, onClose }) => {
               ? 'Join PawPawMate to discover pet-friendly places' 
               : 'Sign in to continue to PawPawMate'}
           </p>
-
-          <form onSubmit={handleEmailAuth} className="auth-form">
+          
+          {error && <div className="error-message">{error}</div>}
+          
+          <form onSubmit={handleSubmit} className="auth-form">
+            {isSignUp && (
+              <input
+                type="text"
+                placeholder="Display Name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+                className="auth-input"
+                disabled={loading}
+              />
+            )}
+            
             <input
               type="email"
               placeholder="Email"
@@ -111,7 +115,9 @@ const Login = ({ isOpen, onClose }) => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="auth-input"
+              disabled={loading}
             />
+            
             <input
               type="password"
               placeholder="Password"
@@ -119,9 +125,8 @@ const Login = ({ isOpen, onClose }) => {
               onChange={(e) => setPassword(e.target.value)}
               required
               className="auth-input"
+              disabled={loading}
             />
-            
-            {error && <p className="error-message">{error}</p>}
             
             <button 
               type="submit" 
@@ -131,13 +136,13 @@ const Login = ({ isOpen, onClose }) => {
               {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
             </button>
           </form>
-
+          
           <div className="auth-divider">
             <span>OR</span>
           </div>
-
+          
           <button 
-            onClick={handleGoogleSignIn} 
+            onClick={handleGoogleSignIn}
             className="auth-button google"
             disabled={loading}
           >
@@ -148,12 +153,16 @@ const Login = ({ isOpen, onClose }) => {
             />
             Continue with Google
           </button>
-
+          
           <p className="auth-switch">
             {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
             <button 
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError('');
+              }}
               className="link-button"
+              disabled={loading}
             >
               {isSignUp ? 'Sign In' : 'Sign Up'}
             </button>

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Map, { Marker, NavigationControl, GeolocateControl, Popup } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { useUser } from '../contexts/UserContext';
 import '../styles/Home.css';
 
 const Home = () => {
+  const { firebaseUser, mongoUser } = useUser();
   const [viewState, setViewState] = useState({
     longitude: -87.6298,  // Chicago downtown longitude
     latitude: 41.8781,    // Chicago downtown latitude
@@ -26,6 +28,37 @@ const Home = () => {
     pet_store: { label: 'Pet Store', icon: '🏪', color: '#f59e0b' },
     pet_grooming: { label: 'Groomer', icon: '✂️', color: '#8b5cf6' },
     animal_shelter: { label: 'Shelter', icon: '🏠', color: '#ef4444' }
+  };
+
+  // Welcome banner component for non-logged-in users
+  const WelcomeBanner = () => {
+    if (firebaseUser) return null;
+
+    return (
+      <div className="welcome-banner">
+        <div className="welcome-content">
+          <h1>🐾 Welcome to PawPawMate</h1>
+          <p>Discover pet-friendly places around you and connect with fellow pet lovers!</p>
+          <div className="welcome-features">
+            <div className="feature">
+              <span className="feature-icon">📍</span>
+              <span>Find dog parks, vets, and pet stores</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">💳</span>
+              <span>Collect place cards and memories</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">🔔</span>
+              <span>Get lost pet alerts in your area</span>
+            </div>
+          </div>
+          <p className="welcome-cta">
+            <strong>Sign in to unlock all features and manage your profile!</strong>
+          </p>
+        </div>
+      </div>
+    );
   };
 
   // Fetch locations from OpenStreetMap using Overpass API
@@ -273,6 +306,8 @@ const Home = () => {
 
   return (
     <div className="home-container">
+      <WelcomeBanner />
+      
       <div className="map-controls">
         <form onSubmit={handleSearch} className="search-bar">
           <input
@@ -299,7 +334,7 @@ const Home = () => {
           ))}
         </div>
 
-        {loading && <div className="loading-indicator">Loading locations...</div>}
+        {/* {loading && <div className="loading-indicator">Loading locations...</div>} */}
       </div>
 
       <div className="map-wrapper">

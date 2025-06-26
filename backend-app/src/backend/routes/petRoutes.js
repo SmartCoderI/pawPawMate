@@ -8,6 +8,7 @@ const petRouter = express.Router();
 const {
   createPet,
   getAllPets,
+  getPetsByOwner,
   getPetById,
   updatePet,
   deletePet,
@@ -23,6 +24,10 @@ petRouter.post("/", createPet); //dev only
 // Get all pets for the authenticated user
 petRouter.get("/", getAllPets); //dev only
 // petRouter.get("/", verifyToken, getAllPets);
+
+// Get pets by owner ID
+petRouter.get("/owner/:ownerId", getPetsByOwner); //dev only
+// petRouter.get("/owner/:ownerId", verifyToken, getPetsByOwner);
 
 // Get a specific pet by ID
 petRouter.get("/:id", getPetById); //dev only
