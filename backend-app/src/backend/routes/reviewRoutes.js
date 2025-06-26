@@ -8,8 +8,8 @@ const reviewRouter = express.Router();
 const { addReview, getReviewsForPlace, getDogParkReviewStats } = require("../controllers/reviewController");
 const verifyToken = require("../middleware/auth");
 
-// Add a new review to a place
-reviewRouter.post("/", verifyToken, addReview);
+// Add a new review to a place (no authentication required - frontend handles login check)
+reviewRouter.post("/", addReview);
 
 // Get all reviews for a place
 reviewRouter.get("/:placeId", getReviewsForPlace);

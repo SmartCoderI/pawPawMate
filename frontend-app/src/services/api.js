@@ -16,15 +16,32 @@ const api = axios.create({
   },
 });
 
-// Add auth token to requests if available
+// Add auth token to requests if available (excluding places and reviews - they handle auth via frontend)
 api.interceptors.request.use(
   async (config) => {
     try {
-      // Get Firebase ID token
+      // Skip auth token for places and reviews endpoints (frontend handles login checks)
+      const skipAuthEndpoints = ['/places', '/reviews'];
+      const shouldSkipAuth = skipAuthEndpoints.some(endpoint => config.url?.includes(endpoint));
+      
+      if (shouldSkipAuth) {
+        console.log('API: Skipping auth token for:', config.method, config.url);
+        return config;
+      }
+      
+      // Get Firebase ID token for other endpoints
       const currentUser = auth.currentUser;
       if (currentUser) {
         const token = await currentUser.getIdToken();
-      config.headers.Authorization = `Bearer ${token}`;
+        config.headers.Authorization = `Bearer ${token}`;
+        console.log('API: Added auth token to request:', {
+          method: config.method,
+          url: config.url,
+          hasToken: !!token,
+          tokenLength: token?.length
+        });
+      } else {
+        console.log('API: No current user, request sent without auth token');
       }
     } catch (error) {
       console.error('Error getting auth token:', error);
@@ -190,15 +207,29 @@ export const placeAPI = {
 
 // Review API calls
 export const reviewAPI = {
-  // Create a review
+  // Create a review (can automatically create place if it doesn't exist)
   createReview: async (reviewData) => {
-    const response = await api.post('/reviews', reviewData);
-    return response.data;
+    console.log('API: Sending review creation request to backend:', reviewData);
+    try {
+      const response = await api.post('/reviews', reviewData);
+      console.log('API: Review creation response received:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API: Review creation failed:', error);
+      console.error('API: Error response:', error.response?.data);
+      throw error;
+    }
   },
 
   // Get reviews for a place
   getReviewsByPlace: async (placeId) => {
-    const response = await api.get(`/reviews/place/${placeId}`);
+    const response = await api.get(`/reviews/${placeId}`);
+    return response.data;
+  },
+
+  // Get dog park statistics
+  getDogParkStats: async (placeId) => {
+    const response = await api.get(`/reviews/${placeId}/dog-park-stats`);
     return response.data;
   },
 };
