@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import LostPets from './pages/LostPets';
 import Profile from './pages/Profile';
+import PlaceDetails from './pages/PlaceDetails';
 import './App.css';
 
 // Navigation component that uses UserContext
@@ -181,6 +182,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/lost-pets" element={<LostPets />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/place/:id" element={<PlaceDetails />} />
           </Routes>
         </main>
       </div>

@@ -1,0 +1,1201 @@
+/* Neo-Brutalism PlaceDetails Styles - Green Theme - Compact Version */
+
+.place-details-container {
+  min-height: 100vh;
+  background: #f0f0f0;
+  padding: 10px;
+  font-family: 'Arial Black', Arial, sans-serif;
+  color: #000000;
+}
+
+/* Header Section */
+.place-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.back-button {
+  background: #FFFF00;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.back-button:hover {
+  background: #CCFF00;
+}
+
+.back-button:active {
+  background: #B8B800;
+}
+
+.place-title h1 {
+  font-size: 20px;
+  font-weight: 900;
+  margin: 0;
+  text-shadow: 3px 3px 0px #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.place-title-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+.place-title-inline h1 {
+  font-size: 20px;
+  font-weight: 900;
+  margin: 0;
+  text-shadow: 3px 3px 0px #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.place-type {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.place-address {
+  display: flex;
+  align-items: center;
+  margin-left: 15px;
+  flex-shrink: 0;
+}
+
+.address-line {
+  font-size: 12px;
+  font-weight: 700;
+  color: #666666;
+  background: #F0F0F0;
+  padding: 4px 8px;
+  border: 2px solid #000000;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.type-icon {
+  font-size: 16px;
+  background: #FF1493;
+  padding: 4px;
+  border: 3px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.type-label {
+  font-size: 12px;
+  font-weight: 900;
+  background: #00FFFF;
+  padding: 4px 8px;
+  border: 3px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+  text-transform: uppercase;
+}
+
+/* Hero Image Section */
+.hero-image-section {
+  margin-bottom: 20px;
+}
+
+.hero-placeholder {
+  background: #00FFFF;
+  border: 3px solid #000000;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.hero-icon {
+  font-size: 60px;
+}
+
+.hero-placeholder h2 {
+  font-size: 24px;
+  font-weight: 900;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Info Cards Grid */
+.info-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.info-card {
+  background: #FFFF00;
+  border: 2px solid #000000;
+  padding: 15px;
+}
+
+.info-card h3 {
+  font-size: 16px;
+  font-weight: 900;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.info-card p {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 4px 0;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tag-chip {
+  background: #FF1493;
+  color: #FFFFFF;
+  padding: 4px 8px;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.review-count {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #FF1493 !important;
+}
+
+.average-rating {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  color: #32CD32 !important;
+}
+
+.address-text {
+  color: #FF1493 !important;
+  font-weight: 900 !important;
+}
+
+.website-link {
+  color: #32CD32 !important;
+  text-decoration: none !important;
+  font-weight: 900 !important;
+}
+
+.website-link:hover {
+  text-decoration: underline !important;
+}
+
+.osm-note {
+  font-size: 10px !important;
+  color: #666666 !important;
+  font-style: italic !important;
+  margin-top: 6px !important;
+}
+
+/* Dog Park Stats - Tag-based Display */
+.dog-park-stats {
+  background: #ffffff;
+  border: 3px solid #000000;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.dog-park-stats h2 {
+  font-size: 18px;
+  font-weight: 900;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #000000;
+}
+
+.categories-description {
+  font-size: 12px;
+  font-weight: bold;
+  color: #000000;
+  margin: 0 0 15px 0;
+  text-align: center;
+}
+
+.category-tags-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.category-section {
+  background-color: #f0f0f0;
+  border: 2px solid #000000;
+  padding: 10px;
+}
+
+.category-section h3 {
+  margin: 0 0 6px 0;
+  color: #000000;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #000000;
+  padding-bottom: 3px;
+}
+
+.category-description {
+  font-size: 10px;
+  font-weight: bold;
+  color: #666666;
+  margin: 0 0 8px 0;
+  font-style: italic;
+}
+
+.feature-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.feature-tag {
+  background-color: #00ff00;
+  color: #000000;
+  padding: 3px 6px;
+  border: 2px solid #000000;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.feature-tag.good {
+  background-color: #00ff00;
+  color: #000000;
+}
+
+.feature-tag.neutral {
+  background-color: #ffff00;
+  color: #000000;
+}
+
+.feature-tag.bad {
+  background-color: #ff0080;
+  color: #ffffff;
+}
+
+/* Option tags for showing all available category options */
+.option-tag {
+  background-color: #f0f0f0;
+  color: #000000;
+  padding: 3px 6px;
+  border: 2px solid #000000;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+.option-tag.good {
+  background-color: #e8f5e8;
+  border-color: #00ff00;
+  opacity: 1;
+}
+
+.option-tag.neutral {
+  background-color: #fffdf0;
+  border-color: #ffff00;
+  opacity: 1;
+}
+
+.option-tag.bad {
+  background-color: #ffe8f0;
+  border-color: #ff0080;
+  opacity: 1;
+}
+
+/* Smart Tag System - Based on Review Frequency */
+.option-tag.gray {
+  background-color: #f0f0f0;
+  color: #666666;
+  border-color: #cccccc;
+  opacity: 0.6;
+}
+
+.option-tag.popular {
+  background-color: #00ff00;
+  color: #000000;
+  border-color: #000000;
+  opacity: 1;
+  font-weight: 900;
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.option-tag.common {
+  background-color: #ccff00;
+  color: #000000;
+  border-color: #000000;
+  opacity: 1;
+  font-weight: 900;
+}
+
+.option-tag.mentioned {
+  background-color: #ffff99;
+  color: #000000;
+  border-color: #666666;
+  opacity: 0.9;
+}
+
+.option-tag.rare {
+  background-color: #ffffff;
+  color: #333333;
+  border-color: #999999;
+  opacity: 0.8;
+}
+
+.tag-count {
+  font-size: 9px;
+  font-weight: 900;
+  margin-left: 2px;
+}
+
+.option-tag.popular .tag-count {
+  color: #000000;
+}
+
+.option-tag.common .tag-count {
+  color: #333333;
+}
+
+.option-tag.mentioned .tag-count {
+  color: #666666;
+}
+
+.option-tag.rare .tag-count {
+  color: #999999;
+}
+
+.option-tag.gray .tag-count {
+  display: none; /* Hide count for gray tags */
+}
+
+/* Review statistics summary */
+.review-stats-summary {
+  background-color: #ffff00;
+  border: 2px solid #000000;
+  padding: 10px;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.review-stats-summary h3 {
+  margin: 0 0 6px 0;
+  color: #000000;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.review-stats-summary p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.stats-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.no-stats {
+  text-align: center;
+  background: #FFFFFF;
+  border: 4px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
+  padding: 30px;
+}
+
+.no-stats p {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.rating-slider {
+  background: #FFFFFF;
+  border: 2px solid #000000;
+  padding: 20px;
+}
+
+.rating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.rating-label {
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.rating-value {
+  font-size: 16px;
+  font-weight: 900;
+  color: #32CD32;
+}
+
+.slider-track {
+  height: 12px;
+  background: #CCCCCC;
+  border: 3px solid #000000;
+  position: relative;
+  overflow: hidden;
+}
+
+.slider-fill {
+  height: 100%;
+  background: #32CD32;
+  transition: width 0.3s ease;
+}
+
+.slider-handle {
+  position: absolute;
+  top: -6px;
+  width: 24px;
+  height: 24px;
+  background: #000000;
+  border: 3px solid #FFFFFF;
+  transform: translateX(-50%);
+  transition: left 0.3s ease;
+}
+
+/* OSM Review Call-to-Action */
+.osm-review-cta {
+  background: #FF1493;
+  border: 6px solid #000000;
+  box-shadow: 8px 8px 0px #000000;
+  padding: 25px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.osm-review-cta h2 {
+  font-size: 22px;
+  font-weight: 900;
+  margin: 0 0 15px 0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #FFFFFF;
+  text-shadow: 3px 3px 0px #000000;
+}
+
+.osm-review-cta p {
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0 0 20px 0;
+  line-height: 1.4;
+}
+
+.big-review-button {
+  background: #FFFF00;
+  border: 4px solid #000000;
+  padding: 15px 30px;
+  font-size: 18px;
+  font-weight: 900;
+  color: #000000;
+  cursor: pointer;
+  box-shadow: 6px 6px 0px #000000;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.big-review-button:hover {
+  background: #CCFF00;
+  transform: translate(1px, 1px);
+  box-shadow: 5px 5px 0px #000000;
+}
+
+/* Reviews Section */
+.reviews-section {
+  background: #FFFFFF;
+  border: 3px solid #000000;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.reviews-header h2 {
+  font-size: 18px;
+  font-weight: 900;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.add-review-button {
+  background: #32CD32;
+  border: 3px solid #000000;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 900;
+  color: #000000;
+  cursor: pointer;
+  box-shadow: 3px 3px 0px #000000;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+}
+
+.add-review-button:hover {
+  background: #90EE90;
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+/* Review Form */
+.review-form-card {
+  background: #F0FFF0;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.review-form-card h3 {
+  font-size: 16px;
+  font-weight: 900;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 900;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.rating-selector {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.star-button {
+  background: #FFFFFF;
+  border: 2px solid #000000;
+  padding: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.star-button:hover {
+  background: #FFFF00;
+}
+
+.star-button.active {
+  background: #32CD32;
+}
+
+.form-group textarea {
+  width: 100%;
+  background: #FFFFFF;
+  border: 2px solid #000000;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Arial Black', Arial, sans-serif;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  background: #F0FFF0;
+}
+
+.form-group select,
+.form-group input[type="text"] {
+  width: 100%;
+  background: #FFFFFF;
+  border: 2px solid #000000;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Arial Black', Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+.form-group select:focus,
+.form-group input[type="text"]:focus {
+  outline: none;
+  background: #F0FFF0;
+}
+
+/* Dog Park Form */
+.dog-park-form {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 4px solid #000000;
+}
+
+.dog-park-form h4 {
+  font-size: 18px;
+  font-weight: 900;
+  margin: 0 0 15px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-section {
+  margin-bottom: 15px;
+  background: #F0FFF0;
+  border: 2px solid #000000;
+  padding: 12px;
+}
+
+.form-section h5 {
+  font-size: 14px;
+  font-weight: 900;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+}
+
+.checkbox-group {
+  display: grid;
+  gap: 8px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  margin-bottom: 0 !important;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #000000;
+  background: #FFFFFF;
+  cursor: pointer;
+  transform: scale(1.1);
+}
+
+.submit-review-button {
+  background: #FF1493;
+  border: 4px solid #000000;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #FFFFFF;
+  cursor: pointer;
+  box-shadow: 6px 6px 0px #000000;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.submit-review-button:hover {
+  background: #FF69B4;
+  transform: translate(1px, 1px);
+  box-shadow: 5px 5px 0px #000000;
+}
+
+/* Reviews List */
+.reviews-list {
+  display: grid;
+  gap: 4px;
+}
+
+.empty-reviews {
+  text-align: center;
+  background: #F0F0F0;
+  border: 4px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
+  padding: 25px;
+}
+
+.empty-reviews h3 {
+  font-size: 20px;
+  font-weight: 900;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+}
+
+.empty-reviews p {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Simplified Review Cards */
+.review-card-simple {
+  background: #F0FFF0;
+  border: 2px solid #000000;
+  box-shadow: 3px 3px 0px #000000;
+  padding: 8px;
+  margin-bottom: 2px;
+}
+
+.review-simple-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.review-simple-content .reviewer-name {
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #000000;
+  min-width: 100px;
+}
+
+.review-simple-content .review-rating {
+  font-size: 16px;
+  min-width: 70px;
+}
+
+.review-simple-content .review-comment-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #333333;
+  flex: 1;
+  min-width: 150px;
+}
+
+.review-simple-content .review-date {
+  font-size: 10px;
+  font-weight: 700;
+  color: #666666;
+  background: #FFFFFF;
+  padding: 3px 6px;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+  min-width: 70px;
+  text-align: center;
+}
+
+/* Original detailed review card styles (keep for compatibility) */
+.review-card {
+  background: #F0FFF0;
+  border: 4px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
+  padding: 25px;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.reviewer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewer-name {
+  font-size: 18px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.review-rating {
+  font-size: 20px;
+}
+
+.review-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: #666666;
+  background: #FFFFFF;
+  padding: 6px 12px;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.review-comment {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 15px 0;
+}
+
+.review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.review-tag {
+  background: #32CD32;
+  color: #FFFFFF;
+  padding: 4px 10px;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+/* Dog Park Review Details */
+.dog-park-review-details {
+  margin-top: 20px;
+  background: #F0FFF0;
+  border: 4px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  padding: 20px;
+}
+
+.dog-park-review-details h4 {
+  font-size: 18px;
+  font-weight: 900;
+  margin: 0 0 15px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.review-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.detail-item {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px;
+  background: #FFFFFF;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.detail-item strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #32CD32;
+}
+
+.review-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.review-flag {
+  background: #32CD32;
+  color: #FFFFFF;
+  padding: 6px 12px;
+  border: 3px solid #000000;
+  box-shadow: 3px 3px 0px #000000;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+/* Loading and Error States */
+.loading-card, .error-card {
+  background: #FFFF00;
+  border: 8px solid #000000;
+  box-shadow: 12px 12px 0px #000000;
+  padding: 60px;
+  text-align: center;
+  margin: 50px auto;
+  max-width: 500px;
+}
+
+.loading-card h2, .error-card h2 {
+  font-size: 32px;
+  font-weight: 900;
+  margin: 0 0 20px 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.error-card p {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 30px 0;
+}
+
+.brutal-button {
+  background: #FF1493;
+  border: 6px solid #000000;
+  padding: 15px 30px;
+  font-size: 18px;
+  font-weight: 900;
+  color: #FFFFFF;
+  cursor: pointer;
+  box-shadow: 8px 8px 0px #000000;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+}
+
+.brutal-button:hover {
+  background: #FF69B4;
+  transform: translate(2px, 2px);
+  box-shadow: 6px 6px 0px #000000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .place-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+  
+  .back-button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .place-title-inline h1 {
+    font-size: 16px;
+  }
+  
+  .type-icon {
+    font-size: 14px;
+    padding: 3px;
+  }
+  
+  .type-label {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+  
+  .info-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .hero-placeholder {
+    height: 120px;
+  }
+  
+  .hero-icon {
+    font-size: 40px;
+  }
+  
+  .hero-placeholder h2 {
+    font-size: 18px;
+  }
+  
+  .category-tags-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .category-section {
+    padding: 8px;
+  }
+  
+  .category-section h3 {
+    font-size: 11px;
+  }
+  
+  .feature-tags {
+    gap: 4px;
+  }
+  
+  .feature-tag,
+  .option-tag {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .place-header {
+    gap: 6px;
+  }
+  
+  .place-title-inline h1 {
+    font-size: 14px;
+  }
+  
+  .back-button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .type-icon {
+    font-size: 12px;
+    padding: 2px;
+  }
+  
+  .type-label {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+  
+  .hero-placeholder {
+    height: 100px;
+  }
+  
+  .hero-icon {
+    font-size: 30px;
+  }
+  
+  .hero-placeholder h2 {
+    font-size: 14px;
+  }
+  
+  .info-card h3 {
+    font-size: 14px;
+  }
+  
+  .info-card p {
+    font-size: 11px;
+  }
+  
+  .rating-selector {
+    flex-wrap: wrap;
+  }
+  
+  .star-button {
+    padding: 4px;
+    font-size: 14px;
+  }
+  
+  .form-section h5 {
+    font-size: 12px;
+  }
+  
+  /* Simplified reviews mobile styles */
+  .review-simple-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .review-simple-content .reviewer-name,
+  .review-simple-content .review-rating,
+  .review-simple-content .review-comment-text,
+  .review-simple-content .review-date {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .review-simple-content .review-date {
+    align-self: flex-end;
+    width: auto;
+    padding: 2px 4px;
+    font-size: 9px;
+  }
+  
+  .dog-park-stats h2 {
+    font-size: 16px;
+  }
+  
+  .categories-description {
+    font-size: 10px;
+  }
+  
+  .review-stats-summary h3 {
+    font-size: 11px;
+  }
+  
+  .review-stats-summary p {
+    font-size: 10px;
+  }
+  
+  .osm-review-cta {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .osm-review-cta h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .osm-review-cta p {
+    font-size: 12px;
+    margin-bottom: 15px;
+  }
+  
+  .big-review-button {
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+  
+  .submit-review-button {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
+
+/* Login Required Button Styling */
+.login-required {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+.login-required:hover {
+  background-color: #ffcc00 !important;
+  transform: translateY(-2px);
+} 

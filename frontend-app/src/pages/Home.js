@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Map, { Marker, NavigationControl, GeolocateControl, Popup } from 'react-map-gl';
+import { useNavigate } from 'react-router-dom';
+import Map, { Marker, NavigationControl, GeolocateControl } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useUser } from '../contexts/UserContext';
 import '../styles/Home.css';
 
 const Home = () => {
-  const { firebaseUser, mongoUser } = useUser();
+  const { firebaseUser } = useUser();
+  const navigate = useNavigate();
   const [viewState, setViewState] = useState({
     longitude: -87.6298,  // Chicago downtown longitude
     latitude: 41.8781,    // Chicago downtown latitude
@@ -13,7 +15,6 @@ const Home = () => {
   });
   
   const [locations, setLocations] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState(null);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,37 +29,6 @@ const Home = () => {
     pet_store: { label: 'Pet Store', icon: '🏪', color: '#f59e0b' },
     pet_grooming: { label: 'Groomer', icon: '✂️', color: '#8b5cf6' },
     animal_shelter: { label: 'Shelter', icon: '🏠', color: '#ef4444' }
-  };
-
-  // Welcome banner component for non-logged-in users
-  const WelcomeBanner = () => {
-    if (firebaseUser) return null;
-
-    return (
-      <div className="welcome-banner">
-        <div className="welcome-content">
-          <h1>🐾 Welcome to PawPawMate</h1>
-          <p>Discover pet-friendly places around you and connect with fellow pet lovers!</p>
-          <div className="welcome-features">
-            <div className="feature">
-              <span className="feature-icon">📍</span>
-              <span>Find dog parks, vets, and pet stores</span>
-            </div>
-            <div className="feature">
-              <span className="feature-icon">💳</span>
-              <span>Collect place cards and memories</span>
-            </div>
-            <div className="feature">
-              <span className="feature-icon">🔔</span>
-              <span>Get lost pet alerts in your area</span>
-            </div>
-          </div>
-          <p className="welcome-cta">
-            <strong>Sign in to unlock all features and manage your profile!</strong>
-          </p>
-        </div>
-      </div>
-    );
   };
 
   // Fetch locations from OpenStreetMap using Overpass API
@@ -292,12 +262,15 @@ const Home = () => {
   };
 
   const handleLocationClick = (location) => {
-    setSelectedLocation(location);
-    mapRef.current?.flyTo({
-      center: [location.longitude, location.latitude],
-      zoom: 15,
-      duration: 1000
-    });
+    // Directly navigate to place details instead of showing popup
+    // For OSM locations, we'll use the OSM node ID directly if available, 
+    // otherwise create a coordinate-based ID
+    const locationId = location.id && location.id !== `location-${location.latitude}-${location.longitude}` 
+      ? location.id 
+      : `osm-${location.latitude}-${location.longitude}`;
+      
+    console.log('Navigating to place:', locationId, 'with data:', location);
+    navigate(`/place/${locationId}`, { state: { locationData: location } });
   };
 
   const filteredLocations = locations.filter(location => 
@@ -306,8 +279,6 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      <WelcomeBanner />
-      
       <div className="map-controls">
         <form onSubmit={handleSearch} className="search-bar">
           <input
@@ -322,16 +293,23 @@ const Home = () => {
           </button>
         </form>
 
-        <div className="filter-buttons">
-          {Object.entries(locationTypes).map(([key, { label }]) => (
-            <button
-              key={key}
-              className={`filter-button ${filter === key ? 'active' : ''}`}
-              onClick={() => setFilter(key)}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="filter-section">
+          <div className="filter-buttons">
+            {Object.entries(locationTypes).map(([key, { label }]) => (
+              <button
+                key={key}
+                className={`filter-button ${filter === key ? 'active' : ''}`}
+                onClick={() => setFilter(key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          
+          <div className="location-count-display">
+            {filteredLocations.length} locations found
+            {loading && <span className="loading-spinner">⟳</span>}
+          </div>
         </div>
 
         {/* {loading && <div className="loading-indicator">Loading locations...</div>} */}
@@ -380,96 +358,8 @@ const Home = () => {
             </Marker>
           ))}
 
-          {selectedLocation && (
-            <Popup
-              longitude={selectedLocation.longitude}
-              latitude={selectedLocation.latitude}
-              anchor="bottom"
-              onClose={() => setSelectedLocation(null)}
-              closeOnClick={false}
-              maxWidth="300px"
-            >
-              <div className="popup-content">
-                <h3>{selectedLocation.name}</h3>
-                <p className="location-type">
-                  {locationTypes[selectedLocation.type]?.icon} {locationTypes[selectedLocation.type]?.label}
-                </p>
-                
-                {selectedLocation.address && (
-                  <p className="location-address">📍 {selectedLocation.address}</p>
-                )}
-                
-                {selectedLocation.phone && (
-                  <p className="location-phone">📞 {selectedLocation.phone}</p>
-                )}
-                
-                {selectedLocation.opening_hours && (
-                  <p className="location-hours">🕐 {selectedLocation.opening_hours}</p>
-                )}
-                
-                {selectedLocation.website && (
-                  <p className="location-website">
-                    <a href={selectedLocation.website} target="_blank" rel="noopener noreferrer">
-                      🌐 Visit Website
-                    </a>
-                  </p>
-                )}
-                
-                {selectedLocation.tags.length > 0 && (
-                  <div className="tags">
-                    {selectedLocation.tags.map(tag => (
-                      <span key={tag} className="tag">{tag}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Popup>
-          )}
-        </Map>
 
-        <div className="location-list">
-          <h3>
-            Nearby Pet Locations 
-            {loading && <span className="loading-spinner">⟳</span>}
-          </h3>
-          <p className="location-count">{filteredLocations.length} locations found</p>
-          
-          {filteredLocations.length === 0 && !loading && (
-            <p className="empty-state">No locations found. Try moving the map or zooming out.</p>
-          )}
-          
-          {filteredLocations.map(location => (
-            <div
-              key={location.id}
-              className="location-card"
-              onClick={() => handleLocationClick(location)}
-            >
-              <div className="location-card-header">
-                <span className="location-icon">
-                  {locationTypes[location.type]?.icon}
-                </span>
-                <div>
-                  <h4>{location.name}</h4>
-                  <p className="location-type-label">
-                    {locationTypes[location.type]?.label}
-                  </p>
-                </div>
-              </div>
-              
-              {location.address && (
-                <p className="location-card-address">📍 {location.address}</p>
-              )}
-              
-              {location.tags.length > 0 && (
-                <div className="location-card-tags">
-                  {location.tags.slice(0, 2).map(tag => (
-                    <span key={tag} className="mini-tag">{tag}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        </Map>
       </div>
     </div>
   );

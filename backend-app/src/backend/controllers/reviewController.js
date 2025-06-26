@@ -102,13 +102,49 @@ const validateDogParkReview = (dogParkReview) => {
   return errors.length === 0 ? true : errors;
 };
 
+// Helper function to clean dog park review data (remove empty strings to avoid enum validation errors)
+const cleanDogParkReview = (dogParkReview) => {
+  if (!dogParkReview) return dogParkReview;
+  
+  const cleanObject = (obj) => {
+    if (!obj || typeof obj !== 'object') return obj;
+    
+    const cleaned = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === '' || value === null) {
+        // Skip empty strings and null values to avoid enum validation errors
+        continue;
+      } else if (Array.isArray(value)) {
+        // Filter out empty strings from arrays
+        const cleanedArray = value.filter(item => item !== '' && item !== null);
+        if (cleanedArray.length > 0) {
+          cleaned[key] = cleanedArray;
+        }
+      } else if (typeof value === 'object') {
+        // Recursively clean nested objects
+        const cleanedNested = cleanObject(value);
+        if (Object.keys(cleanedNested).length > 0) {
+          cleaned[key] = cleanedNested;
+        }
+      } else {
+        // Keep non-empty values
+        cleaned[key] = value;
+      }
+    }
+    return cleaned;
+  };
+  
+  return cleanObject(dogParkReview);
+};
+
 exports.addReview = async (req, res) => {
   try {
-    const { placeId, rating, comment, tags, dogParkReview } = req.body;
+    console.log('Review creation request received:', req.body);
+    const { placeId, rating, comment, tags, dogParkReview, userId, placeData } = req.body;
     
     // Validate required fields
-    if (!placeId || !rating) {
-      return res.status(400).json({ error: 'placeId and rating are required' });
+    if (!rating) {
+      return res.status(400).json({ error: 'rating is required' });
     }
     
     // Validate rating range
@@ -116,42 +152,125 @@ exports.addReview = async (req, res) => {
       return res.status(400).json({ error: 'Rating must be between 1 and 5' });
     }
     
-    // Validate dog park review data if provided
+    // Validate user ID (frontend should send MongoDB user ID)
+    if (!userId) {
+      return res.status(400).json({ error: 'userId is required. Please log in to submit a review.' });
+    }
+    
+    // Verify the user exists in the database
+    const User = require("../models/User");
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found. Please log in again.' });
+    }
+    
+    // Clean and validate dog park review data if provided
+    let cleanedDogParkReview = null;
     if (dogParkReview) {
-      const validationResult = validateDogParkReview(dogParkReview);
-      if (validationResult !== true) {
-        return res.status(400).json({ 
-          error: 'Invalid dog park review data', 
-          details: validationResult 
+      // Clean the dog park review data (remove empty strings to avoid enum validation errors)
+      cleanedDogParkReview = cleanDogParkReview(dogParkReview);
+      console.log('Original dogParkReview:', dogParkReview);
+      console.log('Cleaned dogParkReview:', cleanedDogParkReview);
+      
+      // Validate the cleaned data
+      if (cleanedDogParkReview && Object.keys(cleanedDogParkReview).length > 0) {
+        const validationResult = validateDogParkReview(cleanedDogParkReview);
+        if (validationResult !== true) {
+          return res.status(400).json({ 
+            error: 'Invalid dog park review data', 
+            details: validationResult 
+          });
+        }
+      }
+    }
+    
+    let finalPlaceId = placeId;
+    
+    // Check if we have a placeId first
+    if (placeId) {
+      // Check if place exists in database
+      const existingPlace = await Place.findById(placeId);
+      if (!existingPlace) {
+        console.log(`Place with ID ${placeId} not found in database`);
+        // If placeId provided but place doesn't exist, we need placeData to create it
+        if (!placeData) {
+          return res.status(404).json({ error: 'Place not found and no place data provided to create it' });
+        }
+        finalPlaceId = null; // We'll create a new place
+      }
+    }
+    
+    // If no placeId or place doesn't exist, create or find the place first
+    if (!finalPlaceId) {
+      if (!placeData) {
+        return res.status(400).json({ error: 'Either placeId for existing place or placeData for new place is required' });
+      }
+      
+      // Validate place data
+      if (!placeData.name || !placeData.coordinates || !placeData.coordinates.lat || !placeData.coordinates.lng) {
+        return res.status(400).json({ error: 'Place data must include name and valid coordinates (lat, lng)' });
+      }
+      
+      const lat = Number(placeData.coordinates.lat);
+      const lng = Number(placeData.coordinates.lng);
+      
+      // Check if a place already exists at these coordinates (within ~100 meters)
+      const existingPlaceAtLocation = await Place.findOne({
+        'coordinates.lat': { $gte: lat - 0.001, $lte: lat + 0.001 },
+        'coordinates.lng': { $gte: lng - 0.001, $lte: lng + 0.001 },
+        type: placeData.type || 'other'
+      });
+      
+      if (existingPlaceAtLocation) {
+        console.log('Found existing place at similar coordinates:', existingPlaceAtLocation._id);
+        finalPlaceId = existingPlaceAtLocation._id;
+      } else {
+        console.log('Creating new place before adding review:', placeData);
+        
+        // Create the place
+        const newPlace = await Place.create({
+          name: placeData.name,
+          type: placeData.type || 'other',
+          coordinates: {
+            lat: lat,
+            lng: lng
+          },
+          address: placeData.address || '',
+          phone: placeData.phone || '',
+          website: placeData.website || '',
+          opening_hours: placeData.opening_hours || '',
+          description: placeData.description || '',
+          tags: placeData.tags || [],
+          addedBy: userId
         });
+        
+        console.log('New place created successfully:', newPlace);
+        finalPlaceId = newPlace._id;
       }
     }
     
-    // Check if place exists and is a dog park (if dog park review is provided)
-    if (dogParkReview) {
-      const place = await Place.findById(placeId);
-      if (!place) {
-        return res.status(404).json({ error: 'Place not found' });
-      }
-      if (place.type !== 'dog park') {
-        return res.status(400).json({ error: 'Dog park reviews can only be added to dog parks' });
-      }
-    }
-    
-    // Create the review
+    // Create the review with the correct MongoDB user ID
     const review = await Review.create({ 
-      userId: req.user.uid,
-      placeId,
+      userId: userId, // Use MongoDB user ID from request body
+      placeId: finalPlaceId,
       rating,
       comment,
       tags,
-      dogParkReview
+      dogParkReview: cleanedDogParkReview // Use cleaned data
     });
     
     // Populate user information for response
-    await review.populate('userId', 'name email');
+    await review.populate('userId', 'name email profileImage');
     
-    res.status(201).json(review);
+    console.log('Review created successfully:', review);
+    
+    // Include the final place ID in the response for frontend navigation
+    const responseData = {
+      ...review.toObject(),
+      placeId: finalPlaceId // Ensure we return the actual place ID used
+    };
+    
+    res.status(201).json(responseData);
   } catch (err) {
     console.error('Error adding review:', err);
     res.status(400).json({ error: err.message });
