@@ -14,7 +14,7 @@ const {
   deletePet,
   uploadPetPhoto,
 } = require("../controllers/petController");
-const upload = require("../utils/upload");
+const { petImageUpload } = require("../utils/upload");
 const verifyToken = require("../middleware/auth");
 
 // Create a new pet
@@ -41,7 +41,7 @@ petRouter.put("/:id", updatePet); //dev only
 petRouter.delete("/:id", deletePet); //dev only
 // petRouter.delete("/:id", verifyToken, deletePet);
 
-// Upload photos
-petRouter.post("/upload-photo", upload.single("photo"), uploadPetPhoto);
+// Upload pet photo
+petRouter.post("/upload-photo", petImageUpload, uploadPetPhoto);
 
 module.exports = petRouter;
