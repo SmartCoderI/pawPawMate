@@ -6,8 +6,9 @@ Handles creation, listing, and details of locations.
 const express = require("express");
 const placeRouter = express.Router();
 const { createPlace, getAllPlaces, getPlaceById } = require("../controllers/placeController");
+const verifyToken = require("../middleware/auth");
 
-// Create a new place
+// Create a new place (no authentication required - frontend handles login check)
 placeRouter.post("/", createPlace);
 
 // Get all places with optional filters
