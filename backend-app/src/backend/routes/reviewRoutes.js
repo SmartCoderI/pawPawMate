@@ -9,6 +9,7 @@ const {
   addReview,
   getReviewsForPlace,
   getDogParkReviewStats,
+  getVetClinicReviewStats,
   uploadReviewImages,
 } = require("../controllers/reviewController");
 const { reviewImageUpload } = require("../utils/upload");
@@ -50,5 +51,8 @@ reviewRouter.get("/:placeId", getReviewsForPlace);
 
 // Get dog park specific review statistics
 reviewRouter.get("/:placeId/dog-park-stats", getDogParkReviewStats);
+
+// Get vet clinic specific review statistics
+reviewRouter.get("/:placeId/vet-clinic-stats", getVetClinicReviewStats);
 
 module.exports = reviewRouter;
