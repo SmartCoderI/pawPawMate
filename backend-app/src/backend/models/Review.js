@@ -98,6 +98,105 @@ const reviewSchema = new mongoose.Schema({
     },
   },
 
+  // New 5-category review system for vet clinics
+  vetClinicReview: {
+    // 1. Clinic Environment & Facilities
+    clinicEnvironmentAndFacilities: {
+      cleanliness: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      comfortLevel: { type: String, enum: ["very_comfortable", "comfortable", "neutral", "uncomfortable"], required: false },
+      facilitySize: { type: String, enum: ["small", "medium", "large"], required: false },
+    },
+
+    // 2. Cost & Transparency
+    costAndTransparency: {
+      // Cost of Services
+      routineCheckupCost: { type: String, enum: ["low", "moderate", "high", "very_high"], required: false },
+      vaccinationCost: { type: String, enum: ["low", "moderate", "high", "very_high"], required: false },
+      spayNeuterCost: { type: String, enum: ["low", "moderate", "high", "very_high"], required: false },
+      dentalCleaningCost: { type: String, enum: ["low", "moderate", "high", "very_high"], required: false },
+      emergencyVisitCost: { type: String, enum: ["low", "moderate", "high", "very_high"], required: false },
+      
+      // Price Transparency
+      feesExplainedUpfront: { type: Boolean, required: false },
+      printedEstimatesAvailable: { type: Boolean, required: false },
+      insuranceAccepted: { type: Boolean, required: false },
+      paymentPlansOffered: { type: Boolean, required: false },
+    },
+
+    // 3. Medical Staff & Services
+    medicalStaffAndServices: {
+      // Staff Performance
+      veterinarianAttitude: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      veterinarianCompetence: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      technicianNursePerformance: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      
+      // Services & Specializations
+      onSiteDiagnostics: {
+        type: [String],
+        enum: ["xray", "ultrasound", "bloodwork", "none"],
+        required: false,
+      },
+      surgeryOrthopedics: { type: Boolean, required: false },
+      behavioralCounseling: { type: Boolean, required: false },
+      nutritionConsultation: { type: Boolean, required: false },
+    },
+
+    // 4. Scheduling & Communication
+    schedulingAndCommunication: {
+      responseTime: { type: String, enum: ["immediate", "same_day", "next_day", "several_days"], required: false },
+      appointmentWaitTime: { type: String, enum: ["same_day", "within_week", "1_2_weeks", "over_2_weeks"], required: false },
+      inClinicWaitingTime: { type: String, enum: ["under_15_min", "15_30_min", "30_60_min", "over_1_hour"], required: false },
+      followUpCommunication: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+    },
+
+    // 5. Emergency & After-Hours Care
+    emergencyAndAfterHours: {
+      // Availability
+      openWeekends: { type: Boolean, required: false },
+      openEvenings: { type: Boolean, required: false },
+      onCallEmergencyNumber: { type: Boolean, required: false },
+      
+      // Referral Process
+      connectedToEmergencyHospitals: { type: Boolean, required: false },
+      clearHandoffsToSpecialists: { type: Boolean, required: false },
+      
+      // Urgency Response
+      emergencyTriageSpeed: { type: String, enum: ["immediate", "within_30_min", "within_1_hour", "over_1_hour"], required: false },
+      crisisHandlingConfidence: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+    },
+
+    // Emergency Experiences & Photos
+    emergencyExperiences: [{
+      situationType: { type: String, required: false }, // e.g., "Poisoning", "Broken bone", "Allergic reaction"
+      description: { type: String, required: false },
+      photos: [String], // Array of image URLs for this specific emergency
+      outcome: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      dateOfIncident: { type: Date, required: false },
+    }],
+
+    // 6. Owner Involvement
+    ownerInvolvement: {
+      allowedDuringExams: { type: Boolean, required: false },
+      allowedDuringProcedures: { type: Boolean, required: false },
+      communicationDuringAnesthesia: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      communicationDuringSurgery: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      explainsProceduresWell: { type: Boolean, required: false },
+      involvesOwnerInDecisions: { type: Boolean, required: false },
+    },
+
+    // 7. Reputation & Community Engagement
+    reputationAndCommunity: {
+      onlineReputationConsistency: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      wordOfMouthReputation: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      communityInvolvement: { type: String, enum: ["high", "moderate", "low", "none"], required: false },
+      hostsVaccineClinic: { type: Boolean, required: false },
+      shelterPartnerships: { type: Boolean, required: false },
+      communityEvents: { type: Boolean, required: false },
+      educationalPrograms: { type: Boolean, required: false },
+      socialMediaPresence: { type: String, enum: ["excellent", "good", "fair", "poor", "none"], required: false },
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
 });
 
