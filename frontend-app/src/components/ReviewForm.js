@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./ReviewForm.css";
+import api from '../services/api';
 
 const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
   // Determine place type from placeData
@@ -180,7 +181,7 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
         formData.append("images", file);
       });
 
-      const response = await fetch("http://localhost:5001/api/reviews/upload-images", {
+      const response = await fetch(`${api.defaults.baseURL}/reviews/upload-images`, {
         method: "POST",
         body: formData,
       });
@@ -281,13 +282,7 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
       }
 
       // Submit review
-      const response = await fetch("http://localhost:5001/api/reviews", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(reviewData),
-      });
+      const response = await api.post("/reviews", reviewData);
 
       if (!response.ok) {
         const errorData = await response.json();

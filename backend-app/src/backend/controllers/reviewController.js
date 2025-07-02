@@ -1,5 +1,6 @@
 const Review = require("../models/Review");
 const Place = require("../models/Place");
+const Card = require("../models/Card");
 const { generateRewardCard } = require("./cardController");
 
 // Helper function to validate pet store review data (basic enum validation)
@@ -651,24 +652,23 @@ exports.addReview = async (req, res) => {
         
         // Check if this is the user's first review ever
         const userReviewCount = await Review.countDocuments({ userId: userId });
+        console.log(`User review count: ${userReviewCount}`);
         
-        if (userReviewCount === 1) {
-          // This is their first review
+        // Check existing cards to prevent duplicates
+        const existingCards = await Card.find({ earnedBy: userId });
+        const hasFirstReviewCard = existingCards.some(card => card.contributionType === 'first_review');
+        const hasMilestoneCard = existingCards.some(card => card.contributionType === 'milestone_achievement');
+        
+        if (userReviewCount === 1 && !hasFirstReviewCard) {
+          // This is their first review and they don't have a first review card yet
           shouldGenerateCard = true;
           contributionType = "first_review";
           console.log("User earned card for first review");
-        } else {
-          // Check other conditions for additional cards
-          
-          // Check if user has 3+ total reviews (milestone achievement)
-          if (userReviewCount >= 3) {
-            shouldGenerateCard = true;
-            contributionType = "milestone_achievement";
-            console.log("User earned card for milestone achievement (3+ reviews)");
-          }
-          
-          // Note: Community approval (2+ upvotes) will be checked separately 
-          // when the helpful count is updated, not during review creation
+        } else if (userReviewCount === 3 && !hasMilestoneCard) {
+          // They just reached 3 reviews and don't have a milestone card yet
+          shouldGenerateCard = true;
+          contributionType = "milestone_achievement";
+          console.log("User earned card for milestone achievement (3 reviews)");
         }
         
         // Generate the card if eligible
@@ -686,6 +686,8 @@ exports.addReview = async (req, res) => {
           );
           
           console.log(`✅ Reward card generated for user ${userId} - ${contributionType}`);
+        } else {
+          console.log(`No card generated - Review count: ${userReviewCount}, Has first card: ${hasFirstReviewCard}, Has milestone card: ${hasMilestoneCard}`);
         }
       }
     } catch (cardError) {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useUser } from "../contexts/UserContext";
 import CardsList from "../components/CardsList";
 import "../styles/Dashboard.css";
+import api from '../services/api';
 
 const Dashboard = () => {
   const { mongoUser, firebaseUser } = useUser();
@@ -27,19 +28,19 @@ const Dashboard = () => {
 
       try {
         // Load user's reward cards count
-        const cardsResponse = await fetch(`http://localhost:5001/api/cards/user/${mongoUser._id}`);
-        const cardsData = cardsResponse.ok ? await cardsResponse.json() : [];
+        const cardsResponse = await api.get(`/cards/user/${mongoUser._id}`);
+        const cards = cardsResponse.data;
 
         // Load user's reviews count
-        const reviewsResponse = await fetch(`http://localhost:5001/api/reviews/user/${mongoUser._id}`);
-        const reviewsData = reviewsResponse.ok ? await reviewsResponse.json() : [];
+        const reviewsResponse = await api.get(`/reviews/user/${mongoUser._id}`);
+        const reviews = reviewsResponse.data;
 
         // Calculate helpful votes from cards
-        const totalHelpfulVotes = cardsData.reduce((sum, card) => sum + (card.helpfulCount || 0), 0);
+        const totalHelpfulVotes = cards.reduce((sum, card) => sum + (card.helpfulCount || 0), 0);
 
         setUserStats({
-          cardsCount: cardsData.length,
-          reviewsCount: reviewsData.length,
+          cardsCount: cards.length,
+          reviewsCount: reviews.length,
           helpfulVotes: totalHelpfulVotes
         });
       } catch (error) {

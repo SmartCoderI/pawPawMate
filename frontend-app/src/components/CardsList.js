@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useUser } from "../contexts/UserContext";
 import Card from "./Card";
 import "./CardsList.css";
+import api from '../services/api';
 
 const CardsList = () => {
   const { mongoUser } = useUser();
@@ -17,11 +18,8 @@ const CardsList = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:5001/api/cards/user/${mongoUser._id}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch cards");
-        }
-        const cardsData = await response.json();
+        const response = await api.get(`/cards/user/${mongoUser._id}`);
+        const cardsData = response.data;
         setCards(cardsData);
       } catch (err) {
         console.error("Error fetching cards:", err);
@@ -36,13 +34,7 @@ const CardsList = () => {
 
   const handleHelpfulClick = async (cardId) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/cards/${cardId}/helpful`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ increment: true }),
-      });
+      const response = await api.put(`/cards/${cardId}/helpful`);
 
       if (!response.ok) {
         throw new Error("Failed to update helpful count");

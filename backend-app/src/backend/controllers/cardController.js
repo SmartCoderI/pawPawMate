@@ -66,11 +66,18 @@ const generateRewardCard = async (userId, reviewId, placeId, locationName, contr
 const getUserCards = async (req, res) => {
   try {
     const { userId } = req.params;
+    console.log("Fetching cards for user ID:", userId);
     
-    const cards = await Card.find({ earnedBy: userId })
+    // Ensure we're using the correct ObjectId format for the query
+    const mongoose = require('mongoose');
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    
+    const cards = await Card.find({ earnedBy: userObjectId })
+      .populate('earnedBy', 'name profileImage')
       .populate('reviewId', 'rating comment createdAt')
       .sort({ createdAt: -1 });
 
+    console.log(`Found ${cards.length} cards for user ${userId}`);
     res.json(cards);
   } catch (error) {
     console.error("Error fetching user cards:", error);
