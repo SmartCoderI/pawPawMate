@@ -1,66 +1,75 @@
 import React, { useState, useEffect } from "react";
-import { auth, db } from "../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { useUser } from "../contexts/UserContext";
+import CardsList from "../components/CardsList";
 import "../styles/Dashboard.css";
-import { fetchMyCards, likeCard } from "../api/cards";
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const [cards, setCards] = useState([]);
-  const [contributions, setContributions] = useState([]);
+  const { mongoUser, firebaseUser } = useUser();
   const [activeTab, setActiveTab] = useState("cards");
+  const [userStats, setUserStats] = useState({
+    cardsCount: 0,
+    reviewsCount: 0,
+    helpfulVotes: 0
+  });
   const [loading, setLoading] = useState(true);
 
+  // Debug logging
+  console.log("Dashboard - mongoUser:", mongoUser);
+  console.log("Dashboard - firebaseUser:", firebaseUser);
+
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setUser(user);
-      if (user) {
-        const token = await user.getIdToken();
-        await loadUserData(user.uid, token);
+    const loadUserStats = async () => {
+      if (!mongoUser?._id) {
+        console.log("No mongoUser._id available:", mongoUser);
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    });
 
-    return () => unsubscribe();
-  }, []);
+      try {
+        // Load user's reward cards count
+        const cardsResponse = await fetch(`http://localhost:5001/api/cards/user/${mongoUser._id}`);
+        const cardsData = cardsResponse.ok ? await cardsResponse.json() : [];
 
-  const loadUserData = async (userId, token) => {
-    try {
-      // Load user's collectible cards from backend
-      const cardsData = await fetchMyCards(token);
-      setCards(cardsData);
+        // Load user's reviews count
+        const reviewsResponse = await fetch(`http://localhost:5001/api/reviews/user/${mongoUser._id}`);
+        const reviewsData = reviewsResponse.ok ? await reviewsResponse.json() : [];
 
-      // Load user's contributions (still from Firestore)
-      const contributionsQuery = query(collection(db, "contributions"), where("userId", "==", userId));
-      const contributionsSnapshot = await getDocs(contributionsQuery);
-      const contributionsData = contributionsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setContributions(contributionsData);
-    } catch (error) {
-      console.error("Error loading user data:", error);
-    }
-  };
+        // Calculate helpful votes from cards
+        const totalHelpfulVotes = cardsData.reduce((sum, card) => sum + (card.helpfulCount || 0), 0);
 
-  const handleLike = async (cardId) => {
-    if (!user) return;
-    try {
-      const token = await user.getIdToken();
-      const updated = await likeCard(cardId, token);
-      setCards(cards.map((c) => (c._id === cardId ? updated : c)));
-    } catch (err) {
-      console.error("Failed to like card:", err);
-    }
-  };
+        setUserStats({
+          cardsCount: cardsData.length,
+          reviewsCount: reviewsData.length,
+          helpfulVotes: totalHelpfulVotes
+        });
+      } catch (error) {
+        console.error("Error loading user stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserStats();
+  }, [mongoUser]);
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="dashboard-container">
+        <div className="loading">Loading your dashboard...</div>
+      </div>
+    );
   }
 
-  if (!user) {
+  // Only require mongoUser since that's what we need for the dashboard functionality
+  if (!mongoUser) {
     return (
       <div className="dashboard-container">
         <div className="auth-prompt">
           <h2>Please sign in to view your dashboard</h2>
-          <p>Track your contributions and collectible cards</p>
+          <p>Track your contributions and collectible reward cards</p>
+          <div style={{ marginTop: '20px', fontSize: '12px', color: '#999' }}>
+            Debug: mongoUser={mongoUser ? 'present' : 'null'}, firebaseUser={firebaseUser ? 'present' : 'null'}
+          </div>
         </div>
       </div>
     );
@@ -71,96 +80,90 @@ const Dashboard = () => {
       <div className="dashboard-header">
         <h1>My Dashboard</h1>
         <div className="user-info">
-          <img src={user.photoURL || "/default-avatar.png"} alt="Profile" className="user-avatar" />
-          <span>{user.displayName || user.email}</span>
+          <img 
+            src={firebaseUser?.photoURL || mongoUser?.profileImage || "/default-avatar.png"} 
+            alt="Profile" 
+            className="user-avatar" 
+          />
+          <span>{mongoUser?.name || firebaseUser?.displayName || firebaseUser?.email || "User"}</span>
         </div>
       </div>
 
       <div className="dashboard-stats">
         <div className="stat-card">
-          <h3>{cards.length}</h3>
-          <p>Cards Collected</p>
+          <h3>{userStats.cardsCount}</h3>
+          <p>Reward Cards Earned</p>
         </div>
         <div className="stat-card">
-          <h3>{contributions.length}</h3>
-          <p>Contributions</p>
+          <h3>{userStats.reviewsCount}</h3>
+          <p>Reviews Submitted</p>
         </div>
         <div className="stat-card">
-          <h3>{contributions.reduce((sum, c) => sum + (c.helpfulCount || 0), 0)}</h3>
-          <p>Helpful Votes</p>
+          <h3>{userStats.helpfulVotes}</h3>
+          <p>Helpful Votes Received</p>
         </div>
       </div>
 
       <div className="dashboard-tabs">
-        <button className={`tab ${activeTab === "cards" ? "active" : ""}`} onClick={() => setActiveTab("cards")}>
-          My Cards
+        <button 
+          className={`tab ${activeTab === "cards" ? "active" : ""}`} 
+          onClick={() => setActiveTab("cards")}
+        >
+          🏆 My Cards
         </button>
         <button
-          className={`tab ${activeTab === "contributions" ? "active" : ""}`}
-          onClick={() => setActiveTab("contributions")}
+          className={`tab ${activeTab === "achievements" ? "active" : ""}`}
+          onClick={() => setActiveTab("achievements")}
         >
-          My Contributions
+          🎯 Achievements
         </button>
       </div>
 
       <div className="dashboard-content">
         {activeTab === "cards" ? (
-          <div className="cards-grid">
-            {cards.length === 0 ? (
-              <p className="empty-state">Start contributing to earn collectible cards!</p>
-            ) : (
-              cards.map((card) => (
-                <div key={card._id || card.id} className="collectible-card">
-                  <div className="card-image">
-                    <img src={card.imageUrl || "/placeholder-card.png"} alt={card.locationName || card.caption} />
-                  </div>
-                  <div className="card-details">
-                    <h4>{card.locationName || card.caption}</h4>
-                    {card.locationType && <p className="card-type">{card.locationType}</p>}
-                    <p className="card-date">
-                      Earned on {card.createdAt ? new Date(card.createdAt).toLocaleDateString() : ""}
-                    </p>
-                    <div className="card-stats">
-                      <span>👍 {card.helpfulCount || 0} found helpful</span>
-                      <button className="like-btn" onClick={() => handleLike(card._id || card.id)}>
-                        Like
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <CardsList />
         ) : (
-          <div className="contributions-list">
-            {contributions.length === 0 ? (
-              <p className="empty-state">No contributions yet. Start exploring and reviewing places!</p>
-            ) : (
-              contributions.map((contribution) => (
-                <div key={contribution.id} className="contribution-item">
-                  <div className="contribution-header">
-                    <h4>{contribution.locationName}</h4>
-                    <span className="contribution-date">
-                      {new Date(contribution.createdAt?.toDate()).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="contribution-type">{contribution.type}</p>
-                  {contribution.review && <p className="contribution-review">{contribution.review}</p>}
-                  {contribution.tags && (
-                    <div className="contribution-tags">
-                      {contribution.tags.map((tag) => (
-                        <span key={tag} className="tag">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="contribution-stats">
-                    <span>👍 {contribution.helpfulCount || 0} found this helpful</span>
-                  </div>
+          <div className="achievements-section">
+            <div className="achievements-content">
+              <h2>🎯 Your Achievements</h2>
+              <div className="achievements-grid">
+                <div className={`achievement-badge ${userStats.cardsCount >= 1 ? 'earned' : 'locked'}`}>
+                  <div className="badge-icon">🌟</div>
+                  <h3>First Card</h3>
+                  <p>Earn your first reward card</p>
+                  <span className="badge-status">
+                    {userStats.cardsCount >= 1 ? '✅ Earned' : '🔒 Locked'}
+                  </span>
                 </div>
-              ))
-            )}
+                
+                <div className={`achievement-badge ${userStats.reviewsCount >= 3 ? 'earned' : 'locked'}`}>
+                  <div className="badge-icon">📝</div>
+                  <h3>Review Master</h3>
+                  <p>Submit 3 detailed reviews</p>
+                  <span className="badge-status">
+                    {userStats.reviewsCount >= 3 ? '✅ Earned' : `🔒 ${userStats.reviewsCount}/3`}
+                  </span>
+                </div>
+                
+                <div className={`achievement-badge ${userStats.cardsCount >= 5 ? 'earned' : 'locked'}`}>
+                  <div className="badge-icon">🏆</div>
+                  <h3>Card Collector</h3>
+                  <p>Collect 5 reward cards</p>
+                  <span className="badge-status">
+                    {userStats.cardsCount >= 5 ? '✅ Earned' : `🔒 ${userStats.cardsCount}/5`}
+                  </span>
+                </div>
+                
+                <div className={`achievement-badge ${userStats.helpfulVotes >= 10 ? 'earned' : 'locked'}`}>
+                  <div className="badge-icon">👍</div>
+                  <h3>Community Helper</h3>
+                  <p>Receive 10 helpful votes</p>
+                  <span className="badge-status">
+                    {userStats.helpfulVotes >= 10 ? '✅ Earned' : `🔒 ${userStats.helpfulVotes}/10`}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
