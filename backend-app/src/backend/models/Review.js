@@ -185,6 +185,8 @@ const reviewSchema = new mongoose.Schema({
     },
 
     // 7. Reputation & Community Engagement
+
+    
     reputationAndCommunity: {
       onlineReputationConsistency: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
       wordOfMouthReputation: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
