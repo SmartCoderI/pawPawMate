@@ -182,6 +182,115 @@ const ReviewList = ({ reviews = [] }) => {
     return sections;
   };
 
+  // Format vet clinic review data for display
+  const formatVetClinicData = (vetClinicReview) => {
+    if (!vetClinicReview) return null;
+
+    const sections = [];
+
+    // 1. Clinic Environment & Facilities
+    if (vetClinicReview.clinicEnvironmentAndFacilities) {
+      const { cleanliness, comfortLevel, facilitySize } = vetClinicReview.clinicEnvironmentAndFacilities;
+      const details = [];
+
+      if (cleanliness) details.push(`Cleanliness: ${cleanliness}`);
+      if (comfortLevel) details.push(`Comfort: ${comfortLevel.replace(/_/g, " ")}`);
+      if (facilitySize) details.push(`Facility size: ${facilitySize}`);
+
+      if (details.length > 0) {
+        sections.push({ title: "Environment & Facilities", details });
+      }
+    }
+
+    // 2. Cost & Transparency
+    if (vetClinicReview.costAndTransparency) {
+      const { routineCheckupCost, vaccinationCost, feesExplainedUpfront, insuranceAccepted } = vetClinicReview.costAndTransparency;
+      const details = [];
+
+      if (routineCheckupCost) details.push(`Checkup cost: ${routineCheckupCost}`);
+      if (vaccinationCost) details.push(`Vaccination cost: ${vaccinationCost}`);
+      if (feesExplainedUpfront) details.push("Fees explained upfront");
+      if (insuranceAccepted) details.push("Insurance accepted");
+
+      if (details.length > 0) {
+        sections.push({ title: "Cost & Transparency", details });
+      }
+    }
+
+    // 3. Medical Staff & Services
+    if (vetClinicReview.medicalStaffAndServices) {
+      const { veterinarianAttitude, veterinarianCompetence, surgeryOrthopedics, behavioralCounseling } = vetClinicReview.medicalStaffAndServices;
+      const details = [];
+
+      if (veterinarianAttitude) details.push(`Vet attitude: ${veterinarianAttitude}`);
+      if (veterinarianCompetence) details.push(`Vet competence: ${veterinarianCompetence}`);
+      if (surgeryOrthopedics) details.push("Surgery/Orthopedics available");
+      if (behavioralCounseling) details.push("Behavioral counseling available");
+
+      if (details.length > 0) {
+        sections.push({ title: "Medical Staff & Services", details });
+      }
+    }
+
+    // 4. Scheduling & Communication
+    if (vetClinicReview.schedulingAndCommunication) {
+      const { responseTime, appointmentWaitTime, followUpCommunication } = vetClinicReview.schedulingAndCommunication;
+      const details = [];
+
+      if (responseTime) details.push(`Response time: ${responseTime.replace(/_/g, " ")}`);
+      if (appointmentWaitTime) details.push(`Appointment wait: ${appointmentWaitTime.replace(/_/g, " ")}`);
+      if (followUpCommunication) details.push(`Follow-up: ${followUpCommunication}`);
+
+      if (details.length > 0) {
+        sections.push({ title: "Scheduling & Communication", details });
+      }
+    }
+
+    // 5. Emergency & After-Hours
+    if (vetClinicReview.emergencyAndAfterHours) {
+      const { openWeekends, openEvenings, onCallEmergencyNumber } = vetClinicReview.emergencyAndAfterHours;
+      const details = [];
+
+      if (openWeekends) details.push("Open weekends");
+      if (openEvenings) details.push("Open evenings");
+      if (onCallEmergencyNumber) details.push("Emergency on-call number");
+
+      if (details.length > 0) {
+        sections.push({ title: "Emergency & After-Hours", details });
+      }
+    }
+
+    // 6. Owner Involvement
+    if (vetClinicReview.ownerInvolvement) {
+      const { allowedDuringExams, explainsProceduresWell, involvesOwnerInDecisions } = vetClinicReview.ownerInvolvement;
+      const details = [];
+
+      if (allowedDuringExams) details.push("Owner allowed during exams");
+      if (explainsProceduresWell) details.push("Explains procedures well");
+      if (involvesOwnerInDecisions) details.push("Involves owner in decisions");
+
+      if (details.length > 0) {
+        sections.push({ title: "Owner Involvement", details });
+      }
+    }
+
+    // 7. Reputation & Community
+    if (vetClinicReview.reputationAndCommunity) {
+      const { communityInvolvement, hostsVaccineClinic, communityEvents } = vetClinicReview.reputationAndCommunity;
+      const details = [];
+
+      if (communityInvolvement) details.push(`Community involvement: ${communityInvolvement}`);
+      if (hostsVaccineClinic) details.push("Hosts vaccine clinics");
+      if (communityEvents) details.push("Participates in community events");
+
+      if (details.length > 0) {
+        sections.push({ title: "Reputation & Community", details });
+      }
+    }
+
+    return sections;
+  };
+
   if (reviews.length === 0) {
     return (
       <div className="reviews-empty">
@@ -261,6 +370,25 @@ const ReviewList = ({ reviews = [] }) => {
                 <div className="dog-park-sections">
                   {formatDogParkData(review.dogParkReview)?.map((section, index) => (
                     <div key={index} className="dog-park-section">
+                      <h6>{section.title}</h6>
+                      <ul>
+                        {section.details.map((detail, detailIndex) => (
+                          <li key={detailIndex}>{detail}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Display vet clinic review details */}
+            {review.vetClinicReview && (
+              <div className="vet-clinic-details">
+                <h5>🏥 Vet Clinic Details:</h5>
+                <div className="vet-clinic-sections">
+                  {formatVetClinicData(review.vetClinicReview)?.map((section, index) => (
+                    <div key={index} className="vet-clinic-section">
                       <h6>{section.title}</h6>
                       <ul>
                         {section.details.map((detail, detailIndex) => (

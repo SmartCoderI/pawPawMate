@@ -40,6 +40,10 @@ const petsDir = path.join(uploadDir, "pets");
 if (!fs.existsSync(petsDir)) {
   fs.mkdirSync(petsDir, { recursive: true });
 }
+const usersDir = path.join(uploadDir, "users");
+if (!fs.existsSync(usersDir)) {
+  fs.mkdirSync(usersDir, { recursive: true });
+}
 
 // File filter for images
 const imageFileFilter = (req, file, cb) => {
@@ -65,6 +69,8 @@ const s3Storage = hasAWSConfig
             folder = "reviews";
           } else if (req.originalUrl.includes("/pets/upload")) {
             folder = "pets";
+          } else if (req.originalUrl.includes("/users/upload-photo")) {
+            folder = "users";
           } else {
             folder = "uploads";
           }
@@ -117,6 +123,8 @@ const localStorage = multer.diskStorage({
       uploadPath = reviewsDir;
     } else if (req.originalUrl.includes("/pets/upload")) {
       uploadPath = petsDir;
+    } else if (req.originalUrl.includes("/users/upload-photo")) {
+      uploadPath = usersDir;
     } else {
       uploadPath = uploadDir;
     }
@@ -154,9 +162,20 @@ const petImageUpload = multer({
   },
 }).single("image");
 
+// User profile image upload configuration (single image)
+const userImageUpload = multer({
+  storage: storage,
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+    files: 1,
+  },
+}).single("image");
+
 module.exports = {
   reviewImageUpload, // Review image upload (multiple images)
   petImageUpload, // Pet image upload (single image)
+  userImageUpload, // User profile image upload (single image)
   hasAWSConfig,
   s3, // Export s3 instance for direct usage if needed
 };

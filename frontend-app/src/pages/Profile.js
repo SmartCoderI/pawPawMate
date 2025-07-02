@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { updateProfile } from 'firebase/auth';
-import { storage } from '../firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { logOut } from '../firebase';
 import { useUser } from '../contexts/UserContext';
-import { petAPI, cardAPI } from '../services/api';
+import { petAPI, cardAPI, userAPI } from '../services/api';
 import '../styles/Profile.css';
 
 const Profile = () => {
@@ -165,9 +163,10 @@ const Profile = () => {
     }));
   };
 
-  const handlePetPhotoChange = (e) => {
+  const handlePetPhotoChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Show preview while uploading
       const reader = new FileReader();
       reader.onloadend = () => {
         setPetFormData(prev => ({
@@ -176,6 +175,12 @@ const Profile = () => {
         }));
       };
       reader.readAsDataURL(file);
+      
+      // Store the file for later upload when form is submitted
+      setPetFormData(prev => ({
+        ...prev,
+        _photoFile: file
+      }));
     }
   };
 
@@ -188,7 +193,8 @@ const Profile = () => {
       birthDate: '',
       personalityTraits: [],
       notes: '',
-      profileImage: ''
+      profileImage: '',
+      _photoFile: null
     });
     setEditingPet(null);
     setShowAddPet(false);
@@ -202,11 +208,12 @@ const Profile = () => {
     try {
       let profileImage = profileData.profileImage;
       
-      // Upload new photo if selected
+      // Upload new photo if selected using AWS S3
       if (newPhoto) {
-        const storageRef = ref(storage, `profiles/${firebaseUser.uid}`);
-        const snapshot = await uploadBytes(storageRef, newPhoto);
-        profileImage = await getDownloadURL(snapshot.ref);
+        console.log('Uploading user photo to AWS S3...');
+        const uploadResult = await userAPI.uploadUserPhoto(newPhoto);
+        profileImage = uploadResult.imageUrl;
+        console.log('User photo uploaded successfully:', profileImage);
       }
 
       // Update Firebase auth profile
@@ -267,10 +274,24 @@ const Profile = () => {
 
     setLoading(true);
     try {
+      let profileImage = petFormData.profileImage;
+      
+      // Upload photo to AWS S3 if a new file was selected
+      if (petFormData._photoFile) {
+        console.log('Uploading pet photo to AWS S3...');
+        const uploadResult = await petAPI.uploadPetPhoto(petFormData._photoFile);
+        profileImage = uploadResult.imageUrl;
+        console.log('Pet photo uploaded successfully:', profileImage);
+      }
+
       const petData = {
         ...petFormData,
+        profileImage: profileImage,
         owner: mongoUserId
       };
+      
+      // Remove the temporary file reference
+      delete petData._photoFile;
 
       if (editingPet) {
         await petAPI.updatePet(editingPet._id, petData);

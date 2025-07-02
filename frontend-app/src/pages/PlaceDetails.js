@@ -14,10 +14,13 @@ const PlaceDetails = () => {
   const [place, setPlace] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [dogParkStats, setDogParkStats] = useState(null);
+  const [vetClinicStats, setVetClinicStats] = useState(null);
+  const [petStoreStats, setPetStoreStats] = useState(null);
+  const [animalShelterStats, setAnimalShelterStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const [address, setAddress] = useState(""); // Add state for resolved address
+
 
   // Image upload state
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -66,7 +69,8 @@ const PlaceDetails = () => {
         formData.append("images", file);
       });
 
-      const response = await fetch("http://localhost:5001/api/reviews/upload-images", {
+      const apiPort = process.env.REACT_APP_PORT || '5000';
+      const response = await fetch(`http://localhost:${apiPort}/api/reviews/upload-images`, {
         method: "POST",
         body: formData,
       });
@@ -146,13 +150,163 @@ const PlaceDetails = () => {
         communityEnforcement: "",
       },
     },
+    vetClinicReview: {
+      clinicEnvironmentAndFacilities: {
+        cleanliness: "",
+        comfortLevel: "",
+        facilitySize: "",
+      },
+      costAndTransparency: {
+        routineCheckupCost: "",
+        vaccinationCost: "",
+        spayNeuterCost: "",
+        dentalCleaningCost: "",
+        emergencyVisitCost: "",
+        feesExplainedUpfront: false,
+        printedEstimatesAvailable: false,
+        insuranceAccepted: false,
+        paymentPlansOffered: false,
+      },
+      medicalStaffAndServices: {
+        veterinarianAttitude: "",
+        veterinarianCompetence: "",
+        technicianNursePerformance: "",
+        onSiteDiagnostics: [],
+        surgeryOrthopedics: false,
+        behavioralCounseling: false,
+        nutritionConsultation: false,
+      },
+      schedulingAndCommunication: {
+        responseTime: "",
+        appointmentWaitTime: "",
+        inClinicWaitingTime: "",
+        followUpCommunication: "",
+      },
+      emergencyAndAfterHours: {
+        openWeekends: false,
+        openEvenings: false,
+        onCallEmergencyNumber: false,
+        connectedToEmergencyHospitals: false,
+        clearHandoffsToSpecialists: false,
+        emergencyTriageSpeed: "",
+        crisisHandlingConfidence: "",
+      },
+      ownerInvolvement: {
+        allowedDuringExams: false,
+        allowedDuringProcedures: false,
+        communicationDuringAnesthesia: "",
+        communicationDuringSurgery: "",
+        explainsProceduresWell: false,
+        involvesOwnerInDecisions: false,
+      },
+      reputationAndCommunity: {
+        onlineReputationConsistency: "",
+        wordOfMouthReputation: "",
+        communityInvolvement: "",
+        hostsVaccineClinic: false,
+        shelterPartnerships: false,
+        communityEvents: false,
+        educationalPrograms: false,
+        socialMediaPresence: "",
+      },
+    },
+    petStoreReview: {
+      accessAndLocation: {
+        parkingDifficulty: "",
+        handicapFriendly: false,
+        parkingToParkDistance: "",
+      },
+      hoursOfOperation: {
+        is24Hours: false,
+        dawnToDusk: false,
+        specificHours: "",
+      },
+      servicesAndConveniences: {
+        grooming: false,
+        veterinaryServices: false,
+        petTraining: false,
+        deliveryService: false,
+        onlineOrdering: false,
+        curbsidePickup: false,
+        returnPolicy: "",
+      },
+      productSelectionAndQuality: {
+        foodBrandVariety: "",
+        toySelection: "",
+        suppliesAvailability: "",
+        productFreshness: "",
+        organicNaturalOptions: false,
+        prescriptionDietAvailable: false,
+      },
+      pricingAndValue: {
+        overallPricing: "",
+        loyaltyProgram: false,
+        frequentSales: false,
+        priceMatching: false,
+        bulkDiscounts: false,
+        seniorDiscounts: false,
+      },
+      staffKnowledgeAndService: {
+        petKnowledge: "",
+        productRecommendations: "",
+        customerService: "",
+        helpfulness: "",
+        multilingual: false,
+        trainingCertified: false,
+      },
+    },
+    animalShelterReview: {
+      accessAndLocation: {
+        parkingDifficulty: "",
+        handicapFriendly: false,
+        parkingToParkDistance: "",
+      },
+      hoursOfOperation: {
+        is24Hours: false,
+        dawnToDusk: false,
+        specificHours: "",
+      },
+      animalTypeSelection: {
+        availableAnimalTypes: [],
+        breedVariety: "",
+        ageRange: [],
+      },
+      animalCareAndWelfare: {
+        animalHealth: "",
+        livingConditions: "",
+        exercisePrograms: false,
+        medicalCare: "",
+        behavioralAssessment: false,
+        specialNeedsCare: false,
+      },
+      adoptionProcessAndSupport: {
+        applicationProcess: "",
+        processingTime: "",
+        homeVisitRequired: false,
+        adoptionFees: "",
+        postAdoptionSupport: false,
+        returnPolicy: "",
+      },
+      staffAndVolunteerQuality: {
+        staffKnowledge: "",
+        animalHandling: "",
+        customerService: "",
+        volunteerProgram: false,
+        staffTraining: false,
+        compassionLevel: "",
+      },
+    },
   });
 
   // Location types with icons
   const locationTypes = {
     "dog park": { label: "Dog Park", icon: "🌳", color: "#22c55e" },
+    dog_park: { label: "Dog Park", icon: "🌳", color: "#22c55e" },
+    leisure: { label: "Dog Park", icon: "🌳", color: "#22c55e" },
     vet: { label: "Veterinarian", icon: "🏥", color: "#3b82f6" },
+    veterinary: { label: "Veterinarian", icon: "🏥", color: "#3b82f6" },
     "pet store": { label: "Pet Store", icon: "🏪", color: "#f59e0b" },
+    shelter: { label: "Shelter", icon: "🏠", color: "#ef4444" },
     other: { label: "Other", icon: "📍", color: "#6b7280" },
   };
 
@@ -347,7 +501,6 @@ const PlaceDetails = () => {
               const resolvedAddress = await reverseGeocode(osmLocation.latitude, osmLocation.longitude);
               if (resolvedAddress) {
                 console.log("Resolved address:", resolvedAddress);
-                setAddress(resolvedAddress);
                 // Update the place object with the resolved address
                 setPlace((prev) => ({ ...prev, address: resolvedAddress }));
               }
@@ -361,7 +514,7 @@ const PlaceDetails = () => {
               setReviews(reviewsData);
 
               // Load dog park stats if it's a dog park and has reviews
-              if ((osmLocation.type === "dog park" || osmLocation.type === "leisure") && reviewsData.length > 0) {
+              if ((osmLocation.type === "dog park" || osmLocation.type === "dog_park" || osmLocation.type === "leisure") && reviewsData.length > 0) {
                 try {
                   const statsData = await reviewAPI.getDogParkStats(id);
                   setDogParkStats(statsData);
@@ -371,6 +524,45 @@ const PlaceDetails = () => {
                 }
               } else {
                 setDogParkStats(null);
+              }
+
+              // Load vet clinic stats if it's a vet clinic and has reviews
+              if ((osmLocation.type === "vet" || osmLocation.type === "veterinary") && reviewsData.length > 0) {
+                try {
+                  const statsData = await reviewAPI.getVetClinicStats(id);
+                  setVetClinicStats(statsData);
+                } catch (statsError) {
+                  console.error("Error loading vet clinic stats for OSM location:", statsError);
+                  setVetClinicStats(null);
+                }
+              } else {
+                setVetClinicStats(null);
+              }
+
+              // Load pet store stats if it's a pet store and has reviews
+              if ((osmLocation.type === "pet_store" || osmLocation.type === "pet store") && reviewsData.length > 0) {
+                try {
+                  const statsData = await reviewAPI.getPetStoreStats(id);
+                  setPetStoreStats(statsData);
+                } catch (statsError) {
+                  console.error("Error loading pet store stats for OSM location:", statsError);
+                  setPetStoreStats(null);
+                }
+              } else {
+                setPetStoreStats(null);
+              }
+
+              // Load animal shelter stats if it's a shelter and has reviews
+              if ((osmLocation.type === "animal_shelter" || osmLocation.type === "shelter") && reviewsData.length > 0) {
+                try {
+                  const statsData = await reviewAPI.getAnimalShelterStats(id);
+                  setAnimalShelterStats(statsData);
+                } catch (statsError) {
+                  console.error("Error loading animal shelter stats for OSM location:", statsError);
+                  setAnimalShelterStats(null);
+                }
+              } else {
+                setAnimalShelterStats(null);
               }
             } catch (reviewError) {
               console.log("No reviews found for OSM location (this is normal for new locations):", reviewError);
@@ -394,7 +586,6 @@ const PlaceDetails = () => {
             const resolvedAddress = await reverseGeocode(placeData.coordinates.lat, placeData.coordinates.lng);
             if (resolvedAddress) {
               console.log("Resolved address for database place:", resolvedAddress);
-              setAddress(resolvedAddress);
               // Update the place object with the resolved address
               setPlace((prev) => ({ ...prev, address: resolvedAddress }));
             }
@@ -405,12 +596,42 @@ const PlaceDetails = () => {
           setReviews(reviewsData);
 
           // Load dog park stats if it's a dog park
-          if (placeData.type === "dog park") {
+          if (placeData.type === "dog park" || placeData.type === "dog_park" || placeData.type === "leisure") {
             try {
               const statsData = await reviewAPI.getDogParkStats(id);
               setDogParkStats(statsData);
             } catch (statsError) {
               console.error("Error loading dog park stats:", statsError);
+            }
+          }
+
+          // Load vet clinic stats if it's a vet clinic
+          if (placeData.type === "vet" || placeData.type === "veterinary") {
+            try {
+              const statsData = await reviewAPI.getVetClinicStats(id);
+              setVetClinicStats(statsData);
+            } catch (statsError) {
+              console.error("Error loading vet clinic stats:", statsError);
+            }
+          }
+
+          // Load pet store stats if it's a pet store
+          if (placeData.type === "pet store" || placeData.type === "pet_store") {
+            try {
+              const statsData = await reviewAPI.getPetStoreStats(id);
+              setPetStoreStats(statsData);
+            } catch (statsError) {
+              console.error("Error loading pet store stats:", statsError);
+            }
+          }
+
+          // Load animal shelter stats if it's a shelter
+          if (placeData.type === "shelter" || placeData.type === "animal_shelter") {
+            try {
+              const statsData = await reviewAPI.getAnimalShelterStats(id);
+              setAnimalShelterStats(statsData);
+            } catch (statsError) {
+              console.error("Error loading animal shelter stats:", statsError);
             }
           }
         } catch (placeError) {
@@ -471,6 +692,8 @@ const PlaceDetails = () => {
         let mappedType = place.type || "other";
         if (mappedType === "dog_park") mappedType = "dog park";
         if (mappedType === "pet_store") mappedType = "pet store";
+        if (mappedType === "animal_shelter") mappedType = "shelter";
+        if (mappedType === "veterinary") mappedType = "vet";
 
         // Prepare place data for the backend to create automatically
         const placeData = {
@@ -502,6 +725,21 @@ const PlaceDetails = () => {
           reviewData.dogParkReview = reviewForm.dogParkReview;
         }
 
+        // Add vet clinic review data if it's a vet clinic
+        if (mappedType === "vet") {
+          reviewData.vetClinicReview = reviewForm.vetClinicReview;
+        }
+
+        // Add pet store review data if it's a pet store
+        if (mappedType === "pet store") {
+          reviewData.petStoreReview = reviewForm.petStoreReview;
+        }
+
+        // Add animal shelter review data if it's a shelter
+        if (mappedType === "shelter") {
+          reviewData.animalShelterReview = reviewForm.animalShelterReview;
+        }
+
         console.log("Submitting review with place auto-creation:", reviewData);
         const createdReview = await reviewAPI.createReview(reviewData);
         console.log("Review created successfully (place auto-created or found):", createdReview);
@@ -530,6 +768,24 @@ const PlaceDetails = () => {
           setDogParkStats(updatedStats);
         }
 
+        // Reload stats if vet clinic
+        if (mappedType === "vet") {
+          const updatedStats = await reviewAPI.getVetClinicStats(actualPlaceId);
+          setVetClinicStats(updatedStats);
+        }
+
+        // Reload stats if pet store
+        if (mappedType === "pet store") {
+          const updatedStats = await reviewAPI.getPetStoreStats(actualPlaceId);
+          setPetStoreStats(updatedStats);
+        }
+
+        // Reload stats if animal shelter
+        if (mappedType === "shelter") {
+          const updatedStats = await reviewAPI.getAnimalShelterStats(actualPlaceId);
+          setAnimalShelterStats(updatedStats);
+        }
+
         // Reset form and hide it
         console.log("✅ OSM review submission successful, closing form...");
         setShowReviewForm(false);
@@ -538,6 +794,9 @@ const PlaceDetails = () => {
           rating: 5,
           comment: "",
           dogParkReview: reviewForm.dogParkReview,
+          vetClinicReview: reviewForm.vetClinicReview,
+          petStoreReview: reviewForm.petStoreReview,
+          animalShelterReview: reviewForm.animalShelterReview,
         });
 
         alert("Review submitted successfully!");
@@ -580,8 +839,23 @@ const PlaceDetails = () => {
       };
 
       // Add dog park review data if it's a dog park
-      if (place.type === "dog park") {
+      if (place.type === "dog park" || place.type === "dog_park" || place.type === "leisure") {
         reviewData.dogParkReview = reviewForm.dogParkReview;
+      }
+
+      // Add vet clinic review data if it's a vet clinic
+      if (place.type === "vet" || place.type === "veterinary") {
+        reviewData.vetClinicReview = reviewForm.vetClinicReview;
+      }
+
+      // Add pet store review data if it's a pet store
+      if (place.type === "pet store" || place.type === "pet_store") {
+        reviewData.petStoreReview = reviewForm.petStoreReview;
+      }
+
+      // Add animal shelter review data if it's a shelter
+      if (place.type === "shelter" || place.type === "animal_shelter") {
+        reviewData.animalShelterReview = reviewForm.animalShelterReview;
       }
 
       console.log("Submitting review with data:", reviewData);
@@ -593,9 +867,27 @@ const PlaceDetails = () => {
       setReviews(updatedReviews);
 
       // Reload stats if dog park
-      if (place.type === "dog park") {
+      if (place.type === "dog park" || place.type === "dog_park" || place.type === "leisure") {
         const updatedStats = await reviewAPI.getDogParkStats(id);
         setDogParkStats(updatedStats);
+      }
+
+      // Reload stats if vet clinic
+      if (place.type === "vet" || place.type === "veterinary") {
+        const updatedStats = await reviewAPI.getVetClinicStats(id);
+        setVetClinicStats(updatedStats);
+      }
+
+      // Reload stats if pet store
+      if (place.type === "pet store" || place.type === "pet_store") {
+        const updatedStats = await reviewAPI.getPetStoreStats(id);
+        setPetStoreStats(updatedStats);
+      }
+
+      // Reload stats if animal shelter
+      if (place.type === "shelter" || place.type === "animal_shelter") {
+        const updatedStats = await reviewAPI.getAnimalShelterStats(id);
+        setAnimalShelterStats(updatedStats);
       }
 
       // Reset form and hide it
@@ -606,6 +898,9 @@ const PlaceDetails = () => {
         rating: 5,
         comment: "",
         dogParkReview: reviewForm.dogParkReview, // Keep structure but reset values
+        vetClinicReview: reviewForm.vetClinicReview, // Keep structure but reset values
+        petStoreReview: reviewForm.petStoreReview, // Keep structure but reset values
+        animalShelterReview: reviewForm.animalShelterReview, // Keep structure but reset values
       });
 
       alert("Review submitted successfully!");
@@ -910,6 +1205,642 @@ const PlaceDetails = () => {
     ));
   };
 
+  // Analyze vet clinic review tags
+  const analyzeVetReviewTags = () => {
+    const tagCounts = {
+      clinicEnvironmentAndFacilities: {
+        cleanliness: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        comfortLevel: { very_comfortable: 0, comfortable: 0, neutral: 0, uncomfortable: 0 },
+        facilitySize: { small: 0, medium: 0, large: 0 },
+      },
+      costAndTransparency: {
+        routineCheckupCost: { low: 0, moderate: 0, high: 0, very_high: 0 },
+        vaccinationCost: { low: 0, moderate: 0, high: 0, very_high: 0 },
+        spayNeuterCost: { low: 0, moderate: 0, high: 0, very_high: 0 },
+        feesExplainedUpfront: { true: 0, false: 0 },
+        printedEstimatesAvailable: { true: 0, false: 0 },
+        insuranceAccepted: { true: 0, false: 0 },
+      },
+      medicalStaffAndServices: {
+        veterinarianAttitude: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        veterinarianCompetence: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        technicianNursePerformance: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        surgeryOrthopedics: { true: 0, false: 0 },
+        behavioralCounseling: { true: 0, false: 0 },
+      },
+      schedulingAndCommunication: {
+        responseTime: { immediate: 0, same_day: 0, next_day: 0, several_days: 0 },
+        appointmentWaitTime: { same_day: 0, within_week: 0, '1_2_weeks': 0, over_2_weeks: 0 },
+        inClinicWaitingTime: { under_15_min: 0, '15_30_min': 0, '30_60_min': 0, over_1_hour: 0 },
+        followUpCommunication: { excellent: 0, good: 0, fair: 0, poor: 0 },
+      },
+      emergencyAndAfterHours: {
+        openWeekends: { true: 0, false: 0 },
+        openEvenings: { true: 0, false: 0 },
+        onCallEmergencyNumber: { true: 0, false: 0 },
+        emergencyTriageSpeed: { immediate: 0, within_30_min: 0, within_1_hour: 0, over_1_hour: 0 },
+        crisisHandlingConfidence: { excellent: 0, good: 0, fair: 0, poor: 0 },
+      },
+      ownerInvolvement: {
+        allowedDuringExams: { true: 0, false: 0 },
+        allowedDuringProcedures: { true: 0, false: 0 },
+        communicationDuringAnesthesia: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        explainsProceduresWell: { true: 0, false: 0 },
+        involvesOwnerInDecisions: { true: 0, false: 0 },
+      },
+      reputationAndCommunity: {
+        onlineReputationConsistency: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        wordOfMouthReputation: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        communityInvolvement: { high: 0, moderate: 0, low: 0, none: 0 },
+        hostsVaccineClinic: { true: 0, false: 0 },
+        shelterPartnerships: { true: 0, false: 0 },
+        communityEvents: { true: 0, false: 0 },
+      },
+    };
+
+    // Count occurrences from all reviews
+    reviews.forEach((review) => {
+      if (review.vetClinicReview) {
+        const vcReview = review.vetClinicReview;
+
+        // Clinic Environment & Facilities
+        if (vcReview.clinicEnvironmentAndFacilities) {
+          const cef = vcReview.clinicEnvironmentAndFacilities;
+          if (cef.cleanliness) tagCounts.clinicEnvironmentAndFacilities.cleanliness[cef.cleanliness]++;
+          if (cef.comfortLevel) tagCounts.clinicEnvironmentAndFacilities.comfortLevel[cef.comfortLevel]++;
+          if (cef.facilitySize) tagCounts.clinicEnvironmentAndFacilities.facilitySize[cef.facilitySize]++;
+        }
+
+        // Cost & Transparency
+        if (vcReview.costAndTransparency) {
+          const ct = vcReview.costAndTransparency;
+          if (ct.routineCheckupCost) tagCounts.costAndTransparency.routineCheckupCost[ct.routineCheckupCost]++;
+          if (ct.vaccinationCost) tagCounts.costAndTransparency.vaccinationCost[ct.vaccinationCost]++;
+          if (ct.spayNeuterCost) tagCounts.costAndTransparency.spayNeuterCost[ct.spayNeuterCost]++;
+          if (ct.feesExplainedUpfront !== undefined) tagCounts.costAndTransparency.feesExplainedUpfront[ct.feesExplainedUpfront]++;
+          if (ct.printedEstimatesAvailable !== undefined) tagCounts.costAndTransparency.printedEstimatesAvailable[ct.printedEstimatesAvailable]++;
+          if (ct.insuranceAccepted !== undefined) tagCounts.costAndTransparency.insuranceAccepted[ct.insuranceAccepted]++;
+        }
+
+        // Medical Staff & Services
+        if (vcReview.medicalStaffAndServices) {
+          const mss = vcReview.medicalStaffAndServices;
+          if (mss.veterinarianAttitude) tagCounts.medicalStaffAndServices.veterinarianAttitude[mss.veterinarianAttitude]++;
+          if (mss.veterinarianCompetence) tagCounts.medicalStaffAndServices.veterinarianCompetence[mss.veterinarianCompetence]++;
+          if (mss.technicianNursePerformance) tagCounts.medicalStaffAndServices.technicianNursePerformance[mss.technicianNursePerformance]++;
+          if (mss.surgeryOrthopedics !== undefined) tagCounts.medicalStaffAndServices.surgeryOrthopedics[mss.surgeryOrthopedics]++;
+          if (mss.behavioralCounseling !== undefined) tagCounts.medicalStaffAndServices.behavioralCounseling[mss.behavioralCounseling]++;
+        }
+
+        // Scheduling & Communication
+        if (vcReview.schedulingAndCommunication) {
+          const sc = vcReview.schedulingAndCommunication;
+          if (sc.responseTime) tagCounts.schedulingAndCommunication.responseTime[sc.responseTime]++;
+          if (sc.appointmentWaitTime) tagCounts.schedulingAndCommunication.appointmentWaitTime[sc.appointmentWaitTime]++;
+          if (sc.inClinicWaitingTime) tagCounts.schedulingAndCommunication.inClinicWaitingTime[sc.inClinicWaitingTime]++;
+          if (sc.followUpCommunication) tagCounts.schedulingAndCommunication.followUpCommunication[sc.followUpCommunication]++;
+        }
+
+        // Emergency & After-Hours
+        if (vcReview.emergencyAndAfterHours) {
+          const eah = vcReview.emergencyAndAfterHours;
+          if (eah.openWeekends !== undefined) tagCounts.emergencyAndAfterHours.openWeekends[eah.openWeekends]++;
+          if (eah.openEvenings !== undefined) tagCounts.emergencyAndAfterHours.openEvenings[eah.openEvenings]++;
+          if (eah.onCallEmergencyNumber !== undefined) tagCounts.emergencyAndAfterHours.onCallEmergencyNumber[eah.onCallEmergencyNumber]++;
+          if (eah.emergencyTriageSpeed) tagCounts.emergencyAndAfterHours.emergencyTriageSpeed[eah.emergencyTriageSpeed]++;
+          if (eah.crisisHandlingConfidence) tagCounts.emergencyAndAfterHours.crisisHandlingConfidence[eah.crisisHandlingConfidence]++;
+        }
+
+        // Owner Involvement
+        if (vcReview.ownerInvolvement) {
+          const oi = vcReview.ownerInvolvement;
+          if (oi.allowedDuringExams !== undefined) tagCounts.ownerInvolvement.allowedDuringExams[oi.allowedDuringExams]++;
+          if (oi.allowedDuringProcedures !== undefined) tagCounts.ownerInvolvement.allowedDuringProcedures[oi.allowedDuringProcedures]++;
+          if (oi.communicationDuringAnesthesia) tagCounts.ownerInvolvement.communicationDuringAnesthesia[oi.communicationDuringAnesthesia]++;
+          if (oi.explainsProceduresWell !== undefined) tagCounts.ownerInvolvement.explainsProceduresWell[oi.explainsProceduresWell]++;
+          if (oi.involvesOwnerInDecisions !== undefined) tagCounts.ownerInvolvement.involvesOwnerInDecisions[oi.involvesOwnerInDecisions]++;
+        }
+
+        // Reputation & Community
+        if (vcReview.reputationAndCommunity) {
+          const rc = vcReview.reputationAndCommunity;
+          if (rc.onlineReputationConsistency) tagCounts.reputationAndCommunity.onlineReputationConsistency[rc.onlineReputationConsistency]++;
+          if (rc.wordOfMouthReputation) tagCounts.reputationAndCommunity.wordOfMouthReputation[rc.wordOfMouthReputation]++;
+          if (rc.communityInvolvement) tagCounts.reputationAndCommunity.communityInvolvement[rc.communityInvolvement]++;
+          if (rc.hostsVaccineClinic !== undefined) tagCounts.reputationAndCommunity.hostsVaccineClinic[rc.hostsVaccineClinic]++;
+          if (rc.shelterPartnerships !== undefined) tagCounts.reputationAndCommunity.shelterPartnerships[rc.shelterPartnerships]++;
+          if (rc.communityEvents !== undefined) tagCounts.reputationAndCommunity.communityEvents[rc.communityEvents]++;
+        }
+      }
+    });
+
+    return tagCounts;
+  };
+
+  // Render smart vet clinic category tags
+  const renderSmartVetCategoryTags = (category, tagCounts) => {
+    const tagMappings = {
+      clinicEnvironmentAndFacilities: [
+        { category: "clinicEnvironmentAndFacilities", field: "cleanliness", value: "excellent", label: "🌟 Excellent Cleanliness" },
+        { category: "clinicEnvironmentAndFacilities", field: "cleanliness", value: "good", label: "✨ Good Cleanliness" },
+        { category: "clinicEnvironmentAndFacilities", field: "comfortLevel", value: "very_comfortable", label: "😌 Very Comfortable" },
+        { category: "clinicEnvironmentAndFacilities", field: "comfortLevel", value: "comfortable", label: "😊 Comfortable" },
+      ],
+      costAndTransparency: [
+        { category: "costAndTransparency", field: "routineCheckupCost", value: "low", label: "💰 Low Cost Checkups" },
+        { category: "costAndTransparency", field: "routineCheckupCost", value: "moderate", label: "💰 Moderate Cost" },
+        { category: "costAndTransparency", field: "feesExplainedUpfront", value: true, label: "📋 Transparent Fees" },
+        { category: "costAndTransparency", field: "insuranceAccepted", value: true, label: "🏥 Insurance Accepted" },
+      ],
+      medicalStaffAndServices: [
+        { category: "medicalStaffAndServices", field: "veterinarianAttitude", value: "excellent", label: "👨‍⚕️ Excellent Vet" },
+        { category: "medicalStaffAndServices", field: "veterinarianCompetence", value: "excellent", label: "🎯 Expert Care" },
+        { category: "medicalStaffAndServices", field: "surgeryOrthopedics", value: true, label: "🔬 Surgery Available" },
+        { category: "medicalStaffAndServices", field: "behavioralCounseling", value: true, label: "🧠 Behavioral Help" },
+      ],
+      schedulingAndCommunication: [
+        { category: "schedulingAndCommunication", field: "responseTime", value: "immediate", label: "⚡ Immediate Response" },
+        { category: "schedulingAndCommunication", field: "responseTime", value: "same_day", label: "📞 Same Day Response" },
+        { category: "schedulingAndCommunication", field: "appointmentWaitTime", value: "same_day", label: "📅 Same Day Appointments" },
+        { category: "schedulingAndCommunication", field: "followUpCommunication", value: "excellent", label: "📱 Excellent Follow-up" },
+      ],
+      emergencyAndAfterHours: [
+        { category: "emergencyAndAfterHours", field: "openWeekends", value: true, label: "🗓️ Weekend Hours" },
+        { category: "emergencyAndAfterHours", field: "openEvenings", value: true, label: "🌙 Evening Hours" },
+        { category: "emergencyAndAfterHours", field: "onCallEmergencyNumber", value: true, label: "🚨 Emergency On-Call" },
+        { category: "emergencyAndAfterHours", field: "emergencyTriageSpeed", value: "immediate", label: "⚡ Fast Emergency Care" },
+      ],
+      ownerInvolvement: [
+        { category: "ownerInvolvement", field: "allowedDuringExams", value: true, label: "👥 Owner During Exams" },
+        { category: "ownerInvolvement", field: "explainsProceduresWell", value: true, label: "📚 Clear Explanations" },
+        { category: "ownerInvolvement", field: "involvesOwnerInDecisions", value: true, label: "🤝 Collaborative Decisions" },
+        { category: "ownerInvolvement", field: "communicationDuringAnesthesia", value: "excellent", label: "💬 Great Communication" },
+      ],
+      reputationAndCommunity: [
+        { category: "reputationAndCommunity", field: "onlineReputationConsistency", value: "excellent", label: "⭐ Excellent Reputation" },
+        { category: "reputationAndCommunity", field: "wordOfMouthReputation", value: "excellent", label: "🗣️ Great Word of Mouth" },
+        { category: "reputationAndCommunity", field: "hostsVaccineClinic", value: true, label: "💉 Vaccine Clinics" },
+        { category: "reputationAndCommunity", field: "communityEvents", value: true, label: "🎉 Community Events" },
+      ],
+    };
+
+    const mapping = tagMappings[category];
+    if (!mapping) return [];
+
+    // Calculate popularity scores and sort
+    const tagsWithScores = mapping.map((tag) => {
+      const count = tagCounts[tag.category]?.[tag.field]?.[tag.value] || 0;
+      const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+      return {
+        ...tag,
+        count,
+        percentage,
+        styleClass: getTagStyle(tag.category, tag.field, tag.value, tagCounts),
+      };
+    });
+
+    // Sort by count (popular first) and limit to 4 tags
+    const sortedTags = tagsWithScores.sort((a, b) => b.count - a.count).slice(0, 4);
+
+    return sortedTags.map((tag) => (
+      <span
+        key={`${tag.field}-${tag.value}`}
+        className={tag.styleClass}
+        title={
+          tag.count > 0
+            ? `${tag.count} review${tag.count !== 1 ? "s" : ""} mention this`
+            : "No reviews mention this yet"
+        }
+      >
+        {tag.label}
+        {tag.count > 0 && <span className="tag-count"> ({tag.count})</span>}
+      </span>
+    ));
+  };
+
+  // Analyze pet store reviews to get tag popularity for smart coloring
+  const analyzePetStoreReviewTags = () => {
+    if (!reviews || reviews.length === 0) {
+      return {};
+    }
+
+    const tagCounts = {
+      accessAndLocation: {
+        parkingDifficulty: { easy: 0, moderate: 0, difficult: 0 },
+        handicapFriendly: { true: 0, false: 0 },
+        parkingToParkDistance: { close: 0, moderate: 0, far: 0 },
+      },
+      hoursOfOperation: {
+        is24Hours: { true: 0, false: 0 },
+        dawnToDusk: { true: 0, false: 0 },
+        specificHours: {},
+      },
+      servicesAndConveniences: {
+        grooming: { true: 0, false: 0 },
+        veterinaryServices: { true: 0, false: 0 },
+        petTraining: { true: 0, false: 0 },
+        deliveryService: { true: 0, false: 0 },
+        onlineOrdering: { true: 0, false: 0 },
+        curbsidePickup: { true: 0, false: 0 },
+        returnPolicy: { excellent: 0, good: 0, fair: 0, poor: 0 },
+      },
+      productSelectionAndQuality: {
+        foodBrandVariety: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        toySelection: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        suppliesAvailability: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        productFreshness: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        organicNaturalOptions: { true: 0, false: 0 },
+        prescriptionDietAvailable: { true: 0, false: 0 },
+      },
+      pricingAndValue: {
+        overallPricing: { low: 0, moderate: 0, high: 0, very_high: 0 },
+        loyaltyProgram: { true: 0, false: 0 },
+        frequentSales: { true: 0, false: 0 },
+        priceMatching: { true: 0, false: 0 },
+        bulkDiscounts: { true: 0, false: 0 },
+        seniorDiscounts: { true: 0, false: 0 },
+      },
+      staffKnowledgeAndService: {
+        petKnowledge: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        productRecommendations: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        customerService: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        helpfulness: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        multilingual: { true: 0, false: 0 },
+        trainingCertified: { true: 0, false: 0 },
+      },
+    };
+
+    // Count occurrences from all reviews
+    reviews.forEach((review) => {
+      if (review.petStoreReview) {
+        const psReview = review.petStoreReview;
+
+        // Access & Location
+        if (psReview.accessAndLocation) {
+          const al = psReview.accessAndLocation;
+          if (al.parkingDifficulty) tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty]++;
+          if (al.handicapFriendly !== undefined) tagCounts.accessAndLocation.handicapFriendly[al.handicapFriendly]++;
+          if (al.parkingToParkDistance) tagCounts.accessAndLocation.parkingToParkDistance[al.parkingToParkDistance]++;
+        }
+
+        // Hours of Operation
+        if (psReview.hoursOfOperation) {
+          const ho = psReview.hoursOfOperation;
+          if (ho.is24Hours !== undefined) tagCounts.hoursOfOperation.is24Hours[ho.is24Hours]++;
+          if (ho.dawnToDusk !== undefined) tagCounts.hoursOfOperation.dawnToDusk[ho.dawnToDusk]++;
+          if (ho.specificHours) {
+            tagCounts.hoursOfOperation.specificHours[ho.specificHours] = 
+              (tagCounts.hoursOfOperation.specificHours[ho.specificHours] || 0) + 1;
+          }
+        }
+
+        // Services & Conveniences
+        if (psReview.servicesAndConveniences) {
+          const sc = psReview.servicesAndConveniences;
+          if (sc.grooming !== undefined) tagCounts.servicesAndConveniences.grooming[sc.grooming]++;
+          if (sc.veterinaryServices !== undefined) tagCounts.servicesAndConveniences.veterinaryServices[sc.veterinaryServices]++;
+          if (sc.petTraining !== undefined) tagCounts.servicesAndConveniences.petTraining[sc.petTraining]++;
+          if (sc.deliveryService !== undefined) tagCounts.servicesAndConveniences.deliveryService[sc.deliveryService]++;
+          if (sc.onlineOrdering !== undefined) tagCounts.servicesAndConveniences.onlineOrdering[sc.onlineOrdering]++;
+          if (sc.curbsidePickup !== undefined) tagCounts.servicesAndConveniences.curbsidePickup[sc.curbsidePickup]++;
+          if (sc.returnPolicy) tagCounts.servicesAndConveniences.returnPolicy[sc.returnPolicy]++;
+        }
+
+        // Product Selection & Quality
+        if (psReview.productSelectionAndQuality) {
+          const psq = psReview.productSelectionAndQuality;
+          if (psq.foodBrandVariety) tagCounts.productSelectionAndQuality.foodBrandVariety[psq.foodBrandVariety]++;
+          if (psq.toySelection) tagCounts.productSelectionAndQuality.toySelection[psq.toySelection]++;
+          if (psq.suppliesAvailability) tagCounts.productSelectionAndQuality.suppliesAvailability[psq.suppliesAvailability]++;
+          if (psq.productFreshness) tagCounts.productSelectionAndQuality.productFreshness[psq.productFreshness]++;
+          if (psq.organicNaturalOptions !== undefined) tagCounts.productSelectionAndQuality.organicNaturalOptions[psq.organicNaturalOptions]++;
+          if (psq.prescriptionDietAvailable !== undefined) tagCounts.productSelectionAndQuality.prescriptionDietAvailable[psq.prescriptionDietAvailable]++;
+        }
+
+        // Pricing & Value
+        if (psReview.pricingAndValue) {
+          const pv = psReview.pricingAndValue;
+          if (pv.overallPricing) tagCounts.pricingAndValue.overallPricing[pv.overallPricing]++;
+          if (pv.loyaltyProgram !== undefined) tagCounts.pricingAndValue.loyaltyProgram[pv.loyaltyProgram]++;
+          if (pv.frequentSales !== undefined) tagCounts.pricingAndValue.frequentSales[pv.frequentSales]++;
+          if (pv.priceMatching !== undefined) tagCounts.pricingAndValue.priceMatching[pv.priceMatching]++;
+          if (pv.bulkDiscounts !== undefined) tagCounts.pricingAndValue.bulkDiscounts[pv.bulkDiscounts]++;
+          if (pv.seniorDiscounts !== undefined) tagCounts.pricingAndValue.seniorDiscounts[pv.seniorDiscounts]++;
+        }
+
+        // Staff Knowledge & Service
+        if (psReview.staffKnowledgeAndService) {
+          const sks = psReview.staffKnowledgeAndService;
+          if (sks.petKnowledge) tagCounts.staffKnowledgeAndService.petKnowledge[sks.petKnowledge]++;
+          if (sks.productRecommendations) tagCounts.staffKnowledgeAndService.productRecommendations[sks.productRecommendations]++;
+          if (sks.customerService) tagCounts.staffKnowledgeAndService.customerService[sks.customerService]++;
+          if (sks.helpfulness) tagCounts.staffKnowledgeAndService.helpfulness[sks.helpfulness]++;
+          if (sks.multilingual !== undefined) tagCounts.staffKnowledgeAndService.multilingual[sks.multilingual]++;
+          if (sks.trainingCertified !== undefined) tagCounts.staffKnowledgeAndService.trainingCertified[sks.trainingCertified]++;
+        }
+      }
+    });
+
+    return tagCounts;
+  };
+
+  // Render smart category tags for pet stores
+  const renderSmartPetStoreCategoryTags = (category, tagCounts) => {
+    if (!tagCounts || !tagCounts[category]) {
+      return <span className="option-tag gray">No data yet</span>;
+    }
+
+    const tags = [];
+    const categoryData = tagCounts[category];
+
+    // Helper function to add tag if it has data
+    const addTag = (field, value, displayText) => {
+      const count = categoryData[field] && categoryData[field][value] ? categoryData[field][value] : 0;
+      if (count > 0) {
+        const tagStyle = getTagStyle(category, field, value, tagCounts);
+        tags.push(
+          <span key={`${field}-${value}`} className={tagStyle}>
+            {displayText} ({count})
+          </span>
+        );
+      }
+    };
+
+    // Render category-specific tags
+    switch (category) {
+      case "accessAndLocation":
+        addTag("parkingDifficulty", "easy", "Easy Parking");
+        addTag("parkingDifficulty", "moderate", "Moderate Parking");
+        addTag("parkingDifficulty", "difficult", "Difficult Parking");
+        addTag("handicapFriendly", "true", "Handicap Friendly");
+        addTag("parkingToParkDistance", "close", "Close Parking");
+        break;
+
+      case "hoursOfOperation":
+        addTag("is24Hours", "true", "Open 24/7");
+        addTag("dawnToDusk", "true", "Dawn to Dusk");
+        break;
+
+      case "servicesAndConveniences":
+        addTag("grooming", "true", "Grooming");
+        addTag("veterinaryServices", "true", "Vet Services");
+        addTag("petTraining", "true", "Pet Training");
+        addTag("deliveryService", "true", "Delivery");
+        addTag("onlineOrdering", "true", "Online Orders");
+        addTag("curbsidePickup", "true", "Curbside Pickup");
+        addTag("returnPolicy", "excellent", "Excellent Returns");
+        addTag("returnPolicy", "good", "Good Returns");
+        break;
+
+      case "productSelectionAndQuality":
+        addTag("foodBrandVariety", "excellent", "Excellent Food Variety");
+        addTag("toySelection", "excellent", "Excellent Toys");
+        addTag("suppliesAvailability", "excellent", "Well Stocked");
+        addTag("productFreshness", "excellent", "Fresh Products");
+        addTag("organicNaturalOptions", "true", "Organic Options");
+        addTag("prescriptionDietAvailable", "true", "Prescription Diets");
+        break;
+
+      case "pricingAndValue":
+        addTag("overallPricing", "low", "Low Prices");
+        addTag("overallPricing", "moderate", "Fair Prices");
+        addTag("loyaltyProgram", "true", "Loyalty Program");
+        addTag("frequentSales", "true", "Frequent Sales");
+        addTag("priceMatching", "true", "Price Matching");
+        addTag("bulkDiscounts", "true", "Bulk Discounts");
+        break;
+
+      case "staffKnowledgeAndService":
+        addTag("petKnowledge", "excellent", "Expert Staff");
+        addTag("productRecommendations", "excellent", "Great Recommendations");
+        addTag("customerService", "excellent", "Excellent Service");
+        addTag("helpfulness", "excellent", "Very Helpful");
+        addTag("multilingual", "true", "Multilingual Staff");
+        break;
+
+      default:
+        break;
+    }
+
+    return tags.length > 0 ? tags : <span className="option-tag gray">No data yet</span>;
+  };
+
+  // Analyze animal shelter reviews to get tag popularity for smart coloring
+  const analyzeAnimalShelterReviewTags = () => {
+    if (!reviews || reviews.length === 0) {
+      return {};
+    }
+
+    const tagCounts = {
+      accessAndLocation: {
+        parkingDifficulty: { easy: 0, moderate: 0, difficult: 0 },
+        handicapFriendly: { true: 0, false: 0 },
+        parkingToParkDistance: { close: 0, moderate: 0, far: 0 },
+      },
+      hoursOfOperation: {
+        is24Hours: { true: 0, false: 0 },
+        dawnToDusk: { true: 0, false: 0 },
+        specificHours: {},
+      },
+      animalTypeSelection: {
+        availableAnimalTypes: { dogs: 0, cats: 0, rabbits: 0, birds: 0, reptiles: 0, small_mammals: 0 },
+        breedVariety: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        ageRange: { puppies_kittens: 0, young_adults: 0, adults: 0, seniors: 0 },
+      },
+      animalCareAndWelfare: {
+        animalHealth: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        livingConditions: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        exercisePrograms: { true: 0, false: 0 },
+        medicalCare: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        behavioralAssessment: { true: 0, false: 0 },
+        specialNeedsCare: { true: 0, false: 0 },
+      },
+      adoptionProcessAndSupport: {
+        applicationProcess: { easy: 0, moderate: 0, difficult: 0 },
+        processingTime: { same_day: 0, within_week: 0, "1_2_weeks": 0, over_2_weeks: 0 },
+        homeVisitRequired: { true: 0, false: 0 },
+        adoptionFees: { low: 0, moderate: 0, high: 0, very_high: 0 },
+        postAdoptionSupport: { true: 0, false: 0 },
+        returnPolicy: { excellent: 0, good: 0, fair: 0, poor: 0 },
+      },
+      staffAndVolunteerQuality: {
+        staffKnowledge: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        animalHandling: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        customerService: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        volunteerProgram: { true: 0, false: 0 },
+        staffTraining: { true: 0, false: 0 },
+        compassionLevel: { excellent: 0, good: 0, fair: 0, poor: 0 },
+      },
+    };
+
+    // Count occurrences from all reviews
+    reviews.forEach((review) => {
+      if (review.animalShelterReview) {
+        const asReview = review.animalShelterReview;
+
+        // Access & Location
+        if (asReview.accessAndLocation) {
+          const al = asReview.accessAndLocation;
+          if (al.parkingDifficulty) tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty]++;
+          if (al.handicapFriendly !== undefined) tagCounts.accessAndLocation.handicapFriendly[al.handicapFriendly]++;
+          if (al.parkingToParkDistance) tagCounts.accessAndLocation.parkingToParkDistance[al.parkingToParkDistance]++;
+        }
+
+        // Hours of Operation
+        if (asReview.hoursOfOperation) {
+          const ho = asReview.hoursOfOperation;
+          if (ho.is24Hours !== undefined) tagCounts.hoursOfOperation.is24Hours[ho.is24Hours]++;
+          if (ho.dawnToDusk !== undefined) tagCounts.hoursOfOperation.dawnToDusk[ho.dawnToDusk]++;
+          if (ho.specificHours) {
+            tagCounts.hoursOfOperation.specificHours[ho.specificHours] = 
+              (tagCounts.hoursOfOperation.specificHours[ho.specificHours] || 0) + 1;
+          }
+        }
+
+        // Animal Type Selection
+        if (asReview.animalTypeSelection) {
+          const ats = asReview.animalTypeSelection;
+          if (ats.availableAnimalTypes && Array.isArray(ats.availableAnimalTypes)) {
+            ats.availableAnimalTypes.forEach(type => {
+              if (tagCounts.animalTypeSelection.availableAnimalTypes[type] !== undefined) {
+                tagCounts.animalTypeSelection.availableAnimalTypes[type]++;
+              }
+            });
+          }
+          if (ats.breedVariety) tagCounts.animalTypeSelection.breedVariety[ats.breedVariety]++;
+          if (ats.ageRange && Array.isArray(ats.ageRange)) {
+            ats.ageRange.forEach(age => {
+              if (tagCounts.animalTypeSelection.ageRange[age] !== undefined) {
+                tagCounts.animalTypeSelection.ageRange[age]++;
+              }
+            });
+          }
+        }
+
+        // Animal Care & Welfare
+        if (asReview.animalCareAndWelfare) {
+          const acw = asReview.animalCareAndWelfare;
+          if (acw.animalHealth) tagCounts.animalCareAndWelfare.animalHealth[acw.animalHealth]++;
+          if (acw.livingConditions) tagCounts.animalCareAndWelfare.livingConditions[acw.livingConditions]++;
+          if (acw.exercisePrograms !== undefined) tagCounts.animalCareAndWelfare.exercisePrograms[acw.exercisePrograms]++;
+          if (acw.medicalCare) tagCounts.animalCareAndWelfare.medicalCare[acw.medicalCare]++;
+          if (acw.behavioralAssessment !== undefined) tagCounts.animalCareAndWelfare.behavioralAssessment[acw.behavioralAssessment]++;
+          if (acw.specialNeedsCare !== undefined) tagCounts.animalCareAndWelfare.specialNeedsCare[acw.specialNeedsCare]++;
+        }
+
+        // Adoption Process & Support
+        if (asReview.adoptionProcessAndSupport) {
+          const aps = asReview.adoptionProcessAndSupport;
+          if (aps.applicationProcess) tagCounts.adoptionProcessAndSupport.applicationProcess[aps.applicationProcess]++;
+          if (aps.processingTime) tagCounts.adoptionProcessAndSupport.processingTime[aps.processingTime]++;
+          if (aps.homeVisitRequired !== undefined) tagCounts.adoptionProcessAndSupport.homeVisitRequired[aps.homeVisitRequired]++;
+          if (aps.adoptionFees) tagCounts.adoptionProcessAndSupport.adoptionFees[aps.adoptionFees]++;
+          if (aps.postAdoptionSupport !== undefined) tagCounts.adoptionProcessAndSupport.postAdoptionSupport[aps.postAdoptionSupport]++;
+          if (aps.returnPolicy) tagCounts.adoptionProcessAndSupport.returnPolicy[aps.returnPolicy]++;
+        }
+
+        // Staff & Volunteer Quality
+        if (asReview.staffAndVolunteerQuality) {
+          const svq = asReview.staffAndVolunteerQuality;
+          if (svq.staffKnowledge) tagCounts.staffAndVolunteerQuality.staffKnowledge[svq.staffKnowledge]++;
+          if (svq.animalHandling) tagCounts.staffAndVolunteerQuality.animalHandling[svq.animalHandling]++;
+          if (svq.customerService) tagCounts.staffAndVolunteerQuality.customerService[svq.customerService]++;
+          if (svq.volunteerProgram !== undefined) tagCounts.staffAndVolunteerQuality.volunteerProgram[svq.volunteerProgram]++;
+          if (svq.staffTraining !== undefined) tagCounts.staffAndVolunteerQuality.staffTraining[svq.staffTraining]++;
+          if (svq.compassionLevel) tagCounts.staffAndVolunteerQuality.compassionLevel[svq.compassionLevel]++;
+        }
+      }
+    });
+
+    return tagCounts;
+  };
+
+  // Render smart category tags for animal shelters
+  const renderSmartAnimalShelterCategoryTags = (category, tagCounts) => {
+    if (!tagCounts || !tagCounts[category]) {
+      return <span className="option-tag gray">No data yet</span>;
+    }
+
+    const tags = [];
+    const categoryData = tagCounts[category];
+
+    // Helper function to add tag if it has data
+    const addTag = (field, value, displayText) => {
+      const count = categoryData[field] && categoryData[field][value] ? categoryData[field][value] : 0;
+      if (count > 0) {
+        const tagStyle = getTagStyle(category, field, value, tagCounts);
+        tags.push(
+          <span key={`${field}-${value}`} className={tagStyle}>
+            {displayText} ({count})
+          </span>
+        );
+      }
+    };
+
+    // Render category-specific tags
+    switch (category) {
+      case "accessAndLocation":
+        addTag("parkingDifficulty", "easy", "Easy Parking");
+        addTag("parkingDifficulty", "moderate", "Moderate Parking");
+        addTag("parkingDifficulty", "difficult", "Difficult Parking");
+        addTag("handicapFriendly", "true", "Handicap Friendly");
+        addTag("parkingToParkDistance", "close", "Close Parking");
+        break;
+
+      case "hoursOfOperation":
+        addTag("is24Hours", "true", "Open 24/7");
+        addTag("dawnToDusk", "true", "Dawn to Dusk");
+        break;
+
+      case "animalTypeSelection":
+        addTag("availableAnimalTypes", "dogs", "Dogs");
+        addTag("availableAnimalTypes", "cats", "Cats");
+        addTag("availableAnimalTypes", "rabbits", "Rabbits");
+        addTag("availableAnimalTypes", "birds", "Birds");
+        addTag("availableAnimalTypes", "reptiles", "Reptiles");
+        addTag("availableAnimalTypes", "small_mammals", "Small Mammals");
+        addTag("breedVariety", "excellent", "Great Breed Variety");
+        addTag("ageRange", "puppies_kittens", "Puppies/Kittens");
+        addTag("ageRange", "young_adults", "Young Adults");
+        addTag("ageRange", "adults", "Adults");
+        addTag("ageRange", "seniors", "Seniors");
+        break;
+
+      case "animalCareAndWelfare":
+        addTag("animalHealth", "excellent", "Excellent Health");
+        addTag("livingConditions", "excellent", "Great Conditions");
+        addTag("exercisePrograms", "true", "Exercise Programs");
+        addTag("medicalCare", "excellent", "Excellent Medical Care");
+        addTag("behavioralAssessment", "true", "Behavioral Assessment");
+        addTag("specialNeedsCare", "true", "Special Needs Care");
+        break;
+
+      case "adoptionProcessAndSupport":
+        addTag("applicationProcess", "easy", "Easy Application");
+        addTag("processingTime", "same_day", "Same Day");
+        addTag("processingTime", "within_week", "Within Week");
+        addTag("adoptionFees", "low", "Low Fees");
+        addTag("adoptionFees", "moderate", "Fair Fees");
+        addTag("postAdoptionSupport", "true", "Post-Adoption Support");
+        addTag("returnPolicy", "excellent", "Excellent Return Policy");
+        break;
+
+      case "staffAndVolunteerQuality":
+        addTag("staffKnowledge", "excellent", "Expert Staff");
+        addTag("animalHandling", "excellent", "Great Animal Handling");
+        addTag("customerService", "excellent", "Excellent Service");
+        addTag("volunteerProgram", "true", "Volunteer Program");
+        addTag("staffTraining", "true", "Staff Training");
+        addTag("compassionLevel", "excellent", "Very Compassionate");
+        break;
+
+      default:
+        break;
+    }
+
+    return tags.length > 0 ? tags : <span className="option-tag gray">No data yet</span>;
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -970,7 +1901,7 @@ const PlaceDetails = () => {
       </div>
 
       {/* Dog Park Categories Overview - Show all 8 categories with available options */}
-      {(place.type === "dog park" || place.type === "leisure" || true) && (
+      {(place.type === "dog park" || place.type === "dog_park" || place.type === "leisure") && (
         <div className="dog-park-stats">
           <h2>🐕 DOG PARK CATEGORIES</h2>
           <p className="categories-description">
@@ -1050,6 +1981,205 @@ const PlaceDetails = () => {
               <div className="feature-tags">
                 {renderSmartCategoryTags("rulesPoliciesAndCommunity", analyzeReviewTags())}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Vet Clinic Categories Overview - Show all 7 categories with available options */}
+      {(place.type === "vet" || place.type === "veterinary") && (
+        <div className="vet-clinic-stats">
+          <h2>🏥 VET CLINIC CATEGORIES</h2>
+          <p className="categories-description">
+            Evaluate this veterinary clinic across these 7 key categories when leaving a review
+          </p>
+
+          {/* Show review statistics if available */}
+          {vetClinicStats && vetClinicStats.totalReviews > 0 && (
+            <div className="review-stats-summary">
+              <h3>📊 REVIEW SUMMARY ({vetClinicStats.totalReviews} reviews)</h3>
+              <p>
+                Average Rating: <strong>{vetClinicStats.averageRating}/5 ⭐</strong>
+              </p>
+            </div>
+          )}
+
+          <div className="category-tags-grid">
+            {/* 1. Clinic Environment & Facilities */}
+            <div className="category-section">
+              <h3>🏢 Environment & Facilities</h3>
+              <p className="category-description">Cleanliness, comfort and facility quality</p>
+              <div className="feature-tags">{renderSmartVetCategoryTags("clinicEnvironmentAndFacilities", analyzeVetReviewTags())}</div>
+            </div>
+
+            {/* 2. Cost & Transparency */}
+            <div className="category-section">
+              <h3>💰 Cost & Transparency</h3>
+              <p className="category-description">Pricing and financial transparency</p>
+              <div className="feature-tags">{renderSmartVetCategoryTags("costAndTransparency", analyzeVetReviewTags())}</div>
+            </div>
+
+            {/* 3. Medical Staff & Services */}
+            <div className="category-section">
+              <h3>👨‍⚕️ Medical Staff & Services</h3>
+              <p className="category-description">Staff competence and available services</p>
+              <div className="feature-tags">{renderSmartVetCategoryTags("medicalStaffAndServices", analyzeVetReviewTags())}</div>
+            </div>
+
+            {/* 4. Scheduling & Communication */}
+            <div className="category-section">
+              <h3>📅 Scheduling & Communication</h3>
+              <p className="category-description">Appointment availability and communication</p>
+              <div className="feature-tags">{renderSmartVetCategoryTags("schedulingAndCommunication", analyzeVetReviewTags())}</div>
+            </div>
+
+            {/* 5. Emergency & After-Hours Care */}
+            <div className="category-section">
+              <h3>🚨 Emergency & After-Hours</h3>
+              <p className="category-description">Emergency services and availability</p>
+              <div className="feature-tags">{renderSmartVetCategoryTags("emergencyAndAfterHours", analyzeVetReviewTags())}</div>
+            </div>
+
+            {/* 6. Owner Involvement */}
+            <div className="category-section">
+              <h3>👨‍👩‍👧‍👦 Owner Involvement</h3>
+              <p className="category-description">Owner participation and communication</p>
+              <div className="feature-tags">{renderSmartVetCategoryTags("ownerInvolvement", analyzeVetReviewTags())}</div>
+            </div>
+
+            {/* 7. Reputation & Community */}
+            <div className="category-section">
+              <h3>🌟 Reputation & Community</h3>
+              <p className="category-description">Community involvement and reputation</p>
+              <div className="feature-tags">{renderSmartVetCategoryTags("reputationAndCommunity", analyzeVetReviewTags())}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pet Store Categories Overview - Show all 6 categories with available options */}
+      {(place.type === "pet store" || place.type === "pet_store") && (
+        <div className="pet-store-stats">
+          <h2>🏪 PET STORE CATEGORIES</h2>
+          <p className="categories-description">
+            Evaluate this pet store across these 6 key categories when leaving a review
+          </p>
+
+          {/* Show review statistics if available */}
+          {petStoreStats && petStoreStats.totalReviews > 0 && (
+            <div className="review-stats-summary">
+              <h3>📊 REVIEW SUMMARY ({petStoreStats.totalReviews} reviews)</h3>
+              <p>
+                Average Rating: <strong>{petStoreStats.averageRating}/5 ⭐</strong>
+              </p>
+            </div>
+          )}
+
+          <div className="category-tags-grid">
+            {/* 1. Access & Location */}
+            <div className="category-section">
+              <h3>📍 Access & Location</h3>
+              <p className="category-description">Parking and accessibility</p>
+              <div className="feature-tags">{renderSmartPetStoreCategoryTags("accessAndLocation", analyzePetStoreReviewTags())}</div>
+            </div>
+
+            {/* 2. Hours of Operation */}
+            <div className="category-section">
+              <h3>⏰ Hours of Operation</h3>
+              <p className="category-description">Store hours and availability</p>
+              <div className="feature-tags">{renderSmartPetStoreCategoryTags("hoursOfOperation", analyzePetStoreReviewTags())}</div>
+            </div>
+
+            {/* 3. Services & Conveniences */}
+            <div className="category-section">
+              <h3>🛎️ Services & Conveniences</h3>
+              <p className="category-description">Additional services and convenience features</p>
+              <div className="feature-tags">{renderSmartPetStoreCategoryTags("servicesAndConveniences", analyzePetStoreReviewTags())}</div>
+            </div>
+
+            {/* 4. Product Selection & Quality */}
+            <div className="category-section">
+              <h3>🛍️ Product Selection & Quality</h3>
+              <p className="category-description">Product variety and quality</p>
+              <div className="feature-tags">{renderSmartPetStoreCategoryTags("productSelectionAndQuality", analyzePetStoreReviewTags())}</div>
+            </div>
+
+            {/* 5. Pricing & Value */}
+            <div className="category-section">
+              <h3>💰 Pricing & Value</h3>
+              <p className="category-description">Pricing and value for money</p>
+              <div className="feature-tags">{renderSmartPetStoreCategoryTags("pricingAndValue", analyzePetStoreReviewTags())}</div>
+            </div>
+
+            {/* 6. Staff Knowledge & Service */}
+            <div className="category-section">
+              <h3>👥 Staff Knowledge & Service</h3>
+              <p className="category-description">Staff expertise and customer service</p>
+              <div className="feature-tags">{renderSmartPetStoreCategoryTags("staffKnowledgeAndService", analyzePetStoreReviewTags())}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Animal Shelter Categories Overview - Show all 6 categories with available options */}
+      {(place.type === "shelter" || place.type === "animal_shelter") && (
+        <div className="animal-shelter-stats">
+          <h2>🏠 ANIMAL SHELTER CATEGORIES</h2>
+          <p className="categories-description">
+            Evaluate this animal shelter across these 6 key categories when leaving a review
+          </p>
+
+          {/* Show review statistics if available */}
+          {animalShelterStats && animalShelterStats.totalReviews > 0 && (
+            <div className="review-stats-summary">
+              <h3>📊 REVIEW SUMMARY ({animalShelterStats.totalReviews} reviews)</h3>
+              <p>
+                Average Rating: <strong>{animalShelterStats.averageRating}/5 ⭐</strong>
+              </p>
+            </div>
+          )}
+
+          <div className="category-tags-grid">
+            {/* 1. Access & Location */}
+            <div className="category-section">
+              <h3>📍 Access & Location</h3>
+              <p className="category-description">Parking and accessibility</p>
+              <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("accessAndLocation", analyzeAnimalShelterReviewTags())}</div>
+            </div>
+
+            {/* 2. Hours of Operation */}
+            <div className="category-section">
+              <h3>⏰ Hours of Operation</h3>
+              <p className="category-description">Shelter hours and availability</p>
+              <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("hoursOfOperation", analyzeAnimalShelterReviewTags())}</div>
+            </div>
+
+            {/* 3. Animal Type Selection */}
+            <div className="category-section">
+              <h3>🐾 Animal Type Selection</h3>
+              <p className="category-description">Available animals and breed variety</p>
+              <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("animalTypeSelection", analyzeAnimalShelterReviewTags())}</div>
+            </div>
+
+            {/* 4. Animal Care & Welfare */}
+            <div className="category-section">
+              <h3>❤️ Animal Care & Welfare</h3>
+              <p className="category-description">Animal health and living conditions</p>
+              <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("animalCareAndWelfare", analyzeAnimalShelterReviewTags())}</div>
+            </div>
+
+            {/* 5. Adoption Process & Support */}
+            <div className="category-section">
+              <h3>📋 Adoption Process & Support</h3>
+              <p className="category-description">Adoption procedures and support</p>
+              <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("adoptionProcessAndSupport", analyzeAnimalShelterReviewTags())}</div>
+            </div>
+
+            {/* 6. Staff & Volunteer Quality */}
+            <div className="category-section">
+              <h3>👥 Staff & Volunteer Quality</h3>
+              <p className="category-description">Staff expertise and volunteer programs</p>
+              <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("staffAndVolunteerQuality", analyzeAnimalShelterReviewTags())}</div>
             </div>
           </div>
         </div>
@@ -1226,7 +2356,7 @@ const PlaceDetails = () => {
               </div>
 
               {/* Dog Park Specific Form - All 8 Categories */}
-              {(place.type === "dog park" || place.type === "leisure" || true) && (
+              {(place.type === "dog park" || place.type === "dog_park" || place.type === "leisure") && (
                 <div className="dog-park-form">
                   <h4>🐕 DOG PARK DETAILS</h4>
 
@@ -1656,6 +2786,1258 @@ const PlaceDetails = () => {
                           }
                         />
                         Vaccination Required
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Vet Clinic Specific Form - All 7 Categories */}
+              {(place.type === "vet" || place.type === "veterinary") && (
+                <div className="vet-clinic-form">
+                  <h4>🏥 VET CLINIC DETAILS</h4>
+
+                  {/* 1. Clinic Environment & Facilities */}
+                  <div className="form-section">
+                    <h5>🏢 Environment & Facilities</h5>
+                    <div className="form-group">
+                      <label>Cleanliness</label>
+                      <select
+                        value={reviewForm.vetClinicReview.clinicEnvironmentAndFacilities.cleanliness}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            vetClinicReview: {
+                              ...reviewForm.vetClinicReview,
+                              clinicEnvironmentAndFacilities: {
+                                ...reviewForm.vetClinicReview.clinicEnvironmentAndFacilities,
+                                cleanliness: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Comfort Level</label>
+                      <select
+                        value={reviewForm.vetClinicReview.clinicEnvironmentAndFacilities.comfortLevel}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            vetClinicReview: {
+                              ...reviewForm.vetClinicReview,
+                              clinicEnvironmentAndFacilities: {
+                                ...reviewForm.vetClinicReview.clinicEnvironmentAndFacilities,
+                                comfortLevel: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="very_comfortable">Very Comfortable</option>
+                        <option value="comfortable">Comfortable</option>
+                        <option value="neutral">Neutral</option>
+                        <option value="uncomfortable">Uncomfortable</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 2. Cost & Transparency */}
+                  <div className="form-section">
+                    <h5>💰 Cost & Transparency</h5>
+                    <div className="form-group">
+                      <label>Routine Checkup Cost</label>
+                      <select
+                        value={reviewForm.vetClinicReview.costAndTransparency.routineCheckupCost}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            vetClinicReview: {
+                              ...reviewForm.vetClinicReview,
+                              costAndTransparency: {
+                                ...reviewForm.vetClinicReview.costAndTransparency,
+                                routineCheckupCost: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                        <option value="very_high">Very High</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.vetClinicReview.costAndTransparency.feesExplainedUpfront}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                costAndTransparency: {
+                                  ...reviewForm.vetClinicReview.costAndTransparency,
+                                  feesExplainedUpfront: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Fees Explained Upfront
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.vetClinicReview.costAndTransparency.insuranceAccepted}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                costAndTransparency: {
+                                  ...reviewForm.vetClinicReview.costAndTransparency,
+                                  insuranceAccepted: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Insurance Accepted
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 3. Medical Staff & Services */}
+                  <div className="form-section">
+                    <h5>👨‍⚕️ Medical Staff & Services</h5>
+                    <div className="form-group">
+                      <label>Veterinarian Attitude</label>
+                      <select
+                        value={reviewForm.vetClinicReview.medicalStaffAndServices.veterinarianAttitude}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            vetClinicReview: {
+                              ...reviewForm.vetClinicReview,
+                              medicalStaffAndServices: {
+                                ...reviewForm.vetClinicReview.medicalStaffAndServices,
+                                veterinarianAttitude: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.vetClinicReview.medicalStaffAndServices.surgeryOrthopedics}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                medicalStaffAndServices: {
+                                  ...reviewForm.vetClinicReview.medicalStaffAndServices,
+                                  surgeryOrthopedics: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Surgery/Orthopedics Available
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 4. Scheduling & Communication */}
+                  <div className="form-section">
+                    <h5>📅 Scheduling & Communication</h5>
+                    <div className="form-group">
+                      <label>Response Time</label>
+                      <select
+                        value={reviewForm.vetClinicReview.schedulingAndCommunication.responseTime}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            vetClinicReview: {
+                              ...reviewForm.vetClinicReview,
+                              schedulingAndCommunication: {
+                                ...reviewForm.vetClinicReview.schedulingAndCommunication,
+                                responseTime: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="immediate">Immediate</option>
+                        <option value="same_day">Same Day</option>
+                        <option value="next_day">Next Day</option>
+                        <option value="several_days">Several Days</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 5. Emergency & After-Hours */}
+                  <div className="form-section">
+                    <h5>🚨 Emergency & After-Hours</h5>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.vetClinicReview.emergencyAndAfterHours.openWeekends}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                emergencyAndAfterHours: {
+                                  ...reviewForm.vetClinicReview.emergencyAndAfterHours,
+                                  openWeekends: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Open Weekends
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.vetClinicReview.emergencyAndAfterHours.onCallEmergencyNumber}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                emergencyAndAfterHours: {
+                                  ...reviewForm.vetClinicReview.emergencyAndAfterHours,
+                                  onCallEmergencyNumber: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Emergency On-Call Number
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 6. Owner Involvement */}
+                  <div className="form-section">
+                    <h5>👨‍👩‍👧‍👦 Owner Involvement</h5>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.vetClinicReview.ownerInvolvement.allowedDuringExams}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                ownerInvolvement: {
+                                  ...reviewForm.vetClinicReview.ownerInvolvement,
+                                  allowedDuringExams: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Allowed During Exams
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.vetClinicReview.ownerInvolvement.explainsProceduresWell}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                ownerInvolvement: {
+                                  ...reviewForm.vetClinicReview.ownerInvolvement,
+                                  explainsProceduresWell: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Explains Procedures Well
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 7. Reputation & Community */}
+                  <div className="form-section">
+                    <h5>🌟 Reputation & Community</h5>
+                    <div className="form-group">
+                      <label>Community Involvement</label>
+                      <select
+                        value={reviewForm.vetClinicReview.reputationAndCommunity.communityInvolvement}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            vetClinicReview: {
+                              ...reviewForm.vetClinicReview,
+                              reputationAndCommunity: {
+                                ...reviewForm.vetClinicReview.reputationAndCommunity,
+                                communityInvolvement: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="high">High</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="low">Low</option>
+                        <option value="none">None</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.vetClinicReview.reputationAndCommunity.hostsVaccineClinic}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                reputationAndCommunity: {
+                                  ...reviewForm.vetClinicReview.reputationAndCommunity,
+                                  hostsVaccineClinic: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Hosts Vaccine Clinics
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Pet Store Specific Form - All 6 Categories */}
+              {place.type === "pet_store" && (
+                <div className="pet-store-form">
+                  <h4>🛍️ PET STORE DETAILS</h4>
+
+                  {/* 1. Access & Location */}
+                  <div className="form-section">
+                    <h5>🅿️ Access & Location</h5>
+                    <div className="form-group">
+                      <label>Parking Availability</label>
+                      <select
+                        value={reviewForm.petStoreReview.accessAndLocation.parkingAvailability}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            petStoreReview: {
+                              ...reviewForm.petStoreReview,
+                              accessAndLocation: {
+                                ...reviewForm.petStoreReview.accessAndLocation,
+                                parkingAvailability: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="limited">Limited</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.accessAndLocation.publicTransportAccess}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                accessAndLocation: {
+                                  ...reviewForm.petStoreReview.accessAndLocation,
+                                  publicTransportAccess: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Public Transport Access
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.accessAndLocation.wheelchairAccessible}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                accessAndLocation: {
+                                  ...reviewForm.petStoreReview.accessAndLocation,
+                                  wheelchairAccessible: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Wheelchair Accessible
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 2. Hours of Operation */}
+                  <div className="form-section">
+                    <h5>🕐 Hours of Operation</h5>
+                    <div className="form-group">
+                      <label>Convenient Hours</label>
+                      <select
+                        value={reviewForm.petStoreReview.hoursOfOperation.convenientHours}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            petStoreReview: {
+                              ...reviewForm.petStoreReview,
+                              hoursOfOperation: {
+                                ...reviewForm.petStoreReview.hoursOfOperation,
+                                convenientHours: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="very_convenient">Very Convenient</option>
+                        <option value="convenient">Convenient</option>
+                        <option value="somewhat_convenient">Somewhat Convenient</option>
+                        <option value="inconvenient">Inconvenient</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.hoursOfOperation.openLateEvenings}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                hoursOfOperation: {
+                                  ...reviewForm.petStoreReview.hoursOfOperation,
+                                  openLateEvenings: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Open Late Evenings
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.hoursOfOperation.openWeekends}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                hoursOfOperation: {
+                                  ...reviewForm.petStoreReview.hoursOfOperation,
+                                  openWeekends: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Open Weekends
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 3. Services & Conveniences */}
+                  <div className="form-section">
+                    <h5>🔧 Services & Conveniences</h5>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.servicesAndConveniences.groomingServices}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                servicesAndConveniences: {
+                                  ...reviewForm.petStoreReview.servicesAndConveniences,
+                                  groomingServices: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Grooming Services
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.servicesAndConveniences.veterinaryServices}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                servicesAndConveniences: {
+                                  ...reviewForm.petStoreReview.servicesAndConveniences,
+                                  veterinaryServices: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Veterinary Services
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.servicesAndConveniences.deliveryService}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                servicesAndConveniences: {
+                                  ...reviewForm.petStoreReview.servicesAndConveniences,
+                                  deliveryService: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Delivery Service
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.servicesAndConveniences.onlineOrdering}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                servicesAndConveniences: {
+                                  ...reviewForm.petStoreReview.servicesAndConveniences,
+                                  onlineOrdering: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Online Ordering
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 4. Product Selection & Quality */}
+                  <div className="form-section">
+                    <h5>📦 Product Selection & Quality</h5>
+                    <div className="form-group">
+                      <label>Food Quality</label>
+                      <select
+                        value={reviewForm.petStoreReview.productSelectionAndQuality.foodQuality}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            petStoreReview: {
+                              ...reviewForm.petStoreReview,
+                              productSelectionAndQuality: {
+                                ...reviewForm.petStoreReview.productSelectionAndQuality,
+                                foodQuality: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="premium">Premium</option>
+                        <option value="good">Good</option>
+                        <option value="average">Average</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Product Variety</label>
+                      <select
+                        value={reviewForm.petStoreReview.productSelectionAndQuality.productVariety}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            petStoreReview: {
+                              ...reviewForm.petStoreReview,
+                              productSelectionAndQuality: {
+                                ...reviewForm.petStoreReview.productSelectionAndQuality,
+                                productVariety: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="limited">Limited</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.productSelectionAndQuality.organicOptions}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                productSelectionAndQuality: {
+                                  ...reviewForm.petStoreReview.productSelectionAndQuality,
+                                  organicOptions: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Organic Options
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.productSelectionAndQuality.localProducts}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                productSelectionAndQuality: {
+                                  ...reviewForm.petStoreReview.productSelectionAndQuality,
+                                  localProducts: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Local Products
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 5. Pricing & Value */}
+                  <div className="form-section">
+                    <h5>💰 Pricing & Value</h5>
+                    <div className="form-group">
+                      <label>Overall Pricing</label>
+                      <select
+                        value={reviewForm.petStoreReview.pricingAndValue.overallPricing}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            petStoreReview: {
+                              ...reviewForm.petStoreReview,
+                              pricingAndValue: {
+                                ...reviewForm.petStoreReview.pricingAndValue,
+                                overallPricing: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="very_affordable">Very Affordable</option>
+                        <option value="affordable">Affordable</option>
+                        <option value="expensive">Expensive</option>
+                        <option value="very_expensive">Very Expensive</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.pricingAndValue.loyaltyProgram}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                pricingAndValue: {
+                                  ...reviewForm.petStoreReview.pricingAndValue,
+                                  loyaltyProgram: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Loyalty Program
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.pricingAndValue.frequentPromotions}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                pricingAndValue: {
+                                  ...reviewForm.petStoreReview.pricingAndValue,
+                                  frequentPromotions: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Frequent Promotions
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 6. Staff Knowledge & Service */}
+                  <div className="form-section">
+                    <h5>👥 Staff Knowledge & Service</h5>
+                    <div className="form-group">
+                      <label>Staff Helpfulness</label>
+                      <select
+                        value={reviewForm.petStoreReview.staffKnowledgeAndService.staffHelpfulness}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            petStoreReview: {
+                              ...reviewForm.petStoreReview,
+                              staffKnowledgeAndService: {
+                                ...reviewForm.petStoreReview.staffKnowledgeAndService,
+                                staffHelpfulness: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Pet Knowledge</label>
+                      <select
+                        value={reviewForm.petStoreReview.staffKnowledgeAndService.petKnowledge}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            petStoreReview: {
+                              ...reviewForm.petStoreReview,
+                              staffKnowledgeAndService: {
+                                ...reviewForm.petStoreReview.staffKnowledgeAndService,
+                                petKnowledge: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="expert">Expert</option>
+                        <option value="knowledgeable">Knowledgeable</option>
+                        <option value="basic">Basic</option>
+                        <option value="limited">Limited</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.petStoreReview.staffKnowledgeAndService.personalizedRecommendations}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              petStoreReview: {
+                                ...reviewForm.petStoreReview,
+                                staffKnowledgeAndService: {
+                                  ...reviewForm.petStoreReview.staffKnowledgeAndService,
+                                  personalizedRecommendations: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Personalized Recommendations
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Animal Shelter Specific Form - All 6 Categories */}
+              {(place.type === "animal_shelter" || place.type === "shelter") && (
+                <div className="animal-shelter-form">
+                  <h4>🏠 ANIMAL SHELTER DETAILS</h4>
+
+                  {/* 1. Access & Location */}
+                  <div className="form-section">
+                    <h5>🅿️ Access & Location</h5>
+                    <div className="form-group">
+                      <label>Parking & Accessibility</label>
+                      <select
+                        value={reviewForm.animalShelterReview.accessAndLocation.parkingAndAccessibility}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            animalShelterReview: {
+                              ...reviewForm.animalShelterReview,
+                              accessAndLocation: {
+                                ...reviewForm.animalShelterReview.accessAndLocation,
+                                parkingAndAccessibility: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="limited">Limited</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.accessAndLocation.publicTransportNearby}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                accessAndLocation: {
+                                  ...reviewForm.animalShelterReview.accessAndLocation,
+                                  publicTransportNearby: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Public Transport Nearby
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.accessAndLocation.easyToFind}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                accessAndLocation: {
+                                  ...reviewForm.animalShelterReview.accessAndLocation,
+                                  easyToFind: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Easy to Find
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 2. Hours of Operation */}
+                  <div className="form-section">
+                    <h5>🕐 Hours of Operation</h5>
+                    <div className="form-group">
+                      <label>Shelter Hours and Availability</label>
+                      <select
+                        value={reviewForm.animalShelterReview.hoursOfOperation.shelterHoursAndAvailability}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            animalShelterReview: {
+                              ...reviewForm.animalShelterReview,
+                              hoursOfOperation: {
+                                ...reviewForm.animalShelterReview.hoursOfOperation,
+                                shelterHoursAndAvailability: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="very_convenient">Very Convenient</option>
+                        <option value="convenient">Convenient</option>
+                        <option value="limited">Limited</option>
+                        <option value="inconvenient">Inconvenient</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.hoursOfOperation.weekendHours}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                hoursOfOperation: {
+                                  ...reviewForm.animalShelterReview.hoursOfOperation,
+                                  weekendHours: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Weekend Hours
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.hoursOfOperation.appointmentRequired}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                hoursOfOperation: {
+                                  ...reviewForm.animalShelterReview.hoursOfOperation,
+                                  appointmentRequired: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Appointment Required
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 3. Animal Type Selection */}
+                  <div className="form-section">
+                    <h5>🐾 Animal Type Selection</h5>
+                    <div className="form-group">
+                      <label>Available Animals and Breed Variety</label>
+                      <select
+                        value={reviewForm.animalShelterReview.animalTypeSelection.availableAnimalsAndBreedVariety}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            animalShelterReview: {
+                              ...reviewForm.animalShelterReview,
+                              animalTypeSelection: {
+                                ...reviewForm.animalShelterReview.animalTypeSelection,
+                                availableAnimalsAndBreedVariety: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="limited">Limited</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.animalTypeSelection.dogsAvailable}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                animalTypeSelection: {
+                                  ...reviewForm.animalShelterReview.animalTypeSelection,
+                                  dogsAvailable: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Dogs Available
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.animalTypeSelection.catsAvailable}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                animalTypeSelection: {
+                                  ...reviewForm.animalShelterReview.animalTypeSelection,
+                                  catsAvailable: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Cats Available
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.animalTypeSelection.otherAnimals}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                animalTypeSelection: {
+                                  ...reviewForm.animalShelterReview.animalTypeSelection,
+                                  otherAnimals: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Other Animals Available
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 4. Animal Care & Welfare */}
+                  <div className="form-section">
+                    <h5>❤️ Animal Care & Welfare</h5>
+                    <div className="form-group">
+                      <label>Animal Health and Living Conditions</label>
+                      <select
+                        value={reviewForm.animalShelterReview.animalCareAndWelfare.animalHealthAndLivingConditions}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            animalShelterReview: {
+                              ...reviewForm.animalShelterReview,
+                              animalCareAndWelfare: {
+                                ...reviewForm.animalShelterReview.animalCareAndWelfare,
+                                animalHealthAndLivingConditions: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="concerning">Concerning</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.animalCareAndWelfare.medicalCareProvided}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                animalCareAndWelfare: {
+                                  ...reviewForm.animalShelterReview.animalCareAndWelfare,
+                                  medicalCareProvided: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Medical Care Provided
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.animalCareAndWelfare.spayNeuterProgram}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                animalCareAndWelfare: {
+                                  ...reviewForm.animalShelterReview.animalCareAndWelfare,
+                                  spayNeuterProgram: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Spay/Neuter Program
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 5. Adoption Process & Support */}
+                  <div className="form-section">
+                    <h5>📋 Adoption Process & Support</h5>
+                    <div className="form-group">
+                      <label>Adoption Procedures and Support</label>
+                      <select
+                        value={reviewForm.animalShelterReview.adoptionProcessAndSupport.adoptionProceduresAndSupport}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            animalShelterReview: {
+                              ...reviewForm.animalShelterReview,
+                              adoptionProcessAndSupport: {
+                                ...reviewForm.animalShelterReview.adoptionProcessAndSupport,
+                                adoptionProceduresAndSupport: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="adequate">Adequate</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.adoptionProcessAndSupport.followUpSupport}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                adoptionProcessAndSupport: {
+                                  ...reviewForm.animalShelterReview.adoptionProcessAndSupport,
+                                  followUpSupport: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Follow-up Support
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.adoptionProcessAndSupport.educationalResources}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                adoptionProcessAndSupport: {
+                                  ...reviewForm.animalShelterReview.adoptionProcessAndSupport,
+                                  educationalResources: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Educational Resources
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 6. Staff & Volunteer Quality */}
+                  <div className="form-section">
+                    <h5>👨‍👩‍👧‍👦 Staff & Volunteer Quality</h5>
+                    <div className="form-group">
+                      <label>Staff Expertise and Volunteer Programs</label>
+                      <select
+                        value={reviewForm.animalShelterReview.staffAndVolunteerQuality.staffExpertiseAndVolunteerPrograms}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            animalShelterReview: {
+                              ...reviewForm.animalShelterReview,
+                              staffAndVolunteerQuality: {
+                                ...reviewForm.animalShelterReview.staffAndVolunteerQuality,
+                                staffExpertiseAndVolunteerPrograms: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="adequate">Adequate</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.staffAndVolunteerQuality.knowledgeableStaff}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                staffAndVolunteerQuality: {
+                                  ...reviewForm.animalShelterReview.staffAndVolunteerQuality,
+                                  knowledgeableStaff: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Knowledgeable Staff
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.staffAndVolunteerQuality.activeVolunteers}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                staffAndVolunteerQuality: {
+                                  ...reviewForm.animalShelterReview.staffAndVolunteerQuality,
+                                  activeVolunteers: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Active Volunteers
                       </label>
                     </div>
                   </div>
