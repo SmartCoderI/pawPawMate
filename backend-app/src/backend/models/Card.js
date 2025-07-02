@@ -1,11 +1,18 @@
 const mongoose = require("mongoose");
 
 const cardSchema = new mongoose.Schema({
-  place: { type: mongoose.Schema.Types.ObjectId, ref: "Place", required: true },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  imageUrl: String, // AI-generated image or uploaded
-  caption: String, // summary or AI-generated description
+  locationName: { type: String, required: true },
+  petImage: { type: String, required: true }, // URL to the pet image
+  caption: { type: String, required: true },
   helpfulCount: { type: Number, default: 0 },
+  earnedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  contributionType: { 
+    type: String, 
+    enum: ["first_review", "community_approval", "milestone_achievement"], 
+    required: true 
+  },
+  placeId: { type: String, required: true }, // Reference to the place
+  reviewId: { type: mongoose.Schema.Types.ObjectId, ref: "Review", required: true },
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -66,7 +66,7 @@ const PlaceDetails = () => {
         formData.append("images", file);
       });
 
-      const response = await fetch("http://localhost:5001/api/reviews/upload-images", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5001/api'}/reviews/upload-images`, {
         method: "POST",
         body: formData,
       });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import { logOut } from "./firebase";
 import Home from "./pages/Home";
@@ -172,6 +172,18 @@ const Navigation = () => {
   );
 };
 
+// Login Page Component that wraps the Login modal
+const LoginPage = () => {
+  const navigate = useNavigate();
+  
+  return (
+    <Login 
+      isOpen={true} 
+      onClose={() => navigate("/")} 
+    />
+  );
+};
+
 function App() {
   return (
     <UserProvider>
@@ -182,6 +194,7 @@ function App() {
           <main className="main-content">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/lost-pets" element={<LostPets />} />
               <Route path="/profile" element={<Profile />} />

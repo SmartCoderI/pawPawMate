@@ -10,7 +10,7 @@ const reviewSchema = new mongoose.Schema({
   tags: [String], // e.g. ["low cost", "clean", "gentle vet"]
   photos: [String], // Array of image URLs
 
-  // New 8-category review system for dog parks
+  // 8-category review system for dog parks
   dogParkReview: {
     // 1. Access & Location
     accessAndLocation: {
@@ -98,7 +98,7 @@ const reviewSchema = new mongoose.Schema({
     },
   },
 
-  // New 5-category review system for vet clinics
+  // 7-category review system for vet clinics
   vetClinicReview: {
     // 1. Clinic Environment & Facilities
     clinicEnvironmentAndFacilities: {

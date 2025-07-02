@@ -8,6 +8,7 @@ const reviewRouter = express.Router();
 const {
   addReview,
   getReviewsForPlace,
+  getReviewsByUser,
   getDogParkReviewStats,
   getVetClinicReviewStats,
   uploadReviewImages,
@@ -48,6 +49,9 @@ reviewRouter.post("/", addReview);
 
 // Get all reviews for a place
 reviewRouter.get("/:placeId", getReviewsForPlace);
+
+// Get all reviews by a specific user
+reviewRouter.get("/user/:userId", getReviewsByUser);
 
 // Get dog park specific review statistics
 reviewRouter.get("/:placeId/dog-park-stats", getDogParkReviewStats);

@@ -2,10 +2,10 @@
 echo Starting PawPawMate Application...
 echo.
 
-REM Kill any existing processes on ports 3000 and 5000
+REM Kill any existing processes on ports 3000 and 5001
 echo Cleaning up existing processes...
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :3000') do taskkill /f /pid %%a >nul 2>&1
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr :5000') do taskkill /f /pid %%a >nul 2>&1
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :5001') do taskkill /f /pid %%a >nul 2>&1
 echo Ports cleared.
 echo.
 
@@ -25,7 +25,7 @@ start "PawPawMate Frontend" cmd /k "npm start"
 
 echo.
 echo PawPawMate is starting up!
-echo Backend: http://localhost:5000
+echo Backend: http://localhost:5001
 echo Frontend: http://localhost:3000
 echo.
 echo Both servers are running in separate windows.

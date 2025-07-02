@@ -1,5 +1,6 @@
 const Review = require("../models/Review");
 const Place = require("../models/Place");
+const { generateRewardCard } = require("./cardController");
 
 // Helper function to validate dog park review data
 const validateDogParkReview = (dogParkReview) => {
@@ -462,6 +463,62 @@ exports.addReview = async (req, res) => {
 
     console.log("Review created successfully:", review);
 
+    // REWARD CARD GENERATION LOGIC
+    try {
+      // Step 1: Content Validity Check (Anti-spam)
+      const isValidContent = (comment && comment.length >= 20) || (tags && tags.length > 0) || rating;
+      
+      if (isValidContent) {
+        console.log("Review meets content validity requirements");
+        
+        // Step 2: Reward Eligibility Check
+        let shouldGenerateCard = false;
+        let contributionType = "";
+        
+        // Check if this is the user's first review ever
+        const userReviewCount = await Review.countDocuments({ userId: userId });
+        
+        if (userReviewCount === 1) {
+          // This is their first review
+          shouldGenerateCard = true;
+          contributionType = "first_review";
+          console.log("User earned card for first review");
+        } else {
+          // Check other conditions for additional cards
+          
+          // Check if user has 3+ total reviews (milestone achievement)
+          if (userReviewCount >= 3) {
+            shouldGenerateCard = true;
+            contributionType = "milestone_achievement";
+            console.log("User earned card for milestone achievement (3+ reviews)");
+          }
+          
+          // Note: Community approval (2+ upvotes) will be checked separately 
+          // when the helpful count is updated, not during review creation
+        }
+        
+        // Generate the card if eligible
+        if (shouldGenerateCard) {
+          // Get place name for the card
+          const place = await Place.findById(finalPlaceId);
+          const locationName = place ? place.name : "Unknown Location";
+          
+          await generateRewardCard(
+            userId,
+            review._id,
+            finalPlaceId,
+            locationName,
+            contributionType
+          );
+          
+          console.log(`✅ Reward card generated for user ${userId} - ${contributionType}`);
+        }
+      }
+    } catch (cardError) {
+      // Don't fail the review if card generation fails
+      console.error("Error generating reward card:", cardError);
+    }
+
     // Include the final place ID in the response for frontend navigation
     const responseData = {
       ...review.toObject(),
@@ -485,6 +542,21 @@ exports.getReviewsForPlace = async (req, res) => {
     res.json(reviews);
   } catch (err) {
     console.error("Error fetching reviews:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get all reviews by a specific user
+exports.getReviewsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const reviews = await Review.find({ userId })
+      .populate("userId", "name email profileImage")
+      .sort({ createdAt: -1 });
+
+    res.json(reviews);
+  } catch (err) {
+    console.error("Error fetching user reviews:", err);
     res.status(500).json({ error: err.message });
   }
 };
