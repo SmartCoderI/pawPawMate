@@ -17,7 +17,8 @@ const Pets = () => {
     birthDate: '',
     personalityTraits: [],
     notes: '',
-    profileImage: ''
+    profileImage: '',
+    _photoFile: null
   });
   const [newTraitInput, setNewTraitInput] = useState('');
 
@@ -72,8 +73,7 @@ const Pets = () => {
     const file = e.target.files[0];
     if (file) {
       try {
-        // For now, we'll create a preview URL
-        // In production, you'd upload to a storage service
+        // Show preview while storing file for later upload
         const reader = new FileReader();
         reader.onloadend = () => {
           setFormData(prev => ({
@@ -82,6 +82,12 @@ const Pets = () => {
           }));
         };
         reader.readAsDataURL(file);
+        
+        // Store the file for upload when form is submitted
+        setFormData(prev => ({
+          ...prev,
+          _photoFile: file
+        }));
       } catch (error) {
         console.error('Error handling photo:', error);
         alert('Error handling photo. Please try again.');
@@ -98,10 +104,24 @@ const Pets = () => {
 
     setLoading(true);
     try {
+      let profileImage = formData.profileImage;
+      
+      // Upload photo to AWS S3 if a new file was selected
+      if (formData._photoFile) {
+        console.log('Uploading pet photo to AWS S3...');
+        const uploadResult = await petAPI.uploadPetPhoto(formData._photoFile);
+        profileImage = uploadResult.imageUrl;
+        console.log('Pet photo uploaded successfully:', profileImage);
+      }
+
       const petData = {
         ...formData,
+        profileImage: profileImage,
         owner: mongoUserId // Use MongoDB user ID
       };
+      
+      // Remove the temporary file reference
+      delete petData._photoFile;
 
       if (editingPet) {
         await petAPI.updatePet(editingPet._id, petData);
@@ -155,7 +175,8 @@ const Pets = () => {
       birthDate: '',
       personalityTraits: [],
       notes: '',
-      profileImage: ''
+      profileImage: '',
+      _photoFile: null
     });
     setEditingPet(null);
     setShowAddForm(false);

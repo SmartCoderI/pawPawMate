@@ -27,7 +27,6 @@ const Home = () => {
     dog_park: { label: 'Dog Park', icon: '🌳', color: '#22c55e' },
     veterinary: { label: 'Veterinarian', icon: '🏥', color: '#3b82f6' },
     pet_store: { label: 'Pet Store', icon: '🏪', color: '#f59e0b' },
-    pet_grooming: { label: 'Groomer', icon: '✂️', color: '#8b5cf6' },
     animal_shelter: { label: 'Shelter', icon: '🏠', color: '#ef4444' }
   };
 
@@ -64,10 +63,26 @@ const Home = () => {
           way["amenity"="veterinary"](${bbox});
           node["shop"="pet"](${bbox});
           way["shop"="pet"](${bbox});
-          node["shop"="pet_grooming"](${bbox});
-          way["shop"="pet_grooming"](${bbox});
+          
+          // Animal shelters - multiple tagging approaches
           node["amenity"="animal_shelter"](${bbox});
           way["amenity"="animal_shelter"](${bbox});
+          node["amenity"="animal_rescue"](${bbox});
+          way["amenity"="animal_rescue"](${bbox});
+          node["amenity"="animal_boarding"](${bbox});
+          way["amenity"="animal_boarding"](${bbox});
+          
+          // Places with comprehensive shelter/rescue keywords in the name
+          node["name"~"[Ss]helter|[Rr]escue|[Hh]umane|[Ww]elfare|[Ss]anctuary|[Cc]ruelty|PAWS|[Aa]nimal [Cc]are|[Aa]nimal [Ww]elfare|[Pp]et [Rr]escue|[Aa]nti-[Cc]ruelty",i](${bbox});
+          way["name"~"[Ss]helter|[Rr]escue|[Hh]umane|[Ww]elfare|[Ss]anctuary|[Cc]ruelty|PAWS|[Aa]nimal [Cc]are|[Aa]nimal [Ww]elfare|[Pp]et [Rr]escue|[Aa]nti-[Cc]ruelty",i](${bbox});
+          
+          // Additional specific searches for common shelter types
+          node["name"~"[Aa]nimal [Ll]eague",i](${bbox});
+          way["name"~"[Aa]nimal [Ll]eague",i](${bbox});
+          
+          // Other pet service locations
+          node["shop"="pet_grooming"](${bbox});
+          way["shop"="pet_grooming"](${bbox});
         );
         out center;
       `;
@@ -110,8 +125,10 @@ const Home = () => {
           } else if (element.tags.shop === 'pet') {
             type = 'pet_store';
           } else if (element.tags.shop === 'pet_grooming') {
-            type = 'pet_grooming';
-          } else if (element.tags.amenity === 'animal_shelter') {
+            type = 'pet_store'; // Treat grooming as pet store for now
+          } else if (element.tags.amenity === 'animal_shelter' || element.tags.amenity === 'animal_rescue' || element.tags.amenity === 'animal_boarding') {
+            type = 'animal_shelter';
+          } else if (element.tags.name && /shelter|rescue|humane|welfare|sanctuary|cruelty|paws|animal\s+care|animal\s+welfare|pet\s+rescue|anti-cruelty|animal\s+league/i.test(element.tags.name)) {
             type = 'animal_shelter';
           }
 
@@ -119,6 +136,12 @@ const Home = () => {
           let name = element.tags.name;
           if (!name && type === 'dog_park') {
             name = 'Dog Park';
+          } else if (!name && type === 'animal_shelter') {
+            name = 'Animal Shelter';
+          } else if (!name && type === 'veterinary') {
+            name = 'Veterinary Clinic';
+          } else if (!name && type === 'pet_store') {
+            name = 'Pet Store';
           }
 
           return {
@@ -143,7 +166,12 @@ const Home = () => {
         })
         .slice(0, 30); // Increased limit to show more locations
 
-      console.log(`Processed ${processedLocations.length} locations, ${processedLocations.filter(l => l.type === 'dog_park').length} are dog parks`);
+      console.log(`Processed ${processedLocations.length} locations:`);
+      console.log(`- ${processedLocations.filter(l => l.type === 'dog_park').length} dog parks`);
+      console.log(`- ${processedLocations.filter(l => l.type === 'veterinary').length} veterinary clinics`);
+      console.log(`- ${processedLocations.filter(l => l.type === 'pet_store').length} pet stores`);
+      console.log(`- ${processedLocations.filter(l => l.type === 'animal_shelter').length} animal shelters`);
+      console.log('Animal shelters found:', processedLocations.filter(l => l.type === 'animal_shelter'));
       setLocations(processedLocations);
     } catch (error) {
       console.error('Error fetching locations:', error);
@@ -232,10 +260,47 @@ const Home = () => {
     }
   };
 
+  // Test specifically for animal shelters in Chicago
+  const testShelterQuery = async () => {
+    try {
+      // Chicago area bounding box: approximately 41.6, -87.9, 42.0, -87.5
+      const chicagoBbox = '41.6,-87.9,42.0,-87.5';
+      const shelterTestQuery = `
+        [out:json][timeout:25];
+        (
+          node["amenity"="animal_shelter"](${chicagoBbox});
+          way["amenity"="animal_shelter"](${chicagoBbox});
+          node["name"~"[Ss]helter|[Rr]escue|[Hh]umane|[Ww]elfare|[Ss]anctuary|[Cc]ruelty|PAWS|[Aa]nimal [Cc]are|[Aa]nimal [Ww]elfare|[Pp]et [Rr]escue|[Aa]nti-[Cc]ruelty|[Aa]nimal [Ll]eague",i](${chicagoBbox});
+          way["name"~"[Ss]helter|[Rr]escue|[Hh]umane|[Ww]elfare|[Ss]anctuary|[Cc]ruelty|PAWS|[Aa]nimal [Cc]are|[Aa]nimal [Ww]elfare|[Pp]et [Rr]escue|[Aa]nti-[Cc]ruelty|[Aa]nimal [Ll]eague",i](${chicagoBbox});
+        );
+        out center;
+      `;
+      console.log('Testing shelter query for Chicago...');
+      const response = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: `data=${encodeURIComponent(shelterTestQuery)}`,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+      const data = await response.json();
+      console.log('Chicago shelter test results:', data);
+      console.log(`Found ${data.elements?.length || 0} potential shelter locations in Chicago area`);
+      if (data.elements?.length > 0) {
+        console.log('Sample shelter data:', data.elements.slice(0, 3));
+      }
+    } catch (error) {
+      console.error('Shelter test query failed:', error);
+    }
+  };
+
   // Initial load
   useEffect(() => {
     // Test API first
     testOverpassAPI();
+    
+    // Test shelter query specifically
+    testShelterQuery();
     
     // Fetch initial locations after map loads
     const timer = setTimeout(() => {

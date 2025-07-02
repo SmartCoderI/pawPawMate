@@ -1,0 +1,383 @@
+.review-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.review-form h3 {
+  color: #2c3e50;
+  margin-bottom: 30px;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.form-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.form-section h4 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.form-section h5 {
+  color: #34495e;
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-weight: 500;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 8px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #34495e;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Star Rating Styles */
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.star {
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  user-select: none;
+}
+
+.star:hover {
+  transform: scale(1.1);
+}
+
+.star.filled {
+  filter: brightness(1.2);
+}
+
+.rating-text {
+  margin-left: 10px;
+  font-weight: 500;
+  color: #7f8c8d;
+}
+
+/* Image Upload Styles */
+.image-upload-section {
+  padding: 20px;
+  border: 2px dashed #bdc3c7;
+  border-radius: 8px;
+  text-align: center;
+  background: #fff;
+}
+
+.image-upload-section input[type="file"] {
+  display: none;
+}
+
+.upload-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #3498db;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  margin-bottom: 10px;
+}
+
+.upload-button:hover {
+  background: #2980b9;
+}
+
+.upload-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.upload-info {
+  color: #7f8c8d;
+  font-size: 14px;
+  margin: 0;
+}
+
+.selected-files {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.selected-files h5 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.file-previews {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.file-preview {
+  position: relative;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.preview-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.file-name {
+  display: block;
+  padding: 8px;
+  font-size: 12px;
+  color: #7f8c8d;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.remove-file {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.remove-file:hover {
+  background: rgba(192, 57, 43, 0.9);
+}
+
+.remove-file:disabled {
+  background: rgba(127, 140, 141, 0.9);
+  cursor: not-allowed;
+}
+
+/* Dog Park Review Styles */
+.dog-park-review {
+  border: 2px solid #e74c3c;
+  border-radius: 8px;
+  background: #fff5f5;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.dog-park-review h4 {
+  color: #e74c3c;
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  margin-bottom: 0;
+}
+
+.checkbox-group input[type="checkbox"] {
+  margin-right: 8px;
+  width: auto;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.submit-button,
+.cancel-button {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.submit-button {
+  background: #27ae60;
+  color: white;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #229954;
+  transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cancel-button {
+  background: #95a5a6;
+  color: white;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background: #7f8c8d;
+}
+
+.cancel-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .review-form {
+    margin: 10px;
+    padding: 15px;
+  }
+
+  .form-section {
+    padding: 15px;
+  }
+
+  .file-previews {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .preview-image {
+    height: 100px;
+  }
+
+  .checkbox-group {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .submit-button,
+  .cancel-button {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* Loading States */
+.uploading .image-upload-section {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.submitting .form-group input,
+.submitting .form-group select,
+.submitting .form-group textarea {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Accessibility */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+.star:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Animation */
+.form-section {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 

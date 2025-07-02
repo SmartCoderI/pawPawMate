@@ -116,6 +116,18 @@ export const userAPI = {
       throw error;
     }
   },
+
+  // Upload user profile photo
+  uploadUserPhoto: async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const response = await api.post('/users/upload-photo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
 };
 
 // Pet API calls
@@ -162,7 +174,7 @@ export const petAPI = {
   // Upload pet photo
   uploadPetPhoto: async (file) => {
     const formData = new FormData();
-    formData.append('photo', file);
+    formData.append('image', file);
     const response = await api.post('/pets/upload-photo', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -230,6 +242,24 @@ export const reviewAPI = {
   // Get dog park statistics
   getDogParkStats: async (placeId) => {
     const response = await api.get(`/reviews/${placeId}/dog-park-stats`);
+    return response.data;
+  },
+
+  // Get vet clinic statistics
+  getVetClinicStats: async (placeId) => {
+    const response = await api.get(`/reviews/${placeId}/vet-clinic-stats`);
+    return response.data;
+  },
+
+  // Get pet store statistics
+  getPetStoreStats: async (placeId) => {
+    const response = await api.get(`/reviews/${placeId}/pet-store-stats`);
+    return response.data;
+  },
+
+  // Get animal shelter statistics
+  getAnimalShelterStats: async (placeId) => {
+    const response = await api.get(`/reviews/${placeId}/animal-shelter-stats`);
     return response.data;
   },
 };

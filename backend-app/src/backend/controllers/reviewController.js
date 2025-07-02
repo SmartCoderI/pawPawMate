@@ -1,126 +1,439 @@
 const Review = require("../models/Review");
 const Place = require("../models/Place");
 
-// Helper function to validate dog park review data
+// Helper function to validate pet store review data (basic enum validation)
+const validatePetStoreReview = (petStoreReview) => {
+  if (!petStoreReview) return true; // Optional field
+
+  const errors = [];
+
+  // Validate accessAndLocation
+  if (petStoreReview.accessAndLocation) {
+    const { parkingDifficulty, parkingToParkDistance } = petStoreReview.accessAndLocation;
+    if (parkingDifficulty && !["easy", "moderate", "difficult"].includes(parkingDifficulty)) {
+      errors.push("Invalid parkingDifficulty value");
+    }
+    if (parkingToParkDistance && !["close", "moderate", "far"].includes(parkingToParkDistance)) {
+      errors.push("Invalid parkingToParkDistance value");
+    }
+  }
+
+  // Validate servicesAndConveniences
+  if (petStoreReview.servicesAndConveniences) {
+    const { returnPolicy } = petStoreReview.servicesAndConveniences;
+    if (returnPolicy && !["excellent", "good", "fair", "poor"].includes(returnPolicy)) {
+      errors.push("Invalid returnPolicy value");
+    }
+  }
+
+  // Validate productSelectionAndQuality
+  if (petStoreReview.productSelectionAndQuality) {
+    const { foodBrandVariety, toySelection, suppliesAvailability, productFreshness } = petStoreReview.productSelectionAndQuality;
+    const qualityValues = ["excellent", "good", "fair", "poor"];
+    
+    if (foodBrandVariety && !qualityValues.includes(foodBrandVariety)) {
+      errors.push("Invalid foodBrandVariety value");
+    }
+    if (toySelection && !qualityValues.includes(toySelection)) {
+      errors.push("Invalid toySelection value");
+    }
+    if (suppliesAvailability && !qualityValues.includes(suppliesAvailability)) {
+      errors.push("Invalid suppliesAvailability value");
+    }
+    if (productFreshness && !qualityValues.includes(productFreshness)) {
+      errors.push("Invalid productFreshness value");
+    }
+  }
+
+  // Validate pricingAndValue
+  if (petStoreReview.pricingAndValue) {
+    const { overallPricing } = petStoreReview.pricingAndValue;
+    if (overallPricing && !["low", "moderate", "high", "very_high"].includes(overallPricing)) {
+      errors.push("Invalid overallPricing value");
+    }
+  }
+
+  // Validate staffKnowledgeAndService
+  if (petStoreReview.staffKnowledgeAndService) {
+    const { petKnowledge, productRecommendations, customerService, helpfulness } = petStoreReview.staffKnowledgeAndService;
+    const serviceValues = ["excellent", "good", "fair", "poor"];
+    
+    if (petKnowledge && !serviceValues.includes(petKnowledge)) {
+      errors.push("Invalid petKnowledge value");
+    }
+    if (productRecommendations && !serviceValues.includes(productRecommendations)) {
+      errors.push("Invalid productRecommendations value");
+    }
+    if (customerService && !serviceValues.includes(customerService)) {
+      errors.push("Invalid customerService value");
+    }
+    if (helpfulness && !serviceValues.includes(helpfulness)) {
+      errors.push("Invalid helpfulness value");
+    }
+  }
+
+  return errors.length === 0 ? true : errors;
+};
+
+// Helper function to validate animal shelter review data (basic enum validation)
+const validateAnimalShelterReview = (animalShelterReview) => {
+  if (!animalShelterReview) return true; // Optional field
+
+  const errors = [];
+
+  // Validate accessAndLocation
+  if (animalShelterReview.accessAndLocation) {
+    const { parkingDifficulty, parkingToParkDistance } = animalShelterReview.accessAndLocation;
+    if (parkingDifficulty && !["easy", "moderate", "difficult"].includes(parkingDifficulty)) {
+      errors.push("Invalid parkingDifficulty value");
+    }
+    if (parkingToParkDistance && !["close", "moderate", "far"].includes(parkingToParkDistance)) {
+      errors.push("Invalid parkingToParkDistance value");
+    }
+  }
+
+  // Validate animalTypeSelection
+  if (animalShelterReview.animalTypeSelection) {
+    const { availableAnimalTypes, breedVariety, ageRange } = animalShelterReview.animalTypeSelection;
+    const validAnimalTypes = ["dogs", "cats", "rabbits", "birds", "reptiles", "small_mammals"];
+    const validAgeRanges = ["puppies_kittens", "young_adults", "adults", "seniors"];
+    
+    if (availableAnimalTypes && Array.isArray(availableAnimalTypes)) {
+      availableAnimalTypes.forEach((type, index) => {
+        if (!validAnimalTypes.includes(type)) {
+          errors.push(`Invalid animal type at index ${index}: ${type}`);
+        }
+      });
+    }
+    
+    if (breedVariety && !["excellent", "good", "fair", "poor"].includes(breedVariety)) {
+      errors.push("Invalid breedVariety value");
+    }
+    
+    if (ageRange && Array.isArray(ageRange)) {
+      ageRange.forEach((age, index) => {
+        if (!validAgeRanges.includes(age)) {
+          errors.push(`Invalid age range at index ${index}: ${age}`);
+        }
+      });
+    }
+  }
+
+  // Validate animalCareAndWelfare
+  if (animalShelterReview.animalCareAndWelfare) {
+    const { animalHealth, livingConditions, medicalCare } = animalShelterReview.animalCareAndWelfare;
+    const careValues = ["excellent", "good", "fair", "poor"];
+    
+    if (animalHealth && !careValues.includes(animalHealth)) {
+      errors.push("Invalid animalHealth value");
+    }
+    if (livingConditions && !careValues.includes(livingConditions)) {
+      errors.push("Invalid livingConditions value");
+    }
+    if (medicalCare && !careValues.includes(medicalCare)) {
+      errors.push("Invalid medicalCare value");
+    }
+  }
+
+  // Validate adoptionProcessAndSupport
+  if (animalShelterReview.adoptionProcessAndSupport) {
+    const { applicationProcess, processingTime, adoptionFees, returnPolicy } = animalShelterReview.adoptionProcessAndSupport;
+    
+    if (applicationProcess && !["easy", "moderate", "difficult"].includes(applicationProcess)) {
+      errors.push("Invalid applicationProcess value");
+    }
+    if (processingTime && !["same_day", "within_week", "1_2_weeks", "over_2_weeks"].includes(processingTime)) {
+      errors.push("Invalid processingTime value");
+    }
+    if (adoptionFees && !["low", "moderate", "high", "very_high"].includes(adoptionFees)) {
+      errors.push("Invalid adoptionFees value");
+    }
+    if (returnPolicy && !["excellent", "good", "fair", "poor"].includes(returnPolicy)) {
+      errors.push("Invalid returnPolicy value");
+    }
+  }
+
+  // Validate staffAndVolunteerQuality
+  if (animalShelterReview.staffAndVolunteerQuality) {
+    const { staffKnowledge, animalHandling, customerService, compassionLevel } = animalShelterReview.staffAndVolunteerQuality;
+    const qualityValues = ["excellent", "good", "fair", "poor"];
+    
+    if (staffKnowledge && !qualityValues.includes(staffKnowledge)) {
+      errors.push("Invalid staffKnowledge value");
+    }
+    if (animalHandling && !qualityValues.includes(animalHandling)) {
+      errors.push("Invalid animalHandling value");
+    }
+    if (customerService && !qualityValues.includes(customerService)) {
+      errors.push("Invalid customerService value");
+    }
+    if (compassionLevel && !qualityValues.includes(compassionLevel)) {
+      errors.push("Invalid compassionLevel value");
+    }
+  }
+
+  return errors.length === 0 ? true : errors;
+};
+
+// Helper function to validate dog park review data (basic enum validation)
 const validateDogParkReview = (dogParkReview) => {
   if (!dogParkReview) return true; // Optional field
-  
+
   const errors = [];
-  
+
   // Validate accessAndLocation
   if (dogParkReview.accessAndLocation) {
     const { parkingDifficulty, handicapFriendly, parkingToParkDistance } = dogParkReview.accessAndLocation;
-    if (parkingDifficulty && !['easy', 'moderate', 'difficult'].includes(parkingDifficulty)) {
-      errors.push('Invalid parkingDifficulty value');
+    if (parkingDifficulty && !["easy", "moderate", "difficult"].includes(parkingDifficulty)) {
+      errors.push("Invalid parkingDifficulty value");
     }
-    if (parkingToParkDistance && !['close', 'moderate', 'far'].includes(parkingToParkDistance)) {
-      errors.push('Invalid parkingToParkDistance value');
+    if (parkingToParkDistance && !["close", "moderate", "far"].includes(parkingToParkDistance)) {
+      errors.push("Invalid parkingToParkDistance value");
     }
   }
-  
+
   // Validate safetyLevel
   if (dogParkReview.safetyLevel) {
     const { fencingCondition } = dogParkReview.safetyLevel;
-    if (fencingCondition && !['fully_enclosed', 'partially_enclosed', 'not_enclosed'].includes(fencingCondition)) {
-      errors.push('Invalid fencingCondition value');
+    if (fencingCondition && !["fully_enclosed", "partially_enclosed", "not_enclosed"].includes(fencingCondition)) {
+      errors.push("Invalid fencingCondition value");
     }
   }
-  
+
   // Validate sizeAndLayout
   if (dogParkReview.sizeAndLayout) {
     const { separateAreas, runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
-    if (separateAreas && !['yes_small_large', 'yes_other', 'no'].includes(separateAreas)) {
-      errors.push('Invalid separateAreas value');
+    if (separateAreas && !["yes_small_large", "yes_other", "no"].includes(separateAreas)) {
+      errors.push("Invalid separateAreas value");
     }
-    if (runningSpace && !['enough', 'limited', 'tight'].includes(runningSpace)) {
-      errors.push('Invalid runningSpace value');
+    if (runningSpace && !["enough", "limited", "tight"].includes(runningSpace)) {
+      errors.push("Invalid runningSpace value");
     }
-    if (drainagePerformance && !['excellent', 'good', 'poor'].includes(drainagePerformance)) {
-      errors.push('Invalid drainagePerformance value');
+    if (drainagePerformance && !["excellent", "good", "poor"].includes(drainagePerformance)) {
+      errors.push("Invalid drainagePerformance value");
     }
   }
-  
+
   // Validate amenitiesAndFacilities
   if (dogParkReview.amenitiesAndFacilities) {
     const { seatingLevel, shadeAndCover, waterAccess } = dogParkReview.amenitiesAndFacilities;
-    if (seatingLevel && !['bench', 'gazebo', 'no_seat'].includes(seatingLevel)) {
-      errors.push('Invalid seatingLevel value');
+    if (seatingLevel && !["bench", "gazebo", "no_seat"].includes(seatingLevel)) {
+      errors.push("Invalid seatingLevel value");
     }
-    if (shadeAndCover && !['trees', 'shade_structures', 'none'].includes(shadeAndCover)) {
-      errors.push('Invalid shadeAndCover value');
+    if (shadeAndCover && !["trees", "shade_structures", "none"].includes(shadeAndCover)) {
+      errors.push("Invalid shadeAndCover value");
     }
-    if (waterAccess && !['drinking_fountain', 'fire_hydrant', 'pool', 'none'].includes(waterAccess)) {
-      errors.push('Invalid waterAccess value');
+    if (waterAccess && !["drinking_fountain", "fire_hydrant", "pool", "none"].includes(waterAccess)) {
+      errors.push("Invalid waterAccess value");
     }
   }
-  
+
   // Validate maintenanceAndCleanliness
   if (dogParkReview.maintenanceAndCleanliness) {
     const { overallCleanliness, trashLevel, odorLevel, equipmentCondition } = dogParkReview.maintenanceAndCleanliness;
-    if (overallCleanliness && !['good', 'neutral', 'bad'].includes(overallCleanliness)) {
-      errors.push('Invalid overallCleanliness value');
+    if (overallCleanliness && !["good", "neutral", "bad"].includes(overallCleanliness)) {
+      errors.push("Invalid overallCleanliness value");
     }
-    if (trashLevel && !['clean', 'moderate', 'dirty'].includes(trashLevel)) {
-      errors.push('Invalid trashLevel value');
+    if (trashLevel && !["clean", "moderate", "dirty"].includes(trashLevel)) {
+      errors.push("Invalid trashLevel value");
     }
-    if (odorLevel && !['none', 'mild', 'strong'].includes(odorLevel)) {
-      errors.push('Invalid odorLevel value');
+    if (odorLevel && !["none", "mild", "strong"].includes(odorLevel)) {
+      errors.push("Invalid odorLevel value");
     }
-    if (equipmentCondition && !['good', 'fair', 'poor'].includes(equipmentCondition)) {
-      errors.push('Invalid equipmentCondition value');
+    if (equipmentCondition && !["good", "fair", "poor"].includes(equipmentCondition)) {
+      errors.push("Invalid equipmentCondition value");
     }
   }
-  
+
   // Validate crowdAndSocialDynamics
   if (dogParkReview.crowdAndSocialDynamics) {
     const { ownerCulture, wastePickup, ownerFriendliness } = dogParkReview.crowdAndSocialDynamics;
-    if (ownerCulture && !['excellent', 'good', 'fair', 'poor'].includes(ownerCulture)) {
-      errors.push('Invalid ownerCulture value');
+    if (ownerCulture && !["excellent", "good", "fair", "poor"].includes(ownerCulture)) {
+      errors.push("Invalid ownerCulture value");
     }
-    if (wastePickup && !['always', 'usually', 'sometimes', 'rarely'].includes(wastePickup)) {
-      errors.push('Invalid wastePickup value');
+    if (wastePickup && !["always", "usually", "sometimes", "rarely"].includes(wastePickup)) {
+      errors.push("Invalid wastePickup value");
     }
-    if (ownerFriendliness && !['very_friendly', 'friendly', 'neutral', 'unfriendly'].includes(ownerFriendliness)) {
-      errors.push('Invalid ownerFriendliness value');
+    if (ownerFriendliness && !["very_friendly", "friendly", "neutral", "unfriendly"].includes(ownerFriendliness)) {
+      errors.push("Invalid ownerFriendliness value");
     }
   }
-  
+
   // Validate rulesPoliciesAndCommunity
   if (dogParkReview.rulesPoliciesAndCommunity) {
     const { leashPolicy, aggressiveDogPolicy, communityEnforcement } = dogParkReview.rulesPoliciesAndCommunity;
-    if (leashPolicy && !['off_leash_allowed', 'leash_required', 'mixed_areas'].includes(leashPolicy)) {
-      errors.push('Invalid leashPolicy value');
+    if (leashPolicy && !["off_leash_allowed", "leash_required", "mixed_areas"].includes(leashPolicy)) {
+      errors.push("Invalid leashPolicy value");
     }
-    if (aggressiveDogPolicy && !['strict', 'moderate', 'lenient', 'none'].includes(aggressiveDogPolicy)) {
-      errors.push('Invalid aggressiveDogPolicy value');
+    if (aggressiveDogPolicy && !["strict", "moderate", "lenient", "none"].includes(aggressiveDogPolicy)) {
+      errors.push("Invalid aggressiveDogPolicy value");
     }
-    if (communityEnforcement && !['strict', 'moderate', 'lenient', 'none'].includes(communityEnforcement)) {
-      errors.push('Invalid communityEnforcement value');
+    if (communityEnforcement && !["strict", "moderate", "lenient", "none"].includes(communityEnforcement)) {
+      errors.push("Invalid communityEnforcement value");
     }
   }
-  
+
+  return errors.length === 0 ? true : errors;
+};
+
+// Helper function to validate vet clinic review data
+const validateVetClinicReview = (vetClinicReview) => {
+  if (!vetClinicReview) return true; // Optional field
+
+  const errors = [];
+
+  // Validate clinicEnvironmentAndFacilities
+  if (vetClinicReview.clinicEnvironmentAndFacilities) {
+    const { cleanliness, comfortLevel, facilitySize } = vetClinicReview.clinicEnvironmentAndFacilities;
+    if (cleanliness && !["excellent", "good", "fair", "poor"].includes(cleanliness)) {
+      errors.push("Invalid cleanliness value");
+    }
+    if (comfortLevel && !["very_comfortable", "comfortable", "neutral", "uncomfortable"].includes(comfortLevel)) {
+      errors.push("Invalid comfortLevel value");
+    }
+    if (facilitySize && !["small", "medium", "large"].includes(facilitySize)) {
+      errors.push("Invalid facilitySize value");
+    }
+  }
+
+  // Validate costAndTransparency
+  if (vetClinicReview.costAndTransparency) {
+    const { routineCheckupCost, vaccinationCost, spayNeuterCost, dentalCleaningCost, emergencyVisitCost } = vetClinicReview.costAndTransparency;
+    const costValues = ["low", "moderate", "high", "very_high"];
+    
+    if (routineCheckupCost && !costValues.includes(routineCheckupCost)) {
+      errors.push("Invalid routineCheckupCost value");
+    }
+    if (vaccinationCost && !costValues.includes(vaccinationCost)) {
+      errors.push("Invalid vaccinationCost value");
+    }
+    if (spayNeuterCost && !costValues.includes(spayNeuterCost)) {
+      errors.push("Invalid spayNeuterCost value");
+    }
+    if (dentalCleaningCost && !costValues.includes(dentalCleaningCost)) {
+      errors.push("Invalid dentalCleaningCost value");
+    }
+    if (emergencyVisitCost && !costValues.includes(emergencyVisitCost)) {
+      errors.push("Invalid emergencyVisitCost value");
+    }
+  }
+
+  // Validate medicalStaffAndServices
+  if (vetClinicReview.medicalStaffAndServices) {
+    const { veterinarianAttitude, veterinarianCompetence, technicianNursePerformance, onSiteDiagnostics } = vetClinicReview.medicalStaffAndServices;
+    const performanceValues = ["excellent", "good", "fair", "poor"];
+    
+    if (veterinarianAttitude && !performanceValues.includes(veterinarianAttitude)) {
+      errors.push("Invalid veterinarianAttitude value");
+    }
+    if (veterinarianCompetence && !performanceValues.includes(veterinarianCompetence)) {
+      errors.push("Invalid veterinarianCompetence value");
+    }
+    if (technicianNursePerformance && !performanceValues.includes(technicianNursePerformance)) {
+      errors.push("Invalid technicianNursePerformance value");
+    }
+    if (onSiteDiagnostics && Array.isArray(onSiteDiagnostics)) {
+      const validDiagnostics = ["xray", "ultrasound", "bloodwork", "none"];
+      const invalidDiagnostics = onSiteDiagnostics.filter(d => !validDiagnostics.includes(d));
+      if (invalidDiagnostics.length > 0) {
+        errors.push("Invalid onSiteDiagnostics values: " + invalidDiagnostics.join(", "));
+      }
+    }
+  }
+
+  // Validate schedulingAndCommunication
+  if (vetClinicReview.schedulingAndCommunication) {
+    const { responseTime, appointmentWaitTime, inClinicWaitingTime, followUpCommunication } = vetClinicReview.schedulingAndCommunication;
+    
+    if (responseTime && !["immediate", "same_day", "next_day", "several_days"].includes(responseTime)) {
+      errors.push("Invalid responseTime value");
+    }
+    if (appointmentWaitTime && !["same_day", "within_week", "1_2_weeks", "over_2_weeks"].includes(appointmentWaitTime)) {
+      errors.push("Invalid appointmentWaitTime value");
+    }
+    if (inClinicWaitingTime && !["under_15_min", "15_30_min", "30_60_min", "over_1_hour"].includes(inClinicWaitingTime)) {
+      errors.push("Invalid inClinicWaitingTime value");
+    }
+    if (followUpCommunication && !["excellent", "good", "fair", "poor"].includes(followUpCommunication)) {
+      errors.push("Invalid followUpCommunication value");
+    }
+  }
+
+  // Validate emergencyAndAfterHours
+  if (vetClinicReview.emergencyAndAfterHours) {
+    const { emergencyTriageSpeed, crisisHandlingConfidence } = vetClinicReview.emergencyAndAfterHours;
+    
+    if (emergencyTriageSpeed && !["immediate", "within_30_min", "within_1_hour", "over_1_hour"].includes(emergencyTriageSpeed)) {
+      errors.push("Invalid emergencyTriageSpeed value");
+    }
+    if (crisisHandlingConfidence && !["excellent", "good", "fair", "poor"].includes(crisisHandlingConfidence)) {
+      errors.push("Invalid crisisHandlingConfidence value");
+    }
+  }
+
+  // Validate emergencyExperiences
+  if (vetClinicReview.emergencyExperiences && Array.isArray(vetClinicReview.emergencyExperiences)) {
+    vetClinicReview.emergencyExperiences.forEach((exp, index) => {
+      if (exp.outcome && !["excellent", "good", "fair", "poor"].includes(exp.outcome)) {
+        errors.push(`Invalid outcome value in emergency experience ${index + 1}`);
+      }
+    });
+  }
+
+  // Validate ownerInvolvement
+  if (vetClinicReview.ownerInvolvement) {
+    const { communicationDuringAnesthesia, communicationDuringSurgery } = vetClinicReview.ownerInvolvement;
+    const communicationValues = ["excellent", "good", "fair", "poor"];
+    
+    if (communicationDuringAnesthesia && !communicationValues.includes(communicationDuringAnesthesia)) {
+      errors.push("Invalid communicationDuringAnesthesia value");
+    }
+    if (communicationDuringSurgery && !communicationValues.includes(communicationDuringSurgery)) {
+      errors.push("Invalid communicationDuringSurgery value");
+    }
+  }
+
+  // Validate reputationAndCommunity
+  if (vetClinicReview.reputationAndCommunity) {
+    const { onlineReputationConsistency, wordOfMouthReputation, communityInvolvement, socialMediaPresence } = vetClinicReview.reputationAndCommunity;
+    const reputationValues = ["excellent", "good", "fair", "poor"];
+    
+    if (onlineReputationConsistency && !reputationValues.includes(onlineReputationConsistency)) {
+      errors.push("Invalid onlineReputationConsistency value");
+    }
+    if (wordOfMouthReputation && !reputationValues.includes(wordOfMouthReputation)) {
+      errors.push("Invalid wordOfMouthReputation value");
+    }
+    if (communityInvolvement && !["high", "moderate", "low", "none"].includes(communityInvolvement)) {
+      errors.push("Invalid communityInvolvement value");
+    }
+    if (socialMediaPresence && !["excellent", "good", "fair", "poor", "none"].includes(socialMediaPresence)) {
+      errors.push("Invalid socialMediaPresence value");
+    }
+  }
+
   return errors.length === 0 ? true : errors;
 };
 
 // Helper function to clean dog park review data (remove empty strings to avoid enum validation errors)
 const cleanDogParkReview = (dogParkReview) => {
   if (!dogParkReview) return dogParkReview;
-  
+
   const cleanObject = (obj) => {
-    if (!obj || typeof obj !== 'object') return obj;
-    
+    if (!obj || typeof obj !== "object") return obj;
+
     const cleaned = {};
     for (const [key, value] of Object.entries(obj)) {
-      if (value === '' || value === null) {
+      if (value === "" || value === null) {
         // Skip empty strings and null values to avoid enum validation errors
         continue;
       } else if (Array.isArray(value)) {
         // Filter out empty strings from arrays
-        const cleanedArray = value.filter(item => item !== '' && item !== null);
+        const cleanedArray = value.filter((item) => item !== "" && item !== null);
         if (cleanedArray.length > 0) {
           cleaned[key] = cleanedArray;
         }
-      } else if (typeof value === 'object') {
+      } else if (typeof value === "object") {
         // Recursively clean nested objects
         const cleanedNested = cleanObject(value);
         if (Object.keys(cleanedNested).length > 0) {
@@ -133,59 +446,224 @@ const cleanDogParkReview = (dogParkReview) => {
     }
     return cleaned;
   };
-  
+
   return cleanObject(dogParkReview);
+};
+
+// Helper function to clean vet clinic review data (remove empty strings to avoid enum validation errors)
+const cleanVetClinicReview = (vetClinicReview) => {
+  if (!vetClinicReview) return vetClinicReview;
+
+  const cleanObject = (obj) => {
+    if (!obj || typeof obj !== "object") return obj;
+
+    const cleaned = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === "" || value === null) {
+        // Skip empty strings and null values to avoid enum validation errors
+        continue;
+      } else if (Array.isArray(value)) {
+        // Filter out empty strings from arrays
+        const cleanedArray = value.filter((item) => item !== "" && item !== null);
+        if (cleanedArray.length > 0) {
+          cleaned[key] = cleanedArray;
+        }
+      } else if (typeof value === "object") {
+        // Recursively clean nested objects
+        const cleanedNested = cleanObject(value);
+        if (Object.keys(cleanedNested).length > 0) {
+          cleaned[key] = cleanedNested;
+        }
+      } else {
+        // Keep non-empty values
+        cleaned[key] = value;
+      }
+    }
+    return cleaned;
+  };
+
+  return cleanObject(vetClinicReview);
+};
+
+// Helper function to clean pet store review data (remove empty strings to avoid enum validation errors)
+const cleanPetStoreReview = (petStoreReview) => {
+  if (!petStoreReview) return petStoreReview;
+
+  const cleanObject = (obj) => {
+    if (!obj || typeof obj !== "object") return obj;
+
+    const cleaned = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === "" || value === null) {
+        // Skip empty strings and null values to avoid enum validation errors
+        continue;
+      } else if (Array.isArray(value)) {
+        // Filter out empty strings from arrays
+        const cleanedArray = value.filter((item) => item !== "" && item !== null);
+        if (cleanedArray.length > 0) {
+          cleaned[key] = cleanedArray;
+        }
+      } else if (typeof value === "object") {
+        // Recursively clean nested objects
+        const cleanedNested = cleanObject(value);
+        if (Object.keys(cleanedNested).length > 0) {
+          cleaned[key] = cleanedNested;
+        }
+      } else {
+        // Keep non-empty values
+        cleaned[key] = value;
+      }
+    }
+    return cleaned;
+  };
+
+  return cleanObject(petStoreReview);
+};
+
+// Helper function to clean animal shelter review data (remove empty strings to avoid enum validation errors)
+const cleanAnimalShelterReview = (animalShelterReview) => {
+  if (!animalShelterReview) return animalShelterReview;
+
+  const cleanObject = (obj) => {
+    if (!obj || typeof obj !== "object") return obj;
+
+    const cleaned = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === "" || value === null) {
+        // Skip empty strings and null values to avoid enum validation errors
+        continue;
+      } else if (Array.isArray(value)) {
+        // Filter out empty strings from arrays
+        const cleanedArray = value.filter((item) => item !== "" && item !== null);
+        if (cleanedArray.length > 0) {
+          cleaned[key] = cleanedArray;
+        }
+      } else if (typeof value === "object") {
+        // Recursively clean nested objects
+        const cleanedNested = cleanObject(value);
+        if (Object.keys(cleanedNested).length > 0) {
+          cleaned[key] = cleanedNested;
+        }
+      } else {
+        // Keep non-empty values
+        cleaned[key] = value;
+      }
+    }
+    return cleaned;
+  };
+
+  return cleanObject(animalShelterReview);
 };
 
 exports.addReview = async (req, res) => {
   try {
-    console.log('Review creation request received:', req.body);
-    const { placeId, rating, comment, tags, dogParkReview, userId, placeData } = req.body;
-    
+    console.log("Review creation request received:", req.body);
+    const { placeId, rating, comment, tags, dogParkReview, vetClinicReview, petStoreReview, animalShelterReview, userId, placeData, photos } = req.body;
+
     // Validate required fields
     if (!rating) {
-      return res.status(400).json({ error: 'rating is required' });
+      return res.status(400).json({ error: "rating is required" });
     }
-    
+
     // Validate rating range
     if (rating < 1 || rating > 5) {
-      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+      return res.status(400).json({ error: "Rating must be between 1 and 5" });
     }
-    
+
     // Validate user ID (frontend should send MongoDB user ID)
     if (!userId) {
-      return res.status(400).json({ error: 'userId is required. Please log in to submit a review.' });
+      return res.status(400).json({ error: "userId is required. Please log in to submit a review." });
     }
-    
+
     // Verify the user exists in the database
     const User = require("../models/User");
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ error: 'User not found. Please log in again.' });
+      return res.status(404).json({ error: "User not found. Please log in again." });
     }
-    
+
     // Clean and validate dog park review data if provided
     let cleanedDogParkReview = null;
     if (dogParkReview) {
       // Clean the dog park review data (remove empty strings to avoid enum validation errors)
       cleanedDogParkReview = cleanDogParkReview(dogParkReview);
-      console.log('Original dogParkReview:', dogParkReview);
-      console.log('Cleaned dogParkReview:', cleanedDogParkReview);
-      
+      console.log("Original dogParkReview:", dogParkReview);
+      console.log("Cleaned dogParkReview:", cleanedDogParkReview);
+
       // Validate the cleaned data
       if (cleanedDogParkReview && Object.keys(cleanedDogParkReview).length > 0) {
         const validationResult = validateDogParkReview(cleanedDogParkReview);
         if (validationResult !== true) {
-          return res.status(400).json({ 
-            error: 'Invalid dog park review data', 
-            details: validationResult 
+          return res.status(400).json({
+            error: "Invalid dog park review data",
+            details: validationResult,
           });
         }
       }
     }
-    
+
+    // Clean and validate vet clinic review data if provided
+    let cleanedVetClinicReview = null;
+    if (vetClinicReview) {
+      // Clean the vet clinic review data (remove empty strings to avoid enum validation errors)
+      cleanedVetClinicReview = cleanVetClinicReview(vetClinicReview);
+      console.log("Original vetClinicReview:", vetClinicReview);
+      console.log("Cleaned vetClinicReview:", cleanedVetClinicReview);
+
+      // Validate the cleaned data
+      if (cleanedVetClinicReview && Object.keys(cleanedVetClinicReview).length > 0) {
+        const validationResult = validateVetClinicReview(cleanedVetClinicReview);
+        if (validationResult !== true) {
+          return res.status(400).json({
+            error: "Invalid vet clinic review data",
+            details: validationResult,
+          });
+        }
+      }
+    }
+
+    // Clean and validate pet store review data if provided
+    let cleanedPetStoreReview = null;
+    if (petStoreReview) {
+      // Clean the pet store review data (remove empty strings to avoid enum validation errors)
+      cleanedPetStoreReview = cleanPetStoreReview(petStoreReview);
+      console.log("Original petStoreReview:", petStoreReview);
+      console.log("Cleaned petStoreReview:", cleanedPetStoreReview);
+
+      // Validate the cleaned data
+      if (cleanedPetStoreReview && Object.keys(cleanedPetStoreReview).length > 0) {
+        const validationResult = validatePetStoreReview(cleanedPetStoreReview);
+        if (validationResult !== true) {
+          return res.status(400).json({
+            error: "Invalid pet store review data",
+            details: validationResult,
+          });
+        }
+      }
+    }
+
+    // Clean and validate animal shelter review data if provided
+    let cleanedAnimalShelterReview = null;
+    if (animalShelterReview) {
+      // Clean the animal shelter review data (remove empty strings to avoid enum validation errors)
+      cleanedAnimalShelterReview = cleanAnimalShelterReview(animalShelterReview);
+      console.log("Original animalShelterReview:", animalShelterReview);
+      console.log("Cleaned animalShelterReview:", cleanedAnimalShelterReview);
+
+      // Validate the cleaned data
+      if (cleanedAnimalShelterReview && Object.keys(cleanedAnimalShelterReview).length > 0) {
+        const validationResult = validateAnimalShelterReview(cleanedAnimalShelterReview);
+        if (validationResult !== true) {
+          return res.status(400).json({
+            error: "Invalid animal shelter review data",
+            details: validationResult,
+          });
+        }
+      }
+    }
+
     let finalPlaceId = placeId;
-    
+
     // Check if we have a placeId first
     if (placeId) {
       // Check if place exists in database
@@ -194,85 +672,91 @@ exports.addReview = async (req, res) => {
         console.log(`Place with ID ${placeId} not found in database`);
         // If placeId provided but place doesn't exist, we need placeData to create it
         if (!placeData) {
-          return res.status(404).json({ error: 'Place not found and no place data provided to create it' });
+          return res.status(404).json({ error: "Place not found and no place data provided to create it" });
         }
         finalPlaceId = null; // We'll create a new place
       }
     }
-    
+
     // If no placeId or place doesn't exist, create or find the place first
     if (!finalPlaceId) {
       if (!placeData) {
-        return res.status(400).json({ error: 'Either placeId for existing place or placeData for new place is required' });
+        return res
+          .status(400)
+          .json({ error: "Either placeId for existing place or placeData for new place is required" });
       }
-      
+
       // Validate place data
       if (!placeData.name || !placeData.coordinates || !placeData.coordinates.lat || !placeData.coordinates.lng) {
-        return res.status(400).json({ error: 'Place data must include name and valid coordinates (lat, lng)' });
+        return res.status(400).json({ error: "Place data must include name and valid coordinates (lat, lng)" });
       }
-      
+
       const lat = Number(placeData.coordinates.lat);
       const lng = Number(placeData.coordinates.lng);
-      
+
       // Check if a place already exists at these coordinates (within ~100 meters)
       const existingPlaceAtLocation = await Place.findOne({
-        'coordinates.lat': { $gte: lat - 0.001, $lte: lat + 0.001 },
-        'coordinates.lng': { $gte: lng - 0.001, $lte: lng + 0.001 },
-        type: placeData.type || 'other'
+        "coordinates.lat": { $gte: lat - 0.001, $lte: lat + 0.001 },
+        "coordinates.lng": { $gte: lng - 0.001, $lte: lng + 0.001 },
+        type: placeData.type || "shelter",
       });
-      
+
       if (existingPlaceAtLocation) {
-        console.log('Found existing place at similar coordinates:', existingPlaceAtLocation._id);
+        console.log("Found existing place at similar coordinates:", existingPlaceAtLocation._id);
         finalPlaceId = existingPlaceAtLocation._id;
       } else {
-        console.log('Creating new place before adding review:', placeData);
-        
+        console.log("Creating new place before adding review:", placeData);
+
         // Create the place
         const newPlace = await Place.create({
           name: placeData.name,
-          type: placeData.type || 'other',
+          type: placeData.type || "shelter",
           coordinates: {
             lat: lat,
-            lng: lng
+            lng: lng,
           },
-          address: placeData.address || '',
-          phone: placeData.phone || '',
-          website: placeData.website || '',
-          opening_hours: placeData.opening_hours || '',
-          description: placeData.description || '',
+          address: placeData.address || "",
+          phone: placeData.phone || "",
+          website: placeData.website || "",
+          opening_hours: placeData.opening_hours || "",
+          description: placeData.description || "",
           tags: placeData.tags || [],
-          addedBy: userId
+          addedBy: userId,
         });
-        
-        console.log('New place created successfully:', newPlace);
+
+        console.log("New place created successfully:", newPlace);
         finalPlaceId = newPlace._id;
       }
     }
-    
+
     // Create the review with the correct MongoDB user ID
-    const review = await Review.create({ 
+    const review = await Review.create({
       userId: userId, // Use MongoDB user ID from request body
       placeId: finalPlaceId,
       rating,
       comment,
       tags,
-      dogParkReview: cleanedDogParkReview // Use cleaned data
+      photos: photos || [], // Include photos array
+      dogParkReview: cleanedDogParkReview, // Use cleaned data
+      vetClinicReview: cleanedVetClinicReview, // Use cleaned vet clinic data
+      petStoreReview: cleanedPetStoreReview, // Use cleaned pet store data
+      animalShelterReview: cleanedAnimalShelterReview, // Use cleaned animal shelter data
     });
-    
+
     // Populate user information for response
-    await review.populate('userId', 'name email profileImage');
-    
-    console.log('Review created successfully:', review);
-    
+    await review.populate("userId", "name email profileImage");
+
+    console.log("Review created successfully:", review);
+
     // Include the final place ID in the response for frontend navigation
     const responseData = {
       ...review.toObject(),
-      placeId: finalPlaceId // Ensure we return the actual place ID used
+      placeId: finalPlaceId, // Ensure we return the actual place ID used
     };
-    
+
     res.status(201).json(responseData);
   } catch (err) {
-    console.error('Error adding review:', err);
+    console.error("Error adding review:", err);
     res.status(400).json({ error: err.message });
   }
 };
@@ -280,13 +764,43 @@ exports.addReview = async (req, res) => {
 exports.getReviewsForPlace = async (req, res) => {
   try {
     const { placeId } = req.params;
-    const reviews = await Review.find({ placeId })
-      .populate('userId', 'name email profileImage')
-      .sort({ createdAt: -1 });
+    console.log("Fetching reviews for place:", placeId);
     
-    res.json(reviews);
+    // First, get reviews without population to see if they exist
+    const reviewsRaw = await Review.find({ placeId });
+    console.log(`Found ${reviewsRaw.length} reviews for place ${placeId}`);
+    
+    if (reviewsRaw.length === 0) {
+      console.log("No reviews found, returning empty array");
+      return res.json([]);
+    }
+    
+    // Then populate user data with error handling
+    const reviews = await Review.find({ placeId })
+      .populate({
+        path: "userId",
+        select: "name email profileImage",
+        // Handle cases where user might not exist
+        options: { strictPopulate: false }
+      })
+      .sort({ createdAt: -1 });
+
+    // Filter out reviews with invalid user references
+    const validReviews = reviews.filter(review => {
+      if (!review.userId) {
+        console.warn(`Review ${review._id} has invalid userId reference`);
+        // Keep the review but with null user data
+        review.userId = null;
+        return true;
+      }
+      return true;
+    });
+
+    console.log(`Returning ${validReviews.length} valid reviews`);
+    res.json(validReviews);
   } catch (err) {
-    console.error('Error fetching reviews:', err);
+    console.error("Error fetching reviews:", err);
+    console.error("Error stack:", err.stack);
     res.status(500).json({ error: err.message });
   }
 };
@@ -295,35 +809,35 @@ exports.getReviewsForPlace = async (req, res) => {
 exports.getDogParkReviewStats = async (req, res) => {
   try {
     const { placeId } = req.params;
-    
+
     // Get all dog park reviews for this place
-    const reviews = await Review.find({ 
-      placeId, 
-      dogParkReview: { $exists: true, $ne: null } 
+    const reviews = await Review.find({
+      placeId,
+      dogParkReview: { $exists: true, $ne: null },
     });
-    
+
     if (reviews.length === 0) {
       return res.json({
         totalReviews: 0,
         averageRating: 0,
-        categoryStats: {}
+        categoryStats: {},
       });
     }
-    
+
     // Calculate overall statistics
     const totalReviews = reviews.length;
     const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
-    
+
     // Calculate category-specific statistics
     const categoryStats = {
       accessAndLocation: {
         parkingDifficulty: {},
         handicapFriendly: { true: 0, false: 0 },
-        parkingToParkDistance: {}
+        parkingToParkDistance: {},
       },
       hoursOfOperation: {
         is24Hours: { true: 0, false: 0 },
-        dawnToDusk: { true: 0, false: 0 }
+        dawnToDusk: { true: 0, false: 0 },
       },
       safetyLevel: {
         fencingCondition: {},
@@ -332,12 +846,12 @@ exports.getDogParkReviewStats = async (req, res) => {
         firstAidStation: { true: 0, false: 0 },
         emergencyContact: { true: 0, false: 0 },
         surveillanceCameras: { true: 0, false: 0 },
-        noSharpEdges: { true: 0, false: 0 }
+        noSharpEdges: { true: 0, false: 0 },
       },
       sizeAndLayout: {
         separateAreas: {},
         runningSpace: {},
-        drainagePerformance: {}
+        drainagePerformance: {},
       },
       amenitiesAndFacilities: {
         seatingLevel: {},
@@ -345,48 +859,48 @@ exports.getDogParkReviewStats = async (req, res) => {
         wasteStation: { true: 0, false: 0 },
         biodegradableBags: { true: 0, false: 0 },
         restroom: { true: 0, false: 0 },
-        waterAccess: {}
+        waterAccess: {},
       },
       maintenanceAndCleanliness: {
         overallCleanliness: {},
         trashLevel: {},
         odorLevel: {},
-        equipmentCondition: {}
+        equipmentCondition: {},
       },
       crowdAndSocialDynamics: {
         ownerCulture: {},
         wastePickup: {},
-        ownerFriendliness: {}
+        ownerFriendliness: {},
       },
       rulesPoliciesAndCommunity: {
         leashPolicy: {},
         vaccinationRequired: { true: 0, false: 0 },
         aggressiveDogPolicy: {},
-        communityEnforcement: {}
-      }
+        communityEnforcement: {},
+      },
     };
-    
+
     // Aggregate statistics from all reviews
-    reviews.forEach(review => {
+    reviews.forEach((review) => {
       if (review.dogParkReview) {
         const { dogParkReview } = review;
-        
+
         // Access & Location
         if (dogParkReview.accessAndLocation) {
           const { parkingDifficulty, handicapFriendly, parkingToParkDistance } = dogParkReview.accessAndLocation;
           if (parkingDifficulty) {
-            categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] = 
+            categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] =
               (categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] || 0) + 1;
           }
           if (handicapFriendly !== undefined) {
             categoryStats.accessAndLocation.handicapFriendly[handicapFriendly]++;
           }
           if (parkingToParkDistance) {
-            categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] = 
+            categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] =
               (categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] || 0) + 1;
           }
         }
-        
+
         // Hours of Operation
         if (dogParkReview.hoursOfOperation) {
           const { is24Hours, dawnToDusk } = dogParkReview.hoursOfOperation;
@@ -397,12 +911,20 @@ exports.getDogParkReviewStats = async (req, res) => {
             categoryStats.hoursOfOperation.dawnToDusk[dawnToDusk]++;
           }
         }
-        
+
         // Safety Level
         if (dogParkReview.safetyLevel) {
-          const { fencingCondition, doubleGated, nightIllumination, firstAidStation, emergencyContact, surveillanceCameras, noSharpEdges } = dogParkReview.safetyLevel;
+          const {
+            fencingCondition,
+            doubleGated,
+            nightIllumination,
+            firstAidStation,
+            emergencyContact,
+            surveillanceCameras,
+            noSharpEdges,
+          } = dogParkReview.safetyLevel;
           if (fencingCondition) {
-            categoryStats.safetyLevel.fencingCondition[fencingCondition] = 
+            categoryStats.safetyLevel.fencingCondition[fencingCondition] =
               (categoryStats.safetyLevel.fencingCondition[fencingCondition] || 0) + 1;
           }
           if (doubleGated !== undefined) categoryStats.safetyLevel.doubleGated[doubleGated]++;
@@ -412,110 +934,891 @@ exports.getDogParkReviewStats = async (req, res) => {
           if (surveillanceCameras !== undefined) categoryStats.safetyLevel.surveillanceCameras[surveillanceCameras]++;
           if (noSharpEdges !== undefined) categoryStats.safetyLevel.noSharpEdges[noSharpEdges]++;
         }
-        
+
         // Size & Layout
         if (dogParkReview.sizeAndLayout) {
           const { separateAreas, runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
           if (separateAreas) {
-            categoryStats.sizeAndLayout.separateAreas[separateAreas] = 
+            categoryStats.sizeAndLayout.separateAreas[separateAreas] =
               (categoryStats.sizeAndLayout.separateAreas[separateAreas] || 0) + 1;
           }
           if (runningSpace) {
-            categoryStats.sizeAndLayout.runningSpace[runningSpace] = 
+            categoryStats.sizeAndLayout.runningSpace[runningSpace] =
               (categoryStats.sizeAndLayout.runningSpace[runningSpace] || 0) + 1;
           }
           if (drainagePerformance) {
-            categoryStats.sizeAndLayout.drainagePerformance[drainagePerformance] = 
+            categoryStats.sizeAndLayout.drainagePerformance[drainagePerformance] =
               (categoryStats.sizeAndLayout.drainagePerformance[drainagePerformance] || 0) + 1;
           }
         }
-        
+
         // Amenities & Facilities
         if (dogParkReview.amenitiesAndFacilities) {
-          const { seatingLevel, shadeAndCover, wasteStation, biodegradableBags, restroom, waterAccess } = dogParkReview.amenitiesAndFacilities;
+          const { seatingLevel, shadeAndCover, wasteStation, biodegradableBags, restroom, waterAccess } =
+            dogParkReview.amenitiesAndFacilities;
           if (seatingLevel) {
-            categoryStats.amenitiesAndFacilities.seatingLevel[seatingLevel] = 
+            categoryStats.amenitiesAndFacilities.seatingLevel[seatingLevel] =
               (categoryStats.amenitiesAndFacilities.seatingLevel[seatingLevel] || 0) + 1;
           }
           if (shadeAndCover) {
-            categoryStats.amenitiesAndFacilities.shadeAndCover[shadeAndCover] = 
+            categoryStats.amenitiesAndFacilities.shadeAndCover[shadeAndCover] =
               (categoryStats.amenitiesAndFacilities.shadeAndCover[shadeAndCover] || 0) + 1;
           }
           if (wasteStation !== undefined) categoryStats.amenitiesAndFacilities.wasteStation[wasteStation]++;
-          if (biodegradableBags !== undefined) categoryStats.amenitiesAndFacilities.biodegradableBags[biodegradableBags]++;
+          if (biodegradableBags !== undefined)
+            categoryStats.amenitiesAndFacilities.biodegradableBags[biodegradableBags]++;
           if (restroom !== undefined) categoryStats.amenitiesAndFacilities.restroom[restroom]++;
           if (waterAccess) {
-            categoryStats.amenitiesAndFacilities.waterAccess[waterAccess] = 
+            categoryStats.amenitiesAndFacilities.waterAccess[waterAccess] =
               (categoryStats.amenitiesAndFacilities.waterAccess[waterAccess] || 0) + 1;
           }
         }
-        
+
         // Maintenance & Cleanliness
         if (dogParkReview.maintenanceAndCleanliness) {
-          const { overallCleanliness, trashLevel, odorLevel, equipmentCondition } = dogParkReview.maintenanceAndCleanliness;
+          const { overallCleanliness, trashLevel, odorLevel, equipmentCondition } =
+            dogParkReview.maintenanceAndCleanliness;
           if (overallCleanliness) {
-            categoryStats.maintenanceAndCleanliness.overallCleanliness[overallCleanliness] = 
+            categoryStats.maintenanceAndCleanliness.overallCleanliness[overallCleanliness] =
               (categoryStats.maintenanceAndCleanliness.overallCleanliness[overallCleanliness] || 0) + 1;
           }
           if (trashLevel) {
-            categoryStats.maintenanceAndCleanliness.trashLevel[trashLevel] = 
+            categoryStats.maintenanceAndCleanliness.trashLevel[trashLevel] =
               (categoryStats.maintenanceAndCleanliness.trashLevel[trashLevel] || 0) + 1;
           }
           if (odorLevel) {
-            categoryStats.maintenanceAndCleanliness.odorLevel[odorLevel] = 
+            categoryStats.maintenanceAndCleanliness.odorLevel[odorLevel] =
               (categoryStats.maintenanceAndCleanliness.odorLevel[odorLevel] || 0) + 1;
           }
           if (equipmentCondition) {
-            categoryStats.maintenanceAndCleanliness.equipmentCondition[equipmentCondition] = 
+            categoryStats.maintenanceAndCleanliness.equipmentCondition[equipmentCondition] =
               (categoryStats.maintenanceAndCleanliness.equipmentCondition[equipmentCondition] || 0) + 1;
           }
         }
-        
+
         // Crowd & Social Dynamics
         if (dogParkReview.crowdAndSocialDynamics) {
           const { ownerCulture, wastePickup, ownerFriendliness } = dogParkReview.crowdAndSocialDynamics;
           if (ownerCulture) {
-            categoryStats.crowdAndSocialDynamics.ownerCulture[ownerCulture] = 
+            categoryStats.crowdAndSocialDynamics.ownerCulture[ownerCulture] =
               (categoryStats.crowdAndSocialDynamics.ownerCulture[ownerCulture] || 0) + 1;
           }
           if (wastePickup) {
-            categoryStats.crowdAndSocialDynamics.wastePickup[wastePickup] = 
+            categoryStats.crowdAndSocialDynamics.wastePickup[wastePickup] =
               (categoryStats.crowdAndSocialDynamics.wastePickup[wastePickup] || 0) + 1;
           }
           if (ownerFriendliness) {
-            categoryStats.crowdAndSocialDynamics.ownerFriendliness[ownerFriendliness] = 
+            categoryStats.crowdAndSocialDynamics.ownerFriendliness[ownerFriendliness] =
               (categoryStats.crowdAndSocialDynamics.ownerFriendliness[ownerFriendliness] || 0) + 1;
           }
         }
-        
+
         // Rules, Policies & Community
         if (dogParkReview.rulesPoliciesAndCommunity) {
-          const { leashPolicy, vaccinationRequired, aggressiveDogPolicy, communityEnforcement } = dogParkReview.rulesPoliciesAndCommunity;
+          const { leashPolicy, vaccinationRequired, aggressiveDogPolicy, communityEnforcement } =
+            dogParkReview.rulesPoliciesAndCommunity;
           if (leashPolicy) {
-            categoryStats.rulesPoliciesAndCommunity.leashPolicy[leashPolicy] = 
+            categoryStats.rulesPoliciesAndCommunity.leashPolicy[leashPolicy] =
               (categoryStats.rulesPoliciesAndCommunity.leashPolicy[leashPolicy] || 0) + 1;
           }
-          if (vaccinationRequired !== undefined) categoryStats.rulesPoliciesAndCommunity.vaccinationRequired[vaccinationRequired]++;
+          if (vaccinationRequired !== undefined)
+            categoryStats.rulesPoliciesAndCommunity.vaccinationRequired[vaccinationRequired]++;
           if (aggressiveDogPolicy) {
-            categoryStats.rulesPoliciesAndCommunity.aggressiveDogPolicy[aggressiveDogPolicy] = 
+            categoryStats.rulesPoliciesAndCommunity.aggressiveDogPolicy[aggressiveDogPolicy] =
               (categoryStats.rulesPoliciesAndCommunity.aggressiveDogPolicy[aggressiveDogPolicy] || 0) + 1;
           }
           if (communityEnforcement) {
-            categoryStats.rulesPoliciesAndCommunity.communityEnforcement[communityEnforcement] = 
+            categoryStats.rulesPoliciesAndCommunity.communityEnforcement[communityEnforcement] =
               (categoryStats.rulesPoliciesAndCommunity.communityEnforcement[communityEnforcement] || 0) + 1;
           }
         }
       }
     });
-    
+
     res.json({
       totalReviews,
       averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
-      categoryStats
+      categoryStats,
     });
-    
   } catch (err) {
-    console.error('Error fetching dog park review stats:', err);
+    console.error("Error fetching dog park review stats:", err);
     res.status(500).json({ error: err.message });
+  }
+};
+
+// New endpoint to get vet clinic specific review statistics
+exports.getVetClinicReviewStats = async (req, res) => {
+  try {
+    const { placeId } = req.params;
+
+    // Get all vet clinic reviews for this place
+    const reviews = await Review.find({
+      placeId,
+      vetClinicReview: { $exists: true, $ne: null },
+    });
+
+    if (reviews.length === 0) {
+      return res.json({
+        totalReviews: 0,
+        averageRating: 0,
+        categoryStats: {},
+      });
+    }
+
+    // Calculate overall statistics
+    const totalReviews = reviews.length;
+    const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
+
+    // Calculate category-specific statistics
+    const categoryStats = {
+      clinicEnvironmentAndFacilities: {
+        cleanliness: {},
+        comfortLevel: {},
+        facilitySize: {},
+      },
+      costAndTransparency: {
+        routineCheckupCost: {},
+        vaccinationCost: {},
+        spayNeuterCost: {},
+        dentalCleaningCost: {},
+        emergencyVisitCost: {},
+        feesExplainedUpfront: { true: 0, false: 0 },
+        printedEstimatesAvailable: { true: 0, false: 0 },
+        insuranceAccepted: { true: 0, false: 0 },
+        paymentPlansOffered: { true: 0, false: 0 },
+      },
+      medicalStaffAndServices: {
+        veterinarianAttitude: {},
+        veterinarianCompetence: {},
+        technicianNursePerformance: {},
+        onSiteDiagnostics: {},
+        surgeryOrthopedics: { true: 0, false: 0 },
+        behavioralCounseling: { true: 0, false: 0 },
+        nutritionConsultation: { true: 0, false: 0 },
+      },
+      schedulingAndCommunication: {
+        responseTime: {},
+        appointmentWaitTime: {},
+        inClinicWaitingTime: {},
+        followUpCommunication: {},
+      },
+      emergencyAndAfterHours: {
+        openWeekends: { true: 0, false: 0 },
+        openEvenings: { true: 0, false: 0 },
+        onCallEmergencyNumber: { true: 0, false: 0 },
+        connectedToEmergencyHospitals: { true: 0, false: 0 },
+        clearHandoffsToSpecialists: { true: 0, false: 0 },
+        emergencyTriageSpeed: {},
+        crisisHandlingConfidence: {},
+      },
+      emergencyExperiences: {
+        totalExperiences: 0,
+        situationTypes: {},
+        outcomes: {},
+      },
+      ownerInvolvement: {
+        allowedDuringExams: {},
+        allowedDuringProcedures: {},
+        communicationDuringAnesthesia: {},
+        communicationDuringSurgery: {},
+        explainsProceduresWell: {},
+        involvesOwnerInDecisions: {},
+      },
+      reputationAndCommunity: {
+        onlineReputationConsistency: {},
+        wordOfMouthReputation: {},
+        communityInvolvement: {},
+        hostsVaccineClinic: {},
+        shelterPartnerships: {},
+        communityEvents: {},
+        educationalPrograms: {},
+        socialMediaPresence: {},
+      },
+    };
+
+    // Aggregate statistics from all reviews
+    reviews.forEach((review) => {
+      if (review.vetClinicReview) {
+        const { vetClinicReview } = review;
+
+        // 1. Clinic Environment & Facilities
+        if (vetClinicReview.clinicEnvironmentAndFacilities) {
+          const { cleanliness, comfortLevel, facilitySize } = vetClinicReview.clinicEnvironmentAndFacilities;
+          if (cleanliness) {
+            categoryStats.clinicEnvironmentAndFacilities.cleanliness[cleanliness] =
+              (categoryStats.clinicEnvironmentAndFacilities.cleanliness[cleanliness] || 0) + 1;
+          }
+          if (comfortLevel) {
+            categoryStats.clinicEnvironmentAndFacilities.comfortLevel[comfortLevel] =
+              (categoryStats.clinicEnvironmentAndFacilities.comfortLevel[comfortLevel] || 0) + 1;
+          }
+          if (facilitySize) {
+            categoryStats.clinicEnvironmentAndFacilities.facilitySize[facilitySize] =
+              (categoryStats.clinicEnvironmentAndFacilities.facilitySize[facilitySize] || 0) + 1;
+          }
+        }
+
+        // 2. Cost & Transparency
+        if (vetClinicReview.costAndTransparency) {
+          const {
+            routineCheckupCost,
+            vaccinationCost,
+            spayNeuterCost,
+            dentalCleaningCost,
+            emergencyVisitCost,
+            feesExplainedUpfront,
+            printedEstimatesAvailable,
+            insuranceAccepted,
+            paymentPlansOffered,
+          } = vetClinicReview.costAndTransparency;
+
+          if (routineCheckupCost) {
+            categoryStats.costAndTransparency.routineCheckupCost[routineCheckupCost] =
+              (categoryStats.costAndTransparency.routineCheckupCost[routineCheckupCost] || 0) + 1;
+          }
+          if (vaccinationCost) {
+            categoryStats.costAndTransparency.vaccinationCost[vaccinationCost] =
+              (categoryStats.costAndTransparency.vaccinationCost[vaccinationCost] || 0) + 1;
+          }
+          if (spayNeuterCost) {
+            categoryStats.costAndTransparency.spayNeuterCost[spayNeuterCost] =
+              (categoryStats.costAndTransparency.spayNeuterCost[spayNeuterCost] || 0) + 1;
+          }
+          if (dentalCleaningCost) {
+            categoryStats.costAndTransparency.dentalCleaningCost[dentalCleaningCost] =
+              (categoryStats.costAndTransparency.dentalCleaningCost[dentalCleaningCost] || 0) + 1;
+          }
+          if (emergencyVisitCost) {
+            categoryStats.costAndTransparency.emergencyVisitCost[emergencyVisitCost] =
+              (categoryStats.costAndTransparency.emergencyVisitCost[emergencyVisitCost] || 0) + 1;
+          }
+          if (feesExplainedUpfront !== undefined) categoryStats.costAndTransparency.feesExplainedUpfront[feesExplainedUpfront]++;
+          if (printedEstimatesAvailable !== undefined) categoryStats.costAndTransparency.printedEstimatesAvailable[printedEstimatesAvailable]++;
+          if (insuranceAccepted !== undefined) categoryStats.costAndTransparency.insuranceAccepted[insuranceAccepted]++;
+          if (paymentPlansOffered !== undefined) categoryStats.costAndTransparency.paymentPlansOffered[paymentPlansOffered]++;
+        }
+
+        // 3. Medical Staff & Services
+        if (vetClinicReview.medicalStaffAndServices) {
+          const {
+            veterinarianAttitude,
+            veterinarianCompetence,
+            technicianNursePerformance,
+            onSiteDiagnostics,
+            surgeryOrthopedics,
+            behavioralCounseling,
+            nutritionConsultation,
+          } = vetClinicReview.medicalStaffAndServices;
+
+          if (veterinarianAttitude) {
+            categoryStats.medicalStaffAndServices.veterinarianAttitude[veterinarianAttitude] =
+              (categoryStats.medicalStaffAndServices.veterinarianAttitude[veterinarianAttitude] || 0) + 1;
+          }
+          if (veterinarianCompetence) {
+            categoryStats.medicalStaffAndServices.veterinarianCompetence[veterinarianCompetence] =
+              (categoryStats.medicalStaffAndServices.veterinarianCompetence[veterinarianCompetence] || 0) + 1;
+          }
+          if (technicianNursePerformance) {
+            categoryStats.medicalStaffAndServices.technicianNursePerformance[technicianNursePerformance] =
+              (categoryStats.medicalStaffAndServices.technicianNursePerformance[technicianNursePerformance] || 0) + 1;
+          }
+          if (onSiteDiagnostics && Array.isArray(onSiteDiagnostics)) {
+            onSiteDiagnostics.forEach((diagnostic) => {
+              categoryStats.medicalStaffAndServices.onSiteDiagnostics[diagnostic] =
+                (categoryStats.medicalStaffAndServices.onSiteDiagnostics[diagnostic] || 0) + 1;
+            });
+          }
+          if (surgeryOrthopedics !== undefined) categoryStats.medicalStaffAndServices.surgeryOrthopedics[surgeryOrthopedics]++;
+          if (behavioralCounseling !== undefined) categoryStats.medicalStaffAndServices.behavioralCounseling[behavioralCounseling]++;
+          if (nutritionConsultation !== undefined) categoryStats.medicalStaffAndServices.nutritionConsultation[nutritionConsultation]++;
+        }
+
+        // 4. Scheduling & Communication
+        if (vetClinicReview.schedulingAndCommunication) {
+          const { responseTime, appointmentWaitTime, inClinicWaitingTime, followUpCommunication } = vetClinicReview.schedulingAndCommunication;
+          
+          if (responseTime) {
+            categoryStats.schedulingAndCommunication.responseTime[responseTime] =
+              (categoryStats.schedulingAndCommunication.responseTime[responseTime] || 0) + 1;
+          }
+          if (appointmentWaitTime) {
+            categoryStats.schedulingAndCommunication.appointmentWaitTime[appointmentWaitTime] =
+              (categoryStats.schedulingAndCommunication.appointmentWaitTime[appointmentWaitTime] || 0) + 1;
+          }
+          if (inClinicWaitingTime) {
+            categoryStats.schedulingAndCommunication.inClinicWaitingTime[inClinicWaitingTime] =
+              (categoryStats.schedulingAndCommunication.inClinicWaitingTime[inClinicWaitingTime] || 0) + 1;
+          }
+          if (followUpCommunication) {
+            categoryStats.schedulingAndCommunication.followUpCommunication[followUpCommunication] =
+              (categoryStats.schedulingAndCommunication.followUpCommunication[followUpCommunication] || 0) + 1;
+          }
+        }
+
+        // 5. Emergency & After-Hours Care
+        if (vetClinicReview.emergencyAndAfterHours) {
+          const {
+            openWeekends,
+            openEvenings,
+            onCallEmergencyNumber,
+            connectedToEmergencyHospitals,
+            clearHandoffsToSpecialists,
+            emergencyTriageSpeed,
+            crisisHandlingConfidence,
+          } = vetClinicReview.emergencyAndAfterHours;
+
+          if (openWeekends !== undefined) categoryStats.emergencyAndAfterHours.openWeekends[openWeekends]++;
+          if (openEvenings !== undefined) categoryStats.emergencyAndAfterHours.openEvenings[openEvenings]++;
+          if (onCallEmergencyNumber !== undefined) categoryStats.emergencyAndAfterHours.onCallEmergencyNumber[onCallEmergencyNumber]++;
+          if (connectedToEmergencyHospitals !== undefined) categoryStats.emergencyAndAfterHours.connectedToEmergencyHospitals[connectedToEmergencyHospitals]++;
+          if (clearHandoffsToSpecialists !== undefined) categoryStats.emergencyAndAfterHours.clearHandoffsToSpecialists[clearHandoffsToSpecialists]++;
+          
+          if (emergencyTriageSpeed) {
+            categoryStats.emergencyAndAfterHours.emergencyTriageSpeed[emergencyTriageSpeed] =
+              (categoryStats.emergencyAndAfterHours.emergencyTriageSpeed[emergencyTriageSpeed] || 0) + 1;
+          }
+          if (crisisHandlingConfidence) {
+            categoryStats.emergencyAndAfterHours.crisisHandlingConfidence[crisisHandlingConfidence] =
+              (categoryStats.emergencyAndAfterHours.crisisHandlingConfidence[crisisHandlingConfidence] || 0) + 1;
+          }
+        }
+
+        // Emergency Experiences
+        if (vetClinicReview.emergencyExperiences && Array.isArray(vetClinicReview.emergencyExperiences)) {
+          categoryStats.emergencyExperiences.totalExperiences += vetClinicReview.emergencyExperiences.length;
+          
+          vetClinicReview.emergencyExperiences.forEach((experience) => {
+            if (experience.situationType) {
+              categoryStats.emergencyExperiences.situationTypes[experience.situationType] =
+                (categoryStats.emergencyExperiences.situationTypes[experience.situationType] || 0) + 1;
+            }
+            if (experience.outcome) {
+              categoryStats.emergencyExperiences.outcomes[experience.outcome] =
+                (categoryStats.emergencyExperiences.outcomes[experience.outcome] || 0) + 1;
+            }
+          });
+        }
+
+        // Owner Involvement
+        if (vetClinicReview.ownerInvolvement) {
+          const { communicationDuringAnesthesia, communicationDuringSurgery } = vetClinicReview.ownerInvolvement;
+          const communicationValues = ["excellent", "good", "fair", "poor"];
+          
+          if (communicationDuringAnesthesia && !communicationValues.includes(communicationDuringAnesthesia)) {
+            errors.push("Invalid communicationDuringAnesthesia value");
+          }
+          if (communicationDuringSurgery && !communicationValues.includes(communicationDuringSurgery)) {
+            errors.push("Invalid communicationDuringSurgery value");
+          }
+        }
+
+        // Reputation & Community
+        if (vetClinicReview.reputationAndCommunity) {
+          const { onlineReputationConsistency, wordOfMouthReputation, communityInvolvement, socialMediaPresence } = vetClinicReview.reputationAndCommunity;
+          const reputationValues = ["excellent", "good", "fair", "poor"];
+          
+          if (onlineReputationConsistency && !reputationValues.includes(onlineReputationConsistency)) {
+            errors.push("Invalid onlineReputationConsistency value");
+          }
+          if (wordOfMouthReputation && !reputationValues.includes(wordOfMouthReputation)) {
+            errors.push("Invalid wordOfMouthReputation value");
+          }
+          if (communityInvolvement && !["high", "moderate", "low", "none"].includes(communityInvolvement)) {
+            errors.push("Invalid communityInvolvement value");
+          }
+          if (socialMediaPresence && !["excellent", "good", "fair", "poor", "none"].includes(socialMediaPresence)) {
+            errors.push("Invalid socialMediaPresence value");
+          }
+        }
+      }
+    });
+
+    res.json({
+      totalReviews,
+      averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
+      categoryStats,
+    });
+  } catch (err) {
+    console.error("Error fetching vet clinic review stats:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// New endpoint to get pet store specific review statistics
+exports.getPetStoreReviewStats = async (req, res) => {
+  try {
+    const { placeId } = req.params;
+
+    // Get all pet store reviews for this place
+    const reviews = await Review.find({
+      placeId,
+      petStoreReview: { $exists: true, $ne: null },
+    });
+
+    if (reviews.length === 0) {
+      return res.json({
+        totalReviews: 0,
+        averageRating: 0,
+        categoryStats: {},
+      });
+    }
+
+    // Calculate overall statistics
+    const totalReviews = reviews.length;
+    const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
+
+    // Calculate category-specific statistics
+    const categoryStats = {
+      accessAndLocation: {
+        parkingDifficulty: {},
+        handicapFriendly: { true: 0, false: 0 },
+        parkingToParkDistance: {},
+      },
+      hoursOfOperation: {
+        is24Hours: { true: 0, false: 0 },
+        dawnToDusk: { true: 0, false: 0 },
+        specificHours: {},
+      },
+      servicesAndConveniences: {
+        grooming: { true: 0, false: 0 },
+        veterinaryServices: { true: 0, false: 0 },
+        petTraining: { true: 0, false: 0 },
+        deliveryService: { true: 0, false: 0 },
+        onlineOrdering: { true: 0, false: 0 },
+        curbsidePickup: { true: 0, false: 0 },
+        returnPolicy: {},
+      },
+      productSelectionAndQuality: {
+        foodBrandVariety: {},
+        toySelection: {},
+        suppliesAvailability: {},
+        productFreshness: {},
+        organicNaturalOptions: { true: 0, false: 0 },
+        prescriptionDietAvailable: { true: 0, false: 0 },
+      },
+      pricingAndValue: {
+        overallPricing: {},
+        loyaltyProgram: { true: 0, false: 0 },
+        frequentSales: { true: 0, false: 0 },
+        priceMatching: { true: 0, false: 0 },
+        bulkDiscounts: { true: 0, false: 0 },
+        seniorDiscounts: { true: 0, false: 0 },
+      },
+      staffKnowledgeAndService: {
+        petKnowledge: {},
+        productRecommendations: {},
+        customerService: {},
+        helpfulness: {},
+        multilingual: { true: 0, false: 0 },
+        trainingCertified: { true: 0, false: 0 },
+      },
+    };
+
+    // Aggregate statistics from all reviews
+    reviews.forEach((review) => {
+      if (review.petStoreReview) {
+        const { petStoreReview } = review;
+
+        // 1. Access & Location
+        if (petStoreReview.accessAndLocation) {
+          const { parkingDifficulty, handicapFriendly, parkingToParkDistance } = petStoreReview.accessAndLocation;
+          if (parkingDifficulty) {
+            categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] =
+              (categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] || 0) + 1;
+          }
+          if (handicapFriendly !== undefined) {
+            categoryStats.accessAndLocation.handicapFriendly[handicapFriendly]++;
+          }
+          if (parkingToParkDistance) {
+            categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] =
+              (categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] || 0) + 1;
+          }
+        }
+
+        // 2. Hours of Operation
+        if (petStoreReview.hoursOfOperation) {
+          const { is24Hours, dawnToDusk, specificHours } = petStoreReview.hoursOfOperation;
+          if (is24Hours !== undefined) categoryStats.hoursOfOperation.is24Hours[is24Hours]++;
+          if (dawnToDusk !== undefined) categoryStats.hoursOfOperation.dawnToDusk[dawnToDusk]++;
+          if (specificHours) {
+            categoryStats.hoursOfOperation.specificHours[specificHours] =
+              (categoryStats.hoursOfOperation.specificHours[specificHours] || 0) + 1;
+          }
+        }
+
+        // 3. Services & Conveniences
+        if (petStoreReview.servicesAndConveniences) {
+          const { grooming, veterinaryServices, petTraining, deliveryService, onlineOrdering, curbsidePickup, returnPolicy } =
+            petStoreReview.servicesAndConveniences;
+          if (grooming !== undefined) categoryStats.servicesAndConveniences.grooming[grooming]++;
+          if (veterinaryServices !== undefined) categoryStats.servicesAndConveniences.veterinaryServices[veterinaryServices]++;
+          if (petTraining !== undefined) categoryStats.servicesAndConveniences.petTraining[petTraining]++;
+          if (deliveryService !== undefined) categoryStats.servicesAndConveniences.deliveryService[deliveryService]++;
+          if (onlineOrdering !== undefined) categoryStats.servicesAndConveniences.onlineOrdering[onlineOrdering]++;
+          if (curbsidePickup !== undefined) categoryStats.servicesAndConveniences.curbsidePickup[curbsidePickup]++;
+          if (returnPolicy) {
+            categoryStats.servicesAndConveniences.returnPolicy[returnPolicy] =
+              (categoryStats.servicesAndConveniences.returnPolicy[returnPolicy] || 0) + 1;
+          }
+        }
+
+        // 4. Product Selection & Quality
+        if (petStoreReview.productSelectionAndQuality) {
+          const { foodBrandVariety, toySelection, suppliesAvailability, productFreshness, organicNaturalOptions, prescriptionDietAvailable } =
+            petStoreReview.productSelectionAndQuality;
+          if (foodBrandVariety) {
+            categoryStats.productSelectionAndQuality.foodBrandVariety[foodBrandVariety] =
+              (categoryStats.productSelectionAndQuality.foodBrandVariety[foodBrandVariety] || 0) + 1;
+          }
+          if (toySelection) {
+            categoryStats.productSelectionAndQuality.toySelection[toySelection] =
+              (categoryStats.productSelectionAndQuality.toySelection[toySelection] || 0) + 1;
+          }
+          if (suppliesAvailability) {
+            categoryStats.productSelectionAndQuality.suppliesAvailability[suppliesAvailability] =
+              (categoryStats.productSelectionAndQuality.suppliesAvailability[suppliesAvailability] || 0) + 1;
+          }
+          if (productFreshness) {
+            categoryStats.productSelectionAndQuality.productFreshness[productFreshness] =
+              (categoryStats.productSelectionAndQuality.productFreshness[productFreshness] || 0) + 1;
+          }
+          if (organicNaturalOptions !== undefined) categoryStats.productSelectionAndQuality.organicNaturalOptions[organicNaturalOptions]++;
+          if (prescriptionDietAvailable !== undefined) categoryStats.productSelectionAndQuality.prescriptionDietAvailable[prescriptionDietAvailable]++;
+        }
+
+        // 5. Pricing & Value
+        if (petStoreReview.pricingAndValue) {
+          const { overallPricing, loyaltyProgram, frequentSales, priceMatching, bulkDiscounts, seniorDiscounts } =
+            petStoreReview.pricingAndValue;
+          if (overallPricing) {
+            categoryStats.pricingAndValue.overallPricing[overallPricing] =
+              (categoryStats.pricingAndValue.overallPricing[overallPricing] || 0) + 1;
+          }
+          if (loyaltyProgram !== undefined) categoryStats.pricingAndValue.loyaltyProgram[loyaltyProgram]++;
+          if (frequentSales !== undefined) categoryStats.pricingAndValue.frequentSales[frequentSales]++;
+          if (priceMatching !== undefined) categoryStats.pricingAndValue.priceMatching[priceMatching]++;
+          if (bulkDiscounts !== undefined) categoryStats.pricingAndValue.bulkDiscounts[bulkDiscounts]++;
+          if (seniorDiscounts !== undefined) categoryStats.pricingAndValue.seniorDiscounts[seniorDiscounts]++;
+        }
+
+        // 6. Staff Knowledge & Service
+        if (petStoreReview.staffKnowledgeAndService) {
+          const { petKnowledge, productRecommendations, customerService, helpfulness, multilingual, trainingCertified } =
+            petStoreReview.staffKnowledgeAndService;
+          if (petKnowledge) {
+            categoryStats.staffKnowledgeAndService.petKnowledge[petKnowledge] =
+              (categoryStats.staffKnowledgeAndService.petKnowledge[petKnowledge] || 0) + 1;
+          }
+          if (productRecommendations) {
+            categoryStats.staffKnowledgeAndService.productRecommendations[productRecommendations] =
+              (categoryStats.staffKnowledgeAndService.productRecommendations[productRecommendations] || 0) + 1;
+          }
+          if (customerService) {
+            categoryStats.staffKnowledgeAndService.customerService[customerService] =
+              (categoryStats.staffKnowledgeAndService.customerService[customerService] || 0) + 1;
+          }
+          if (helpfulness) {
+            categoryStats.staffKnowledgeAndService.helpfulness[helpfulness] =
+              (categoryStats.staffKnowledgeAndService.helpfulness[helpfulness] || 0) + 1;
+          }
+          if (multilingual !== undefined) categoryStats.staffKnowledgeAndService.multilingual[multilingual]++;
+          if (trainingCertified !== undefined) categoryStats.staffKnowledgeAndService.trainingCertified[trainingCertified]++;
+        }
+      }
+    });
+
+    res.json({
+      totalReviews,
+      averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
+      categoryStats,
+    });
+  } catch (err) {
+    console.error("Error fetching pet store review stats:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// New endpoint to get animal shelter specific review statistics
+exports.getAnimalShelterReviewStats = async (req, res) => {
+  try {
+    const { placeId } = req.params;
+
+    // Get all animal shelter reviews for this place
+    const reviews = await Review.find({
+      placeId,
+      animalShelterReview: { $exists: true, $ne: null },
+    });
+
+    if (reviews.length === 0) {
+      return res.json({
+        totalReviews: 0,
+        averageRating: 0,
+        categoryStats: {},
+      });
+    }
+
+    // Calculate overall statistics
+    const totalReviews = reviews.length;
+    const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
+
+    // Calculate category-specific statistics
+    const categoryStats = {
+      accessAndLocation: {
+        parkingDifficulty: {},
+        handicapFriendly: { true: 0, false: 0 },
+        parkingToParkDistance: {},
+      },
+      hoursOfOperation: {
+        is24Hours: { true: 0, false: 0 },
+        dawnToDusk: { true: 0, false: 0 },
+        specificHours: {},
+      },
+      animalTypeSelection: {
+        availableAnimalTypes: {},
+        breedVariety: {},
+        ageRange: {},
+      },
+      animalCareAndWelfare: {
+        animalHealth: {},
+        livingConditions: {},
+        exercisePrograms: { true: 0, false: 0 },
+        medicalCare: {},
+        behavioralAssessment: { true: 0, false: 0 },
+        specialNeedsCare: { true: 0, false: 0 },
+      },
+      adoptionProcessAndSupport: {
+        applicationProcess: {},
+        processingTime: {},
+        homeVisitRequired: { true: 0, false: 0 },
+        adoptionFees: {},
+        postAdoptionSupport: { true: 0, false: 0 },
+        returnPolicy: {},
+      },
+      staffAndVolunteerQuality: {
+        staffKnowledge: {},
+        animalHandling: {},
+        customerService: {},
+        volunteerProgram: { true: 0, false: 0 },
+        staffTraining: { true: 0, false: 0 },
+        compassionLevel: {},
+      },
+    };
+
+    // Aggregate statistics from all reviews
+    reviews.forEach((review) => {
+      if (review.animalShelterReview) {
+        const { animalShelterReview } = review;
+
+        // 1. Access & Location
+        if (animalShelterReview.accessAndLocation) {
+          const { parkingDifficulty, handicapFriendly, parkingToParkDistance } = animalShelterReview.accessAndLocation;
+          if (parkingDifficulty) {
+            categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] =
+              (categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] || 0) + 1;
+          }
+          if (handicapFriendly !== undefined) {
+            categoryStats.accessAndLocation.handicapFriendly[handicapFriendly]++;
+          }
+          if (parkingToParkDistance) {
+            categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] =
+              (categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] || 0) + 1;
+          }
+        }
+
+        // 2. Hours of Operation
+        if (animalShelterReview.hoursOfOperation) {
+          const { is24Hours, dawnToDusk, specificHours } = animalShelterReview.hoursOfOperation;
+          if (is24Hours !== undefined) categoryStats.hoursOfOperation.is24Hours[is24Hours]++;
+          if (dawnToDusk !== undefined) categoryStats.hoursOfOperation.dawnToDusk[dawnToDusk]++;
+          if (specificHours) {
+            categoryStats.hoursOfOperation.specificHours[specificHours] =
+              (categoryStats.hoursOfOperation.specificHours[specificHours] || 0) + 1;
+          }
+        }
+
+        // 3. Animal Type Selection
+        if (animalShelterReview.animalTypeSelection) {
+          const { availableAnimalTypes, breedVariety, ageRange } = animalShelterReview.animalTypeSelection;
+          if (availableAnimalTypes && Array.isArray(availableAnimalTypes)) {
+            availableAnimalTypes.forEach((type) => {
+              categoryStats.animalTypeSelection.availableAnimalTypes[type] =
+                (categoryStats.animalTypeSelection.availableAnimalTypes[type] || 0) + 1;
+            });
+          }
+          if (breedVariety) {
+            categoryStats.animalTypeSelection.breedVariety[breedVariety] =
+              (categoryStats.animalTypeSelection.breedVariety[breedVariety] || 0) + 1;
+          }
+          if (ageRange && Array.isArray(ageRange)) {
+            ageRange.forEach((age) => {
+              categoryStats.animalTypeSelection.ageRange[age] =
+                (categoryStats.animalTypeSelection.ageRange[age] || 0) + 1;
+            });
+          }
+        }
+
+        // 4. Animal Care & Welfare
+        if (animalShelterReview.animalCareAndWelfare) {
+          const { animalHealth, livingConditions, exercisePrograms, medicalCare, behavioralAssessment, specialNeedsCare } =
+            animalShelterReview.animalCareAndWelfare;
+          if (animalHealth) {
+            categoryStats.animalCareAndWelfare.animalHealth[animalHealth] =
+              (categoryStats.animalCareAndWelfare.animalHealth[animalHealth] || 0) + 1;
+          }
+          if (livingConditions) {
+            categoryStats.animalCareAndWelfare.livingConditions[livingConditions] =
+              (categoryStats.animalCareAndWelfare.livingConditions[livingConditions] || 0) + 1;
+          }
+          if (exercisePrograms !== undefined) categoryStats.animalCareAndWelfare.exercisePrograms[exercisePrograms]++;
+          if (medicalCare) {
+            categoryStats.animalCareAndWelfare.medicalCare[medicalCare] =
+              (categoryStats.animalCareAndWelfare.medicalCare[medicalCare] || 0) + 1;
+          }
+          if (behavioralAssessment !== undefined) categoryStats.animalCareAndWelfare.behavioralAssessment[behavioralAssessment]++;
+          if (specialNeedsCare !== undefined) categoryStats.animalCareAndWelfare.specialNeedsCare[specialNeedsCare]++;
+        }
+
+        // 5. Adoption Process & Support
+        if (animalShelterReview.adoptionProcessAndSupport) {
+          const { applicationProcess, processingTime, homeVisitRequired, adoptionFees, postAdoptionSupport, returnPolicy } =
+            animalShelterReview.adoptionProcessAndSupport;
+          if (applicationProcess) {
+            categoryStats.adoptionProcessAndSupport.applicationProcess[applicationProcess] =
+              (categoryStats.adoptionProcessAndSupport.applicationProcess[applicationProcess] || 0) + 1;
+          }
+          if (processingTime) {
+            categoryStats.adoptionProcessAndSupport.processingTime[processingTime] =
+              (categoryStats.adoptionProcessAndSupport.processingTime[processingTime] || 0) + 1;
+          }
+          if (homeVisitRequired !== undefined) categoryStats.adoptionProcessAndSupport.homeVisitRequired[homeVisitRequired]++;
+          if (adoptionFees) {
+            categoryStats.adoptionProcessAndSupport.adoptionFees[adoptionFees] =
+              (categoryStats.adoptionProcessAndSupport.adoptionFees[adoptionFees] || 0) + 1;
+          }
+          if (postAdoptionSupport !== undefined) categoryStats.adoptionProcessAndSupport.postAdoptionSupport[postAdoptionSupport]++;
+          if (returnPolicy) {
+            categoryStats.adoptionProcessAndSupport.returnPolicy[returnPolicy] =
+              (categoryStats.adoptionProcessAndSupport.returnPolicy[returnPolicy] || 0) + 1;
+          }
+        }
+
+        // 6. Staff & Volunteer Quality
+        if (animalShelterReview.staffAndVolunteerQuality) {
+          const { staffKnowledge, animalHandling, customerService, volunteerProgram, staffTraining, compassionLevel } =
+            animalShelterReview.staffAndVolunteerQuality;
+          if (staffKnowledge) {
+            categoryStats.staffAndVolunteerQuality.staffKnowledge[staffKnowledge] =
+              (categoryStats.staffAndVolunteerQuality.staffKnowledge[staffKnowledge] || 0) + 1;
+          }
+          if (animalHandling) {
+            categoryStats.staffAndVolunteerQuality.animalHandling[animalHandling] =
+              (categoryStats.staffAndVolunteerQuality.animalHandling[animalHandling] || 0) + 1;
+          }
+          if (customerService) {
+            categoryStats.staffAndVolunteerQuality.customerService[customerService] =
+              (categoryStats.staffAndVolunteerQuality.customerService[customerService] || 0) + 1;
+          }
+          if (volunteerProgram !== undefined) categoryStats.staffAndVolunteerQuality.volunteerProgram[volunteerProgram]++;
+          if (staffTraining !== undefined) categoryStats.staffAndVolunteerQuality.staffTraining[staffTraining]++;
+          if (compassionLevel) {
+            categoryStats.staffAndVolunteerQuality.compassionLevel[compassionLevel] =
+              (categoryStats.staffAndVolunteerQuality.compassionLevel[compassionLevel] || 0) + 1;
+          }
+        }
+      }
+    });
+
+    res.json({
+      totalReviews,
+      averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
+      categoryStats,
+    });
+  } catch (err) {
+    console.error("Error fetching animal shelter review stats:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Upload review images
+exports.uploadReviewImages = async (req, res) => {
+  try {
+    console.log("Review images upload request received");
+    console.log("Headers:", req.headers);
+    console.log("Files:", req.files);
+    console.log("Request body:", req.body);
+    console.log("Request URL:", req.originalUrl);
+
+    if (!req.files || req.files.length === 0) {
+      console.log("No files received in request");
+      return res.status(400).json({ error: "No images uploaded" });
+    }
+
+    // Check if AWS S3 is configured
+    const { hasAWSConfig } = require("../utils/upload");
+    console.log("AWS S3 configured:", hasAWSConfig);
+
+    // Generate image URLs
+    const imageUrls = req.files.map((file) => {
+      console.log("Processing file:", {
+        originalname: file.originalname,
+        filename: file.filename,
+        location: file.location,
+        key: file.key,
+        hasLocation: !!file.location,
+        size: file.size,
+      });
+
+      if (hasAWSConfig) {
+        // AWS S3 URL - use location from custom storage
+        if (file.location) {
+          return file.location;
+        } else if (file.key) {
+          // Fallback: construct S3 URL from key
+          return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${file.key}`;
+        } else {
+          console.error("S3 file location and key missing for file:", file.originalname);
+          throw new Error(`S3 upload failed for file: ${file.originalname}`);
+        }
+      } else {
+        // Local storage URL
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        return `${baseUrl}/uploads/reviews/${file.filename}`;
+      }
+    });
+
+    console.log("Generated image URLs:", imageUrls);
+
+    res.json({
+      message: "Images uploaded successfully",
+      imageUrls: imageUrls,
+      uploadedFiles: req.files.map((f) => ({
+        originalName: f.originalname,
+        filename: f.filename || f.key,
+        size: f.size,
+        location: f.location,
+        key: f.key,
+        bucket: f.bucket,
+      })),
+    });
+  } catch (error) {
+    console.error("Error uploading review images:", error);
+    console.error("Error stack:", error.stack);
+
+    // Handle specific multer errors
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ error: "File size too large. Maximum 5MB per image." });
+    } else if (error.code === "LIMIT_FILE_COUNT") {
+      return res.status(400).json({ error: "Too many files. Maximum 5 images allowed." });
+    } else if (error.message && error.message.includes("Only JPEG, PNG, GIF, and WebP")) {
+      return res.status(400).json({ error: error.message });
+    } else if (error.message && error.message.includes("S3 upload failed")) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.status(500).json({
+      error: "Failed to upload images",
+      details: error.message,
+      code: error.code,
+    });
   }
 };

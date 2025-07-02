@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const placeSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  type: { type: String, enum: ["dog park", "vet", "pet store", "other"], required: true },
+  type: { type: String, enum: ["dog park", "vet", "pet store", "shelter"], required: true },
   coordinates: {
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
