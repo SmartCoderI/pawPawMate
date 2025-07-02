@@ -71,7 +71,7 @@ const Card = ({ card, onHelpfulClick }) => {
       </div>
 
       <div className="card-footer">
-        <span className="earned-by">earnedBy</span>
+        <span className="earned-by">{card.earnedBy?.name || 'Unknown User'}</span>
         <span className="created-at">{formatDate(card.createdAt)}</span>
       </div>
     </div>
