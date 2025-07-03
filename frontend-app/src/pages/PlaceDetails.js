@@ -63,28 +63,21 @@ const PlaceDetails = () => {
   const uploadImages = async () => {
     if (selectedFiles.length === 0) return [];
 
-    setUploading(true);
     try {
+      setUploading(true);
       const formData = new FormData();
+
       selectedFiles.forEach((file) => {
         formData.append("images", file);
       });
 
-
-      const apiPort = process.env.REACT_APP_PORT || '5001';
-
-      const response = await fetch(`http://localhost:${apiPort}/api/reviews/upload-images`, {
-        method: "POST",
-        body: formData,
+      const response = await api.post('/reviews/upload-images', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Upload failed");
-      }
-
-      const data = await response.json();
-      return data.imageUrls;
+      return response.data.imageUrls;
     } catch (error) {
       console.error("Image upload failed:", error);
       alert(`Image upload failed: ${error.message}`);

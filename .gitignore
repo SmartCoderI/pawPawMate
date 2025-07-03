@@ -179,4 +179,8 @@ frontend-app/build/
 # Uncomment the one you don't want to track
 # package-lock.json
 # yarn.lock
-# pnpm-lock.yaml 
+# pnpm-lock.yaml
+
+# Startup scripts (platform-specific configurations)
+start.bat
+start-mac.sh 

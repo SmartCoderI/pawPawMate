@@ -33,7 +33,11 @@ const server = http.createServer(app);
 // CORS middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"], // Allow frontend origins
+    origin: [
+      process.env.FRONTEND_URL || "http://localhost:3000",
+      "http://localhost:3001", // Alternative frontend port
+      "http://localhost:3000", // Default frontend port
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
