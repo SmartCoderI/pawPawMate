@@ -63,27 +63,21 @@ const PlaceDetails = () => {
   const uploadImages = async () => {
     if (selectedFiles.length === 0) return [];
 
-    setUploading(true);
     try {
+      setUploading(true);
       const formData = new FormData();
+
       selectedFiles.forEach((file) => {
         formData.append("images", file);
       });
 
-
-      const response = await fetch(`${api.defaults.baseURL}/reviews/upload-images`, {
-
-        method: "POST",
-        body: formData,
+      const response = await api.post('/reviews/upload-images', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Upload failed");
-      }
-
-      const data = await response.json();
-      return data.imageUrls;
+      return response.data.imageUrls;
     } catch (error) {
       console.error("Image upload failed:", error);
       alert(`Image upload failed: ${error.message}`);
@@ -1243,10 +1237,8 @@ const PlaceDetails = () => {
         openEvenings: { true: 0, false: 0 },
         onCallEmergencyNumber: { true: 0, false: 0 },
 
-
         connectedToEmergencyHospitals: { true: 0, false: 0 },
         clearHandoffsToSpecialists: { true: 0, false: 0 },
-
 
         emergencyTriageSpeed: { immediate: 0, within_30_min: 0, within_1_hour: 0, over_1_hour: 0 },
         crisisHandlingConfidence: { excellent: 0, good: 0, fair: 0, poor: 0 },
