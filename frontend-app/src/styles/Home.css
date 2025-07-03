@@ -5,7 +5,7 @@
   flex-direction: column;
   overflow: hidden;
   font-family: 'Arial Black', Arial, sans-serif;
-  background: #f0f0f0;
+  background: #FFF066;
   margin: 0;
   padding: 0;
 }
@@ -107,7 +107,7 @@
 
 .search-button {
   padding: 8px 16px;
-  background-color: #00ff00;
+  background-color: #FF965B;
   color: #000000;
   border: none;
   font-size: 12px;
@@ -122,7 +122,7 @@
 }
 
 .search-button:hover {
-  background-color: #32cd32;
+  background-color: #f76363;
 }
 
 .filter-section {
@@ -149,7 +149,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #ffff00;
+  background: #fff066;
   padding: 6px 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -178,9 +178,9 @@
 }
 
 .filter-button.active {
-  background-color: #ff0080;
+  background-color: #FF965B;
   color: #ffffff;
-  border-color: #ff0080;
+  border-color: #FF965B;
 }
 
 .map-wrapper {
@@ -192,18 +192,20 @@
 }
 
 .marker {
-  width: 48px;
-  height: 48px;
+  width: 3em;
+  height: 3em;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 3px solid #000000;
+  border: 2px solid #000000;
+  border-radius: 8px;
   transition: all 0.1s ease;
 }
 
 .marker:hover {
   transform: scale(1.1);
+  box-shadow: 4px 4px 0px #5d5c5c;
 }
 
 .marker-icon {
@@ -489,9 +491,10 @@
 
   /* Make markers slightly larger on mobile for easier interaction */
   .marker {
-    width: 52px;
-    height: 52px;
-    border: 2px solid #000000;
+    width: 3.25em;
+    height: 3.25em;
+    border: none;
+    border-radius: 14px;
   }
 
   .marker-icon {
@@ -558,8 +561,9 @@
 
   /* Even larger markers for small screens */
   .marker {
-    width: 56px;
-    height: 56px;
+    width: 3.5em;
+    height: 3.5em;
+    border-radius: 16px;
   }
 
   .marker-icon {

@@ -302,9 +302,9 @@ const PlaceDetails = () => {
 
   // Location types with icons
   const locationTypes = {
-    "dog park": { label: "Dog Park", icon: "🌳", color: "#22c55e" },
-    dog_park: { label: "Dog Park", icon: "🌳", color: "#22c55e" },
-    leisure: { label: "Dog Park", icon: "🌳", color: "#22c55e" },
+    "dog park": { label: "Dog Park", icon: "🐕", color: "#22c55e" },
+    dog_park: { label: "Dog Park", icon: "🐕", color: "#22c55e" },
+    leisure: { label: "Dog Park", icon: "🐕", color: "#22c55e" },
 
     vet: { label: "VET", icon: "🏥", color: "#3b82f6" },
     veterinary: { label: "VET", icon: "🏥", color: "#3b82f6" },
@@ -1892,7 +1892,7 @@ const PlaceDetails = () => {
       {/* Hero Image Section */}
       <div className="hero-image-section">
         <div className="hero-placeholder">
-          <span className="hero-icon">🌳</span>
+          <span className="hero-icon">{locationTypes[place.type]?.icon || "📍"}</span>
           <h2>PLACE IMAGE</h2>
         </div>
       </div>
