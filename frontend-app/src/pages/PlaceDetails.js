@@ -69,7 +69,7 @@ const PlaceDetails = () => {
         formData.append("images", file);
       });
 
-      const apiPort = process.env.REACT_APP_PORT || '5000';
+      const apiPort = process.env.REACT_APP_PORT || '5001';
       const response = await fetch(`http://localhost:${apiPort}/api/reviews/upload-images`, {
         method: "POST",
         body: formData,
@@ -303,8 +303,8 @@ const PlaceDetails = () => {
     "dog park": { label: "Dog Park", icon: "🌳", color: "#22c55e" },
     dog_park: { label: "Dog Park", icon: "🌳", color: "#22c55e" },
     leisure: { label: "Dog Park", icon: "🌳", color: "#22c55e" },
-    vet: { label: "Veterinarian", icon: "🏥", color: "#3b82f6" },
-    veterinary: { label: "Veterinarian", icon: "🏥", color: "#3b82f6" },
+    vet: { label: "VET", icon: "🏥", color: "#3b82f6" },
+    veterinary: { label: "VET", icon: "🏥", color: "#3b82f6" },
     "pet store": { label: "Pet Store", icon: "🏪", color: "#f59e0b" },
     shelter: { label: "Shelter", icon: "🏠", color: "#ef4444" },
     other: { label: "Other", icon: "📍", color: "#6b7280" },
@@ -1238,6 +1238,8 @@ const PlaceDetails = () => {
         openWeekends: { true: 0, false: 0 },
         openEvenings: { true: 0, false: 0 },
         onCallEmergencyNumber: { true: 0, false: 0 },
+        connectedToEmergencyHospitals: { true: 0, false: 0 },
+        clearHandoffsToSpecialists: { true: 0, false: 0 },
         emergencyTriageSpeed: { immediate: 0, within_30_min: 0, within_1_hour: 0, over_1_hour: 0 },
         crisisHandlingConfidence: { excellent: 0, good: 0, fair: 0, poor: 0 },
       },
@@ -1546,83 +1548,77 @@ const PlaceDetails = () => {
 
   // Render smart category tags for pet stores
   const renderSmartPetStoreCategoryTags = (category, tagCounts) => {
-    if (!tagCounts || !tagCounts[category]) {
-      return <span className="option-tag gray">No data yet</span>;
-    }
-
-    const tags = [];
-    const categoryData = tagCounts[category];
-
-    // Helper function to add tag if it has data
-    const addTag = (field, value, displayText) => {
-      const count = categoryData[field] && categoryData[field][value] ? categoryData[field][value] : 0;
-      if (count > 0) {
-        const tagStyle = getTagStyle(category, field, value, tagCounts);
-        tags.push(
-          <span key={`${field}-${value}`} className={tagStyle}>
-            {displayText} ({count})
-          </span>
-        );
-      }
+    const tagMappings = {
+      accessAndLocation: [
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "easy", label: "🚗 Easy Parking" },
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "moderate", label: "🚗 Moderate Parking" },
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "difficult", label: "🚗 Difficult Parking" },
+        { category: "accessAndLocation", field: "handicapFriendly", value: true, label: "♿ Handicap Friendly" },
+      ],
+      hoursOfOperation: [
+        { category: "hoursOfOperation", field: "is24Hours", value: true, label: "🕐 24 Hours Open" },
+        { category: "hoursOfOperation", field: "dawnToDusk", value: true, label: "🌅 Dawn to Dusk" },
+      ],
+      servicesAndConveniences: [
+        { category: "servicesAndConveniences", field: "veterinaryServices", value: true, label: "🏥 Vet Services" },
+        { category: "servicesAndConveniences", field: "grooming", value: true, label: "✂️ Grooming" },
+        { category: "servicesAndConveniences", field: "petTraining", value: true, label: "🎓 Pet Training" },
+        { category: "servicesAndConveniences", field: "deliveryService", value: true, label: "🚚 Delivery" },
+      ],
+      productSelectionAndQuality: [
+        { category: "productSelectionAndQuality", field: "foodBrandVariety", value: "excellent", label: "🥘 Excellent Food Variety" },
+        { category: "productSelectionAndQuality", field: "toySelection", value: "excellent", label: "🧸 Great Toy Selection" },
+        { category: "productSelectionAndQuality", field: "organicNaturalOptions", value: true, label: "🌱 Organic Options" },
+        { category: "productSelectionAndQuality", field: "prescriptionDietAvailable", value: true, label: "💊 Prescription Diets" },
+      ],
+      pricingAndValue: [
+        { category: "pricingAndValue", field: "loyaltyProgram", value: true, label: "🎁 Loyalty Program" },
+        { category: "pricingAndValue", field: "frequentSales", value: true, label: "💰 Frequent Sales" },
+        { category: "pricingAndValue", field: "priceMatching", value: true, label: "🏷️ Price Matching" },
+        { category: "pricingAndValue", field: "bulkDiscounts", value: true, label: "📦 Bulk Discounts" },
+      ],
+      staffKnowledgeAndService: [
+        { category: "staffKnowledgeAndService", field: "petKnowledge", value: "excellent", label: "🧠 Expert Staff" },
+        { category: "staffKnowledgeAndService", field: "customerService", value: "excellent", label: "😊 Excellent Service" },
+        { category: "staffKnowledgeAndService", field: "helpfulness", value: "excellent", label: "🤝 Very Helpful" },
+        { category: "staffKnowledgeAndService", field: "multilingual", value: true, label: "🗣️ Multilingual Staff" },
+      ],
     };
 
-    // Render category-specific tags
-    switch (category) {
-      case "accessAndLocation":
-        addTag("parkingDifficulty", "easy", "Easy Parking");
-        addTag("parkingDifficulty", "moderate", "Moderate Parking");
-        addTag("parkingDifficulty", "difficult", "Difficult Parking");
-        addTag("handicapFriendly", "true", "Handicap Friendly");
-        addTag("parkingToParkDistance", "close", "Close Parking");
-        break;
+    const mapping = tagMappings[category];
+    if (!mapping) return [];
 
-      case "hoursOfOperation":
-        addTag("is24Hours", "true", "Open 24/7");
-        addTag("dawnToDusk", "true", "Dawn to Dusk");
-        break;
+    // Calculate popularity scores and sort
+    const tagsWithScores = mapping.map((tag) => {
+      const count = tagCounts[tag.category]?.[tag.field]?.[tag.value] || 0;
+      const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+      return {
+        ...tag,
+        count,
+        percentage,
+        styleClass: getTagStyle(tag.category, tag.field, tag.value, tagCounts),
+      };
+    });
 
-      case "servicesAndConveniences":
-        addTag("grooming", "true", "Grooming");
-        addTag("veterinaryServices", "true", "Vet Services");
-        addTag("petTraining", "true", "Pet Training");
-        addTag("deliveryService", "true", "Delivery");
-        addTag("onlineOrdering", "true", "Online Orders");
-        addTag("curbsidePickup", "true", "Curbside Pickup");
-        addTag("returnPolicy", "excellent", "Excellent Returns");
-        addTag("returnPolicy", "good", "Good Returns");
-        break;
+    // Sort by count (popular first) and limit to 4 tags
+    const sortedTags = tagsWithScores.sort((a, b) => b.count - a.count).slice(0, 4);
 
-      case "productSelectionAndQuality":
-        addTag("foodBrandVariety", "excellent", "Excellent Food Variety");
-        addTag("toySelection", "excellent", "Excellent Toys");
-        addTag("suppliesAvailability", "excellent", "Well Stocked");
-        addTag("productFreshness", "excellent", "Fresh Products");
-        addTag("organicNaturalOptions", "true", "Organic Options");
-        addTag("prescriptionDietAvailable", "true", "Prescription Diets");
-        break;
+    return sortedTags.map((tag) => (
+      <span
+        key={`${tag.field}-${tag.value}`}
+        className={tag.styleClass}
+        title={
+          tag.count > 0
+            ? `${tag.count} review${tag.count !== 1 ? "s" : ""} mention this`
+            : "No reviews mention this yet"
+        }
+      >
+        {tag.label}
+        {tag.count > 0 && <span className="tag-count"> ({tag.count})</span>}
+      </span>
+    ));
 
-      case "pricingAndValue":
-        addTag("overallPricing", "low", "Low Prices");
-        addTag("overallPricing", "moderate", "Fair Prices");
-        addTag("loyaltyProgram", "true", "Loyalty Program");
-        addTag("frequentSales", "true", "Frequent Sales");
-        addTag("priceMatching", "true", "Price Matching");
-        addTag("bulkDiscounts", "true", "Bulk Discounts");
-        break;
 
-      case "staffKnowledgeAndService":
-        addTag("petKnowledge", "excellent", "Expert Staff");
-        addTag("productRecommendations", "excellent", "Great Recommendations");
-        addTag("customerService", "excellent", "Excellent Service");
-        addTag("helpfulness", "excellent", "Very Helpful");
-        addTag("multilingual", "true", "Multilingual Staff");
-        break;
-
-      default:
-        break;
-    }
-
-    return tags.length > 0 ? tags : <span className="option-tag gray">No data yet</span>;
   };
 
   // Analyze animal shelter reviews to get tag popularity for smart coloring
@@ -1757,88 +1753,77 @@ const PlaceDetails = () => {
 
   // Render smart category tags for animal shelters
   const renderSmartAnimalShelterCategoryTags = (category, tagCounts) => {
-    if (!tagCounts || !tagCounts[category]) {
-      return <span className="option-tag gray">No data yet</span>;
-    }
-
-    const tags = [];
-    const categoryData = tagCounts[category];
-
-    // Helper function to add tag if it has data
-    const addTag = (field, value, displayText) => {
-      const count = categoryData[field] && categoryData[field][value] ? categoryData[field][value] : 0;
-      if (count > 0) {
-        const tagStyle = getTagStyle(category, field, value, tagCounts);
-        tags.push(
-          <span key={`${field}-${value}`} className={tagStyle}>
-            {displayText} ({count})
-          </span>
-        );
-      }
+    const tagMappings = {
+      accessAndLocation: [
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "easy", label: "🚗 Easy Parking" },
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "moderate", label: "🚗 Moderate Parking" },
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "difficult", label: "🚗 Difficult Parking" },
+        { category: "accessAndLocation", field: "handicapFriendly", value: true, label: "♿ Handicap Friendly" },
+      ],
+      hoursOfOperation: [
+        { category: "hoursOfOperation", field: "is24Hours", value: true, label: "🕐 24 Hours Open" },
+        { category: "hoursOfOperation", field: "dawnToDusk", value: true, label: "🌅 Dawn to Dusk" },
+      ],
+      animalTypeSelection: [
+        { category: "animalTypeSelection", field: "availableAnimalTypes", value: "dogs", label: "🐕 Dogs Available" },
+        { category: "animalTypeSelection", field: "availableAnimalTypes", value: "cats", label: "🐱 Cats Available" },
+        { category: "animalTypeSelection", field: "availableAnimalTypes", value: "rabbits", label: "🐰 Rabbits Available" },
+        { category: "animalTypeSelection", field: "breedVariety", value: "excellent", label: "🎯 Great Breed Variety" },
+      ],
+      animalCareAndWelfare: [
+        { category: "animalCareAndWelfare", field: "animalHealth", value: "excellent", label: "❤️ Excellent Health" },
+        { category: "animalCareAndWelfare", field: "livingConditions", value: "excellent", label: "🏠 Great Conditions" },
+        { category: "animalCareAndWelfare", field: "exercisePrograms", value: true, label: "🏃 Exercise Programs" },
+        { category: "animalCareAndWelfare", field: "medicalCare", value: "excellent", label: "🏥 Excellent Medical Care" },
+      ],
+      adoptionProcessAndSupport: [
+        { category: "adoptionProcessAndSupport", field: "applicationProcess", value: "easy", label: "📝 Easy Application" },
+        { category: "adoptionProcessAndSupport", field: "processingTime", value: "same_day", label: "⚡ Same Day Processing" },
+        { category: "adoptionProcessAndSupport", field: "adoptionFees", value: "low", label: "💰 Low Fees" },
+        { category: "adoptionProcessAndSupport", field: "postAdoptionSupport", value: true, label: "🤝 Post-Adoption Support" },
+      ],
+      staffAndVolunteerQuality: [
+        { category: "staffAndVolunteerQuality", field: "staffKnowledge", value: "excellent", label: "🧠 Expert Staff" },
+        { category: "staffAndVolunteerQuality", field: "animalHandling", value: "excellent", label: "🐾 Great Animal Handling" },
+        { category: "staffAndVolunteerQuality", field: "volunteerProgram", value: true, label: "👥 Volunteer Program" },
+        { category: "staffAndVolunteerQuality", field: "compassionLevel", value: "excellent", label: "💖 Very Compassionate" },
+      ],
     };
 
-    // Render category-specific tags
-    switch (category) {
-      case "accessAndLocation":
-        addTag("parkingDifficulty", "easy", "Easy Parking");
-        addTag("parkingDifficulty", "moderate", "Moderate Parking");
-        addTag("parkingDifficulty", "difficult", "Difficult Parking");
-        addTag("handicapFriendly", "true", "Handicap Friendly");
-        addTag("parkingToParkDistance", "close", "Close Parking");
-        break;
+    const mapping = tagMappings[category];
+    if (!mapping) return [];
 
-      case "hoursOfOperation":
-        addTag("is24Hours", "true", "Open 24/7");
-        addTag("dawnToDusk", "true", "Dawn to Dusk");
-        break;
+    // Calculate popularity scores and sort
+    const tagsWithScores = mapping.map((tag) => {
+      const count = tagCounts[tag.category]?.[tag.field]?.[tag.value] || 0;
+      const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+      return {
+        ...tag,
+        count,
+        percentage,
+        styleClass: getTagStyle(tag.category, tag.field, tag.value, tagCounts),
+      };
+    });
 
-      case "animalTypeSelection":
-        addTag("availableAnimalTypes", "dogs", "Dogs");
-        addTag("availableAnimalTypes", "cats", "Cats");
-        addTag("availableAnimalTypes", "rabbits", "Rabbits");
-        addTag("availableAnimalTypes", "birds", "Birds");
-        addTag("availableAnimalTypes", "reptiles", "Reptiles");
-        addTag("availableAnimalTypes", "small_mammals", "Small Mammals");
-        addTag("breedVariety", "excellent", "Great Breed Variety");
-        addTag("ageRange", "puppies_kittens", "Puppies/Kittens");
-        addTag("ageRange", "young_adults", "Young Adults");
-        addTag("ageRange", "adults", "Adults");
-        addTag("ageRange", "seniors", "Seniors");
-        break;
+    // Sort by count (popular first) and limit to 4 tags
+    const sortedTags = tagsWithScores.sort((a, b) => b.count - a.count).slice(0, 4);
 
-      case "animalCareAndWelfare":
-        addTag("animalHealth", "excellent", "Excellent Health");
-        addTag("livingConditions", "excellent", "Great Conditions");
-        addTag("exercisePrograms", "true", "Exercise Programs");
-        addTag("medicalCare", "excellent", "Excellent Medical Care");
-        addTag("behavioralAssessment", "true", "Behavioral Assessment");
-        addTag("specialNeedsCare", "true", "Special Needs Care");
-        break;
+    return sortedTags.map((tag) => (
+      <span
+        key={`${tag.field}-${tag.value}`}
+        className={tag.styleClass}
+        title={
+          tag.count > 0
+            ? `${tag.count} review${tag.count !== 1 ? "s" : ""} mention this`
+            : "No reviews mention this yet"
+        }
+      >
+        {tag.label}
+        {tag.count > 0 && <span className="tag-count"> ({tag.count})</span>}
+      </span>
+    ));
 
-      case "adoptionProcessAndSupport":
-        addTag("applicationProcess", "easy", "Easy Application");
-        addTag("processingTime", "same_day", "Same Day");
-        addTag("processingTime", "within_week", "Within Week");
-        addTag("adoptionFees", "low", "Low Fees");
-        addTag("adoptionFees", "moderate", "Fair Fees");
-        addTag("postAdoptionSupport", "true", "Post-Adoption Support");
-        addTag("returnPolicy", "excellent", "Excellent Return Policy");
-        break;
 
-      case "staffAndVolunteerQuality":
-        addTag("staffKnowledge", "excellent", "Expert Staff");
-        addTag("animalHandling", "excellent", "Great Animal Handling");
-        addTag("customerService", "excellent", "Excellent Service");
-        addTag("volunteerProgram", "true", "Volunteer Program");
-        addTag("staffTraining", "true", "Staff Training");
-        addTag("compassionLevel", "excellent", "Very Compassionate");
-        break;
-
-      default:
-        break;
-    }
-
-    return tags.length > 0 ? tags : <span className="option-tag gray">No data yet</span>;
   };
 
   // Loading state
@@ -1877,7 +1862,6 @@ const PlaceDetails = () => {
         <div className="place-title-inline">
           <h1>{place.name}</h1>
           <div className="place-type">
-            <span className="type-icon">{locationTypes[place.type]?.icon || "📍"}</span>
             <span className="type-label">{locationTypes[place.type]?.label || place.type}</span>
           </div>
           <div className="place-address">
@@ -1901,12 +1885,8 @@ const PlaceDetails = () => {
       </div>
 
       {/* Dog Park Categories Overview - Show all 8 categories with available options */}
-      {(place.type === "dog park" || place.type === "dog_park" || place.type === "leisure") && (
-        <div className="dog-park-stats">
-          <h2>🐕 DOG PARK CATEGORIES</h2>
-          <p className="categories-description">
-            Evaluate this dog park across these 8 key categories when leaving a review
-          </p>
+      {(place.type === "dog park" || place.type === "dog_park") && (
+        <div className="categories-overview">
 
           {/* Show review statistics if available */}
           {dogParkStats && dogParkStats.totalReviews > 0 && (
@@ -1922,35 +1902,30 @@ const PlaceDetails = () => {
             {/* 1. Access & Location */}
             <div className="category-section">
               <h3>📍 Access & Location</h3>
-              <p className="category-description">Ease of reaching and using the park</p>
               <div className="feature-tags">{renderSmartCategoryTags("accessAndLocation", analyzeReviewTags())}</div>
             </div>
 
             {/* 2. Hours of Operation */}
             <div className="category-section">
               <h3>⏰ Hours of Operation</h3>
-              <p className="category-description">When the park is available for use</p>
               <div className="feature-tags">{renderSmartCategoryTags("hoursOfOperation", analyzeReviewTags())}</div>
             </div>
 
             {/* 3. Safety Level */}
             <div className="category-section">
               <h3>🛡️ Safety Level</h3>
-              <p className="category-description">Security and safety features</p>
               <div className="feature-tags">{renderSmartCategoryTags("safetyLevel", analyzeReviewTags())}</div>
             </div>
 
             {/* 4. Size & Layout */}
             <div className="category-section">
               <h3>📏 Size & Layout</h3>
-              <p className="category-description">Space design and functionality</p>
               <div className="feature-tags">{renderSmartCategoryTags("sizeAndLayout", analyzeReviewTags())}</div>
             </div>
 
             {/* 5. Amenities & Facilities */}
             <div className="category-section">
               <h3>🎾 Amenities & Facilities</h3>
-              <p className="category-description">Comfort and convenience features</p>
               <div className="feature-tags">
                 {renderSmartCategoryTags("amenitiesAndFacilities", analyzeReviewTags())}
               </div>
@@ -1959,7 +1934,6 @@ const PlaceDetails = () => {
             {/* 6. Maintenance & Cleanliness */}
             <div className="category-section">
               <h3>🧹 Maintenance & Cleanliness</h3>
-              <p className="category-description">Upkeep and hygiene standards</p>
               <div className="feature-tags">
                 {renderSmartCategoryTags("maintenanceAndCleanliness", analyzeReviewTags())}
               </div>
@@ -1968,7 +1942,6 @@ const PlaceDetails = () => {
             {/* 7. Crowd & Social Dynamics */}
             <div className="category-section">
               <h3>👥 Crowd & Social Dynamics</h3>
-              <p className="category-description">Usage patterns and community behavior</p>
               <div className="feature-tags">
                 {renderSmartCategoryTags("crowdAndSocialDynamics", analyzeReviewTags())}
               </div>
@@ -1977,7 +1950,6 @@ const PlaceDetails = () => {
             {/* 8. Rules, Policies & Community */}
             <div className="category-section">
               <h3>📋 Rules, Policy & Community</h3>
-              <p className="category-description">Regulations and community standards</p>
               <div className="feature-tags">
                 {renderSmartCategoryTags("rulesPoliciesAndCommunity", analyzeReviewTags())}
               </div>
@@ -1988,11 +1960,7 @@ const PlaceDetails = () => {
 
       {/* Vet Clinic Categories Overview - Show all 7 categories with available options */}
       {(place.type === "vet" || place.type === "veterinary") && (
-        <div className="vet-clinic-stats">
-          <h2>🏥 VET CLINIC CATEGORIES</h2>
-          <p className="categories-description">
-            Evaluate this veterinary clinic across these 7 key categories when leaving a review
-          </p>
+        <div className="categories-overview">
 
           {/* Show review statistics if available */}
           {vetClinicStats && vetClinicStats.totalReviews > 0 && (
@@ -2008,49 +1976,42 @@ const PlaceDetails = () => {
             {/* 1. Clinic Environment & Facilities */}
             <div className="category-section">
               <h3>🏢 Environment & Facilities</h3>
-              <p className="category-description">Cleanliness, comfort and facility quality</p>
               <div className="feature-tags">{renderSmartVetCategoryTags("clinicEnvironmentAndFacilities", analyzeVetReviewTags())}</div>
             </div>
 
             {/* 2. Cost & Transparency */}
             <div className="category-section">
               <h3>💰 Cost & Transparency</h3>
-              <p className="category-description">Pricing and financial transparency</p>
               <div className="feature-tags">{renderSmartVetCategoryTags("costAndTransparency", analyzeVetReviewTags())}</div>
             </div>
 
             {/* 3. Medical Staff & Services */}
             <div className="category-section">
               <h3>👨‍⚕️ Medical Staff & Services</h3>
-              <p className="category-description">Staff competence and available services</p>
               <div className="feature-tags">{renderSmartVetCategoryTags("medicalStaffAndServices", analyzeVetReviewTags())}</div>
             </div>
 
             {/* 4. Scheduling & Communication */}
             <div className="category-section">
               <h3>📅 Scheduling & Communication</h3>
-              <p className="category-description">Appointment availability and communication</p>
               <div className="feature-tags">{renderSmartVetCategoryTags("schedulingAndCommunication", analyzeVetReviewTags())}</div>
             </div>
 
             {/* 5. Emergency & After-Hours Care */}
             <div className="category-section">
               <h3>🚨 Emergency & After-Hours</h3>
-              <p className="category-description">Emergency services and availability</p>
               <div className="feature-tags">{renderSmartVetCategoryTags("emergencyAndAfterHours", analyzeVetReviewTags())}</div>
             </div>
 
             {/* 6. Owner Involvement */}
             <div className="category-section">
               <h3>👨‍👩‍👧‍👦 Owner Involvement</h3>
-              <p className="category-description">Owner participation and communication</p>
               <div className="feature-tags">{renderSmartVetCategoryTags("ownerInvolvement", analyzeVetReviewTags())}</div>
             </div>
 
             {/* 7. Reputation & Community */}
             <div className="category-section">
               <h3>🌟 Reputation & Community</h3>
-              <p className="category-description">Community involvement and reputation</p>
               <div className="feature-tags">{renderSmartVetCategoryTags("reputationAndCommunity", analyzeVetReviewTags())}</div>
             </div>
           </div>
@@ -2059,11 +2020,7 @@ const PlaceDetails = () => {
 
       {/* Pet Store Categories Overview - Show all 6 categories with available options */}
       {(place.type === "pet store" || place.type === "pet_store") && (
-        <div className="pet-store-stats">
-          <h2>🏪 PET STORE CATEGORIES</h2>
-          <p className="categories-description">
-            Evaluate this pet store across these 6 key categories when leaving a review
-          </p>
+        <div className="categories-overview">
 
           {/* Show review statistics if available */}
           {petStoreStats && petStoreStats.totalReviews > 0 && (
@@ -2079,42 +2036,36 @@ const PlaceDetails = () => {
             {/* 1. Access & Location */}
             <div className="category-section">
               <h3>📍 Access & Location</h3>
-              <p className="category-description">Parking and accessibility</p>
               <div className="feature-tags">{renderSmartPetStoreCategoryTags("accessAndLocation", analyzePetStoreReviewTags())}</div>
             </div>
 
             {/* 2. Hours of Operation */}
             <div className="category-section">
               <h3>⏰ Hours of Operation</h3>
-              <p className="category-description">Store hours and availability</p>
               <div className="feature-tags">{renderSmartPetStoreCategoryTags("hoursOfOperation", analyzePetStoreReviewTags())}</div>
             </div>
 
             {/* 3. Services & Conveniences */}
             <div className="category-section">
               <h3>🛎️ Services & Conveniences</h3>
-              <p className="category-description">Additional services and convenience features</p>
               <div className="feature-tags">{renderSmartPetStoreCategoryTags("servicesAndConveniences", analyzePetStoreReviewTags())}</div>
             </div>
 
             {/* 4. Product Selection & Quality */}
             <div className="category-section">
               <h3>🛍️ Product Selection & Quality</h3>
-              <p className="category-description">Product variety and quality</p>
               <div className="feature-tags">{renderSmartPetStoreCategoryTags("productSelectionAndQuality", analyzePetStoreReviewTags())}</div>
             </div>
 
             {/* 5. Pricing & Value */}
             <div className="category-section">
               <h3>💰 Pricing & Value</h3>
-              <p className="category-description">Pricing and value for money</p>
               <div className="feature-tags">{renderSmartPetStoreCategoryTags("pricingAndValue", analyzePetStoreReviewTags())}</div>
             </div>
 
             {/* 6. Staff Knowledge & Service */}
             <div className="category-section">
               <h3>👥 Staff Knowledge & Service</h3>
-              <p className="category-description">Staff expertise and customer service</p>
               <div className="feature-tags">{renderSmartPetStoreCategoryTags("staffKnowledgeAndService", analyzePetStoreReviewTags())}</div>
             </div>
           </div>
@@ -2123,11 +2074,7 @@ const PlaceDetails = () => {
 
       {/* Animal Shelter Categories Overview - Show all 6 categories with available options */}
       {(place.type === "shelter" || place.type === "animal_shelter") && (
-        <div className="animal-shelter-stats">
-          <h2>🏠 ANIMAL SHELTER CATEGORIES</h2>
-          <p className="categories-description">
-            Evaluate this animal shelter across these 6 key categories when leaving a review
-          </p>
+        <div className="categories-overview">
 
           {/* Show review statistics if available */}
           {animalShelterStats && animalShelterStats.totalReviews > 0 && (
@@ -2143,42 +2090,36 @@ const PlaceDetails = () => {
             {/* 1. Access & Location */}
             <div className="category-section">
               <h3>📍 Access & Location</h3>
-              <p className="category-description">Parking and accessibility</p>
               <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("accessAndLocation", analyzeAnimalShelterReviewTags())}</div>
             </div>
 
             {/* 2. Hours of Operation */}
             <div className="category-section">
               <h3>⏰ Hours of Operation</h3>
-              <p className="category-description">Shelter hours and availability</p>
               <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("hoursOfOperation", analyzeAnimalShelterReviewTags())}</div>
             </div>
 
             {/* 3. Animal Type Selection */}
             <div className="category-section">
               <h3>🐾 Animal Type Selection</h3>
-              <p className="category-description">Available animals and breed variety</p>
               <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("animalTypeSelection", analyzeAnimalShelterReviewTags())}</div>
             </div>
 
             {/* 4. Animal Care & Welfare */}
             <div className="category-section">
               <h3>❤️ Animal Care & Welfare</h3>
-              <p className="category-description">Animal health and living conditions</p>
               <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("animalCareAndWelfare", analyzeAnimalShelterReviewTags())}</div>
             </div>
 
             {/* 5. Adoption Process & Support */}
             <div className="category-section">
               <h3>📋 Adoption Process & Support</h3>
-              <p className="category-description">Adoption procedures and support</p>
               <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("adoptionProcessAndSupport", analyzeAnimalShelterReviewTags())}</div>
             </div>
 
             {/* 6. Staff & Volunteer Quality */}
             <div className="category-section">
               <h3>👥 Staff & Volunteer Quality</h3>
-              <p className="category-description">Staff expertise and volunteer programs</p>
               <div className="feature-tags">{renderSmartAnimalShelterCategoryTags("staffAndVolunteerQuality", analyzeAnimalShelterReviewTags())}</div>
             </div>
           </div>
@@ -2221,31 +2162,10 @@ const PlaceDetails = () => {
       {/* Add Review Call-to-Action for OSM locations */}
       {place.isOSMLocation && (
         <div className="osm-review-cta">
-          <h2>🎯 HELP OTHERS DISCOVER THIS PLACE!</h2>
+          <h2>🎯 SHARE YOUR EXPERIENCE!</h2>
           <p>
-            This location was found on the map. Be the first to review it and help other pet owners know what to expect!
+            Help other pet owners discover this place.
           </p>
-          {mongoUser ? (
-            <button
-              className="big-review-button"
-              onClick={() => {
-                console.log("🔴 Opening review form...");
-                setShowReviewForm(true);
-              }}
-            >
-              🌟 BE THE FIRST TO REVIEW
-            </button>
-          ) : (
-            <button
-              className="big-review-button login-required"
-              onClick={() => {
-                alert("Please log in to add a review. You will be redirected to the login page.");
-                navigate("/login");
-              }}
-            >
-              🔐 LOG IN TO REVIEW
-            </button>
-          )}
         </div>
       )}
 
@@ -2356,7 +2276,7 @@ const PlaceDetails = () => {
               </div>
 
               {/* Dog Park Specific Form - All 8 Categories */}
-              {(place.type === "dog park" || place.type === "dog_park" || place.type === "leisure") && (
+              {(place.type === "dog park" || place.type === "dog_park") && (
                 <div className="dog-park-form">
                   <h4>🐕 DOG PARK DETAILS</h4>
 
@@ -4056,7 +3976,6 @@ const PlaceDetails = () => {
           {reviews.length === 0 ? (
             <div className="empty-reviews">
               <h3>NO REVIEWS YET</h3>
-              <p>Be the first to review this place!</p>
             </div>
           ) : (
             reviews.map((review) => (
