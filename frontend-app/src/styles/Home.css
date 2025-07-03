@@ -1,6 +1,6 @@
 /* Home Page Styles - Neo-Brutalism */
 .home-container {
-  height: 100vh;
+  height: calc(100vh - 70px); /* Account for navigation height */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -136,7 +136,9 @@
 .filter-buttons {
   display: flex;
   gap: 8px;
-  flex-wrap: nowrap;
+  flex-wrap: nowrap; /* Prevent wrapping */
+  overflow-x: auto; /* Allow horizontal scroll if needed */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .location-count-display {
@@ -167,7 +169,8 @@
   letter-spacing: 0.5px;
   transition: all 0.1s ease;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Prevent buttons from shrinking */
+  min-width: fit-content; /* Use content width */
 }
 
 .filter-button:hover {
@@ -366,46 +369,51 @@
 
 @media (max-width: 768px) {
   .home-container {
+    height: calc(100vh - 50px); /* Account for reduced mobile navigation height */
     background: #f0f0f0;
   }
 
   .welcome-banner {
-    padding: 20px 15px;
-    margin: 10px;
+    padding: 15px 10px;
+    margin: 5px;
   }
 
   .welcome-content h1 {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .welcome-content p {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .welcome-features {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     align-items: center;
   }
 
   .feature {
     width: 100%;
     justify-content: center;
+    padding: 8px 16px;
+    font-size: 14px;
   }
 
   .welcome-cta {
-    font-size: 14px;
-    padding: 12px 20px;
+    font-size: 12px;
+    padding: 10px 16px;
   }
 
   .map-controls {
-    padding: 8px;
-    margin: 8px;
+    padding: 8px; /* Increased padding for better visibility */
+    margin: 6px; /* Increased margin */
+    border: 2px solid #000000;
+    flex-shrink: 0; /* Prevent controls from shrinking */
   }
 
   .search-bar {
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 4px;
+    margin-bottom: 8px; /* Increased margin */
   }
 
   .search-input,
@@ -414,40 +422,254 @@
   }
 
   .search-input {
-    font-size: 12px;
-    padding: 6px 10px;
-    height: 28px;
+    font-size: 14px;
+    padding: 8px 10px;
+    height: 38px; /* Slightly increased height */
+    border: 2px solid #000000;
   }
 
   .search-button {
-    font-size: 10px;
-    padding: 6px 12px;
-    height: 30px;
+    font-size: 12px;
+    padding: 8px 12px;
+    height: 38px; /* Match input height */
+    min-width: 70px;
   }
 
   .filter-section {
-    gap: 6px;
+    gap: 4px;
     flex-wrap: wrap;
+    align-items: stretch;
   }
 
   .filter-buttons {
-    gap: 4px;
-    flex-wrap: wrap;
+    gap: 2px; /* Reduced gap for mobile */
+    flex-wrap: nowrap; /* Never wrap - keep in one row */
+    width: 100%;
+    margin-bottom: 6px; /* Increased margin */
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Hide scrollbar on Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar on IE/Edge */
+  }
+
+  .filter-buttons::-webkit-scrollbar {
+    display: none; /* Hide scrollbar on WebKit browsers */
   }
 
   .filter-button {
-    padding: 4px 8px;
-    font-size: 10px;
+    padding: 6px 8px; /* Reduced padding for mobile */
+    font-size: 10px; /* Smaller font for mobile */
     letter-spacing: 0.3px;
+    min-height: 32px; /* Touch-friendly height */
+    flex-shrink: 0; /* Never shrink */
+    min-width: auto; /* Allow natural width */
+    text-align: center;
+    border: 2px solid #000000;
+    white-space: nowrap;
+  }
+
+  .location-count-display {
+    font-size: 11px;
+    padding: 8px 10px; /* Increased padding */
+    letter-spacing: 0.3px;
+    min-height: 34px; /* Increased height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border: 2px solid #000000;
+  }
+
+  .map-wrapper {
+    margin: 0 6px 6px 6px; /* Increased margins */
+    border: 2px solid #000000;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Make markers slightly larger on mobile for easier interaction */
+  .marker {
+    width: 52px;
+    height: 52px;
+    border: 2px solid #000000;
+  }
+
+  .marker-icon {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-container {
+    height: calc(100vh - 45px); /* Account for smaller navigation height */
+  }
+
+  .map-controls {
+    padding: 6px;
+    margin: 4px;
+  }
+
+  .filter-buttons {
+    gap: 1px; /* Even smaller gap for very small screens */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-button {
+    font-size: 9px; /* Even smaller font */
+    padding: 5px 6px; /* Reduced padding */
+    min-width: auto;
+    min-height: 30px;
+    flex-shrink: 0;
+    letter-spacing: 0.2px;
+  }
+
+  .search-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 8px;
+    height: 36px;
+  }
+
+  .search-button {
+    font-size: 11px;
+    padding: 8px 10px;
+    min-width: 60px;
+    height: 36px;
   }
 
   .location-count-display {
     font-size: 10px;
-    padding: 4px 8px;
-    letter-spacing: 0.3px;
+    padding: 6px 8px;
+    min-height: 32px;
   }
 
-  .map-wrapper {
-    margin: 0 8px 0 8px;
+  .welcome-content h1 {
+    font-size: 18px;
+  }
+
+  .welcome-content p {
+    font-size: 13px;
+  }
+
+  .feature {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+
+  /* Even larger markers for small screens */
+  .marker {
+    width: 56px;
+    height: 56px;
+  }
+
+  .marker-icon {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 360px) {
+  .home-container {
+    height: calc(100vh - 42px); /* Account for very small navigation height */
+  }
+
+  .filter-buttons {
+    gap: 1px; /* Minimal gap */
+  }
+
+  .filter-button {
+    font-size: 8px; /* Very small font for tiny screens */
+    padding: 4px 5px;
+    min-height: 28px;
+    letter-spacing: 0.1px;
+  }
+}
+
+/* Additional mobile optimizations */
+@media (max-width: 768px) and (max-height: 700px) {
+  /* For shorter mobile screens, make everything more compact but still visible */
+  .home-container {
+    height: calc(100vh - 50px); /* Maintain proper height calculation */
+  }
+
+  .map-controls {
+    padding: 6px;
+    margin: 4px;
+  }
+
+  .search-bar {
+    margin-bottom: 6px;
+  }
+
+  .search-input {
+    height: 34px;
+    font-size: 13px;
+  }
+
+  .search-button {
+    height: 34px;
+    font-size: 11px;
+    min-width: 60px;
+  }
+
+  .filter-buttons {
+    gap: 1px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .filter-button {
+    min-height: 28px;
+    font-size: 9px;
+    padding: 5px 6px;
+    flex-shrink: 0;
+  }
+
+  .location-count-display {
+    min-height: 30px;
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+}
+
+/* Landscape mobile optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .home-container {
+    height: calc(100vh - 50px); /* Maintain proper height calculation */
+  }
+
+  .map-controls {
+    padding: 4px;
+    margin: 2px;
+  }
+
+  .search-bar {
+    margin-bottom: 4px;
+  }
+
+  .filter-section {
+    gap: 2px;
+  }
+
+  .filter-buttons {
+    gap: 1px;
+    margin-bottom: 4px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .search-input,
+  .search-button {
+    height: 32px;
+  }
+
+  .filter-button,
+  .location-count-display {
+    min-height: 26px;
+    font-size: 8px;
+    padding: 3px 5px;
+  }
+
+  .filter-button {
+    flex-shrink: 0;
   }
 } 

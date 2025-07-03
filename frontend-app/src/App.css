@@ -134,6 +134,7 @@ body {
 /* User Menu Styles */
 .user-menu-container {
   position: relative;
+  z-index: 1000;
 }
 
 .user-menu-button {
@@ -146,6 +147,7 @@ body {
   padding: 8px 15px;
   transition: all 0.1s ease;
   font-weight: 900;
+  position: relative;
 }
 
 .user-menu-button:hover {
@@ -179,13 +181,15 @@ body {
 
 .user-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 5px);
   right: 0;
   background: #ffffff;
-  border: 2px solid #000000;
+  border: 3px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
   min-width: 200px;
-  z-index: 1000;
-  margin-top: 8px;
+  z-index: 1002;
+  margin-top: 0;
+  border-radius: 0;
 }
 
 .dropdown-item {
@@ -232,61 +236,336 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
   .navbar {
-    margin: 0 10px;
+    margin: 0;
+    border-bottom: 2px solid #000000;
   }
 
   .nav-container {
-    padding: 0 15px;
+    padding: 0 10px;
+    height: 50px;
+    position: relative;
   }
 
   .nav-menu {
-    gap: 10px;
+    gap: 5px;
   }
   
   .nav-link {
-    padding: 8px 12px;
-    font-size: 14px;
+    padding: 6px 8px;
+    font-size: 12px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
   }
   
   .signin-button {
-    padding: 10px 15px !important;
-    font-size: 14px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    min-height: 36px !important;
+    background-color: #ff0080 !important;
+    color: #ffffff !important;
+    border: 2px solid #000000 !important;
+    border-radius: 4px;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   
   .user-name {
-    display: none;
+    display: block;
+    font-size: 11px;
+    max-width: 80px;
+    letter-spacing: 0.5px;
   }
   
   .dropdown-arrow {
-    display: none;
+    display: block;
+    font-size: 10px;
+  }
+
+  .user-menu-container {
+    position: relative;
+    z-index: 1003;
   }
 
   .user-menu-button {
-    padding: 6px 10px;
+    padding: 4px 8px;
+    min-height: 36px;
+    border: 2px solid #000000;
+    border-radius: 4px;
+    background-color: #ffffff;
+  }
+
+  .user-menu-button:hover {
+    background-color: #f0f0f0;
   }
 
   .nav-logo {
-    font-size: 20px;
+    font-size: 16px;
     letter-spacing: 1px;
+    text-shadow: 2px 2px 0px #00ff00;
+  }
+
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #000000;
+    border-radius: 50%;
+  }
+
+  .main-content {
+    min-height: calc(100vh - 50px);
+  }
+
+  .user-dropdown {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    left: auto;
+    min-width: 180px;
+    max-width: calc(100vw - 20px);
+    border: 3px solid #000000;
+    box-shadow: 6px 6px 0px #000000;
+    z-index: 1004;
+    margin-top: 0;
+  }
+
+  .dropdown-item {
+    padding: 12px 16px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
   }
 }
 
 @media (max-width: 480px) {
+  .nav-container {
+    height: 45px;
+    padding: 0 8px;
+    position: relative;
+  }
+
   .nav-menu {
-    gap: 8px;
+    gap: 3px;
   }
 
   .nav-link {
-    font-size: 12px;
-    padding: 6px 10px;
+    font-size: 10px;
+    padding: 4px 6px;
+    min-height: 32px;
   }
 
   .nav-logo {
-    font-size: 18px;
+    font-size: 14px;
+    gap: 4px;
   }
 
   .signin-button {
-    padding: 8px 12px !important;
-    font-size: 12px !important;
+    padding: 6px 10px !important;
+    font-size: 10px !important;
+    min-height: 32px !important;
+    letter-spacing: 0.3px;
+  }
+
+  .user-menu-container {
+    position: relative;
+    z-index: 1003;
+  }
+
+  .user-menu-button {
+    min-height: 32px;
+    padding: 3px 6px;
+  }
+
+  .user-avatar {
+    width: 24px;
+    height: 24px;
+  }
+
+  .user-name {
+    font-size: 9px;
+    max-width: 60px;
+    letter-spacing: 0.3px;
+  }
+
+  .dropdown-arrow {
+    font-size: 8px;
+  }
+
+  .main-content {
+    min-height: calc(100vh - 45px);
+  }
+
+  .user-dropdown {
+    position: fixed;
+    top: 55px;
+    right: 5px;
+    left: auto;
+    min-width: 150px;
+    max-width: calc(100vw - 10px);
+    border: 3px solid #000000;
+    box-shadow: 6px 6px 0px #000000;
+    z-index: 1004;
+    margin-top: 0;
+  }
+
+  .dropdown-item {
+    padding: 9px 11px;
+    font-size: 9px;
+    letter-spacing: 0.2px;
+  }
+}
+
+/* Additional mobile optimizations for very small screens */
+@media (max-width: 360px) {
+  .nav-container {
+    height: 42px;
+    padding: 0 6px;
+    position: relative;
+  }
+
+  .nav-menu {
+    gap: 2px;
+  }
+
+  .nav-link {
+    font-size: 9px;
+    padding: 3px 5px;
+    min-height: 30px;
+  }
+
+  .nav-logo {
+    font-size: 12px;
+    gap: 3px;
+  }
+
+  .signin-button {
+    padding: 5px 8px !important;
+    font-size: 9px !important;
+    min-height: 30px !important;
+    letter-spacing: 0.2px;
+  }
+
+  .user-menu-container {
+    position: relative;
+    z-index: 1003;
+  }
+
+  .user-menu-button {
+    min-height: 30px;
+    padding: 2px 4px;
+  }
+
+  .user-avatar {
+    width: 22px;
+    height: 22px;
+  }
+
+  .user-name {
+    font-size: 8px;
+    max-width: 50px;
+    letter-spacing: 0.2px;
+  }
+
+  .dropdown-arrow {
+    font-size: 7px;
+  }
+
+  .main-content {
+    min-height: calc(100vh - 42px);
+  }
+
+  .user-dropdown {
+    position: fixed;
+    top: 52px;
+    right: 6px;
+    left: auto;
+    min-width: 140px;
+    max-width: calc(100vw - 12px);
+    border: 3px solid #000000;
+    box-shadow: 6px 6px 0px #000000;
+    z-index: 1004;
+    margin-top: 0;
+  }
+
+  .dropdown-item {
+    padding: 8px 10px;
+    font-size: 9px;
+  }
+}
+
+/* Ensure user menu button is always visible and accessible */
+@media (max-width: 768px) {
+  .user-menu-button {
+    touch-action: manipulation; /* Improves touch responsiveness */
+  }
+
+  .signin-button {
+    touch-action: manipulation;
+    white-space: nowrap; /* Prevent text wrapping */
+  }
+}
+
+/* Portrait orientation optimizations */
+@media (max-width: 768px) and (orientation: portrait) {
+  .nav-container {
+    justify-content: space-between;
+  }
+
+  .nav-menu {
+    flex-wrap: nowrap;
+    overflow-x: hidden;
+  }
+
+  .user-menu-button,
+  .signin-button {
+    flex-shrink: 0; /* Prevent user button from shrinking */
+  }
+}
+
+/* Specific fix for iPhone 12 Pro (390px width) */
+@media (max-width: 390px) and (min-width: 375px) {
+  .user-dropdown {
+    position: fixed;
+    top: 55px; /* Positioned below navbar */
+    right: 0; /* Align to right edge */
+    left: auto;
+    min-width: 140px; /* Reasonable size */
+    max-width: 180px; /* Reasonable max */
+    border: 3px solid #000000;
+    box-shadow: 6px 6px 0px #000000;
+    z-index: 1004;
+    margin-top: 0;
+    transform: translateX(-10px); /* Move left by 10px to account for shadow */
+  }
+
+  .dropdown-item {
+    padding: 7px 10px; /* Reasonable padding */
+    font-size: 9px; /* Readable font */
+    letter-spacing: 0.1px;
+    text-transform: uppercase;
+    font-weight: 900;
+  }
+}
+
+/* iPhone 12 Pro specific fix (390x844) - Using transform for reliable positioning */
+@media (width: 390px) and (height: 844px) {
+  .user-dropdown {
+    position: fixed;
+    top: 55px;
+    right: 0; /* Align to right edge */
+    left: auto;
+    min-width: 130px; /* Compact but readable */
+    max-width: 170px; /* Max width that will fit */
+    border: 3px solid #000000;
+    box-shadow: 6px 6px 0px #000000;
+    z-index: 1004;
+    margin-top: 0;
+    transform: translateX(-12px); /* Move left to prevent shadow cutoff */
+  }
+
+  .dropdown-item {
+    padding: 8px 10px; /* Comfortable padding */
+    font-size: 9px; /* Good readability */
+    letter-spacing: 0.1px;
   }
 }
