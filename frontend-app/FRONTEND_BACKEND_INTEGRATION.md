@@ -7,7 +7,7 @@ This document outlines the integration between the React frontend and MongoDB ba
 
 ### Backend (MongoDB + Express)
 - **Database**: MongoDB with Mongoose ODM
-- **API Base URL**: `http://localhost:5000/api`
+- **API Base URL**: `http://localhost:5001/api`
 - **Authentication**: Firebase Admin SDK (configured but auth middleware commented out for dev)
 - **CORS**: Enabled for all origins
 

@@ -68,11 +68,6 @@ const Navigation = () => {
           </Link>
           <ul className="nav-menu">
             <li className="nav-item">
-              <Link to="/" className="nav-link">
-                Home
-              </Link>
-            </li>
-            <li className="nav-item">
               <span className="nav-link">Loading...</span>
             </li>
           </ul>
@@ -89,16 +84,6 @@ const Navigation = () => {
             🐾 PawPawMate
           </Link>
           <ul className="nav-menu">
-            <li className="nav-item">
-              <Link to="/" className="nav-link">
-                Home
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link to="/demo" className="nav-link">
-                📷 Review Demo
-              </Link>
-            </li>
             {firebaseUser && (
               <>
                 <li className="nav-item">
@@ -109,11 +94,6 @@ const Navigation = () => {
                 <li className="nav-item">
                   <Link to="/lost-pets" className="nav-link">
                     Lost Pets
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link to="/profile" className="nav-link">
-                    Profile
                   </Link>
                 </li>
               </>
@@ -186,7 +166,6 @@ function App() {
               <Route path="/lost-pets" element={<LostPets />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/place/:id" element={<PlaceDetails />} />
-              <Route path="/demo" element={<PlaceDetails />} />
             </Routes>
           </main>
         </div>
