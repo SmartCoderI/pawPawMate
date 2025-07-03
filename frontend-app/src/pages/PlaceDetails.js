@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import { placeAPI, reviewAPI } from "../services/api";
 import "../styles/PlaceDetails.css";
+import api from '../services/api';
 
 const PlaceDetails = () => {
   const { id } = useParams();
@@ -70,9 +71,8 @@ const PlaceDetails = () => {
       });
 
 
-      const apiPort = process.env.REACT_APP_PORT || '5001';
+      const response = await fetch(`${api.defaults.baseURL}/reviews/upload-images`, {
 
-      const response = await fetch(`http://localhost:${apiPort}/api/reviews/upload-images`, {
         method: "POST",
         body: formData,
       });
@@ -1243,8 +1243,10 @@ const PlaceDetails = () => {
         openEvenings: { true: 0, false: 0 },
         onCallEmergencyNumber: { true: 0, false: 0 },
 
+
         connectedToEmergencyHospitals: { true: 0, false: 0 },
         clearHandoffsToSpecialists: { true: 0, false: 0 },
+
 
         emergencyTriageSpeed: { immediate: 0, within_30_min: 0, within_1_hour: 0, over_1_hour: 0 },
         crisisHandlingConfidence: { excellent: 0, good: 0, fair: 0, poor: 0 },

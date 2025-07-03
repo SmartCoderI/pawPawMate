@@ -8,10 +8,9 @@ const reviewRouter = express.Router();
 const {
   addReview,
   getReviewsForPlace,
+  getReviewsByUser,
   getDogParkReviewStats,
   getVetClinicReviewStats,
-  getPetStoreReviewStats,
-  getAnimalShelterReviewStats,
   uploadReviewImages,
 } = require("../controllers/reviewController");
 const { reviewImageUpload } = require("../utils/upload");
@@ -51,16 +50,13 @@ reviewRouter.post("/", addReview);
 // Get all reviews for a place
 reviewRouter.get("/:placeId", getReviewsForPlace);
 
+// Get all reviews by a specific user
+reviewRouter.get("/user/:userId", getReviewsByUser);
+
 // Get dog park specific review statistics
 reviewRouter.get("/:placeId/dog-park-stats", getDogParkReviewStats);
 
 // Get vet clinic specific review statistics
 reviewRouter.get("/:placeId/vet-clinic-stats", getVetClinicReviewStats);
-
-// Get pet store specific review statistics
-reviewRouter.get("/:placeId/pet-store-stats", getPetStoreReviewStats);
-
-// Get animal shelter specific review statistics
-reviewRouter.get("/:placeId/animal-shelter-stats", getAnimalShelterReviewStats);
 
 module.exports = reviewRouter;

@@ -1,44 +1,133 @@
 const Card = require("../models/Card");
+const Review = require("../models/Review");
+const User = require("../models/User");
+const Place = require("../models/Place");
 
-exports.createCard = async (req, res) => {
+// Generate a reward card for a user
+const generateRewardCard = async (userId, reviewId, placeId, locationName, contributionType) => {
   try {
-    const card = await Card.create(req.body);
-    res.status(201).json(card);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+    // Get user data to access their pet information
+    const user = await User.findById(userId).populate('pets');
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Get a random pet image from user's pets, or use a default
+    let petImage = "/default-pet.png"; // fallback image
+    if (user.pets && user.pets.length > 0) {
+      const randomPet = user.pets[Math.floor(Math.random() * user.pets.length)];
+      petImage = randomPet.profileImage || "/default-pet.png";
+    }
+
+    // Generate a fun caption based on contribution type and location
+    const captions = {
+      "first_review": [
+        `${user.name}'s first adventure at ${locationName}! 🎉`,
+        `Welcome to the community! First stop: ${locationName}`,
+        `${user.name} discovered ${locationName} - what a great start!`
+      ],
+      "community_approval": [
+        `The community loves ${user.name}'s review of ${locationName}! 👍`,
+        `Popular opinion: ${user.name} knows good spots like ${locationName}`,
+        `${user.name}'s ${locationName} review is community approved!`
+      ],
+      "milestone_achievement": [
+        `${user.name} is becoming a ${locationName} expert! 🏆`,
+        `Milestone reached! ${user.name} explored ${locationName}`,
+        `${user.name} is on a roll - now featuring ${locationName}!`
+      ]
+    };
+
+    const captionOptions = captions[contributionType] || captions["first_review"];
+    const caption = captionOptions[Math.floor(Math.random() * captionOptions.length)];
+
+    // Create the card
+    const card = new Card({
+      locationName,
+      petImage,
+      caption,
+      helpfulCount: 0,
+      earnedBy: userId,
+      contributionType,
+      placeId,
+      reviewId,
+    });
+
+    await card.save();
+    console.log(`✅ Generated reward card for user ${userId} at ${locationName}`);
+    return card;
+  } catch (error) {
+    console.error("Error generating reward card:", error);
+    throw error;
   }
 };
 
-exports.getCards = async (req, res) => {
+// Get all cards for a specific user
+const getUserCards = async (req, res) => {
   try {
-    const cards = await Card.find().populate('place').populate('createdBy', 'name email');
-    res.json(cards);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Get cards by user ID
-exports.getCardsByUser = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    console.log('Backend: Getting cards for user:', userId);
+    const { userId } = req.params;
+    console.log("Fetching cards for user ID:", userId);
     
-    const cards = await Card.find({ createdBy: userId }).populate('place');
-    console.log('Backend: Found cards for user:', cards.length);
-    res.status(200).json(cards);
-  } catch (err) {
-    console.error('Backend: Error getting cards by user:', err);
-    res.status(500).json({ error: err.message });
+    // Ensure we're using the correct ObjectId format for the query
+    const mongoose = require('mongoose');
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    
+    const cards = await Card.find({ earnedBy: userObjectId })
+      .populate('earnedBy', 'name profileImage')
+      .populate('reviewId', 'rating comment createdAt')
+      .sort({ createdAt: -1 });
+
+    console.log(`Found ${cards.length} cards for user ${userId}`);
+    res.json(cards);
+  } catch (error) {
+    console.error("Error fetching user cards:", error);
+    res.status(500).json({ error: "Failed to fetch cards" });
   }
 };
 
-exports.getCardById = async (req, res) => {
+// Get all cards (for leaderboard or exploration)
+const getAllCards = async (req, res) => {
   try {
-    const card = await Card.findById(req.params.id);
-    if (!card) return res.status(404).json({ error: "Card not found" });
-    res.json(card);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const cards = await Card.find()
+      .populate('earnedBy', 'name profileImage')
+      .populate('reviewId', 'rating comment createdAt')
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    res.json(cards);
+  } catch (error) {
+    console.error("Error fetching all cards:", error);
+    res.status(500).json({ error: "Failed to fetch cards" });
   }
+};
+
+// Update helpful count for a card
+const updateHelpfulCount = async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    const { increment } = req.body; // true to increment, false to decrement
+
+    const updateValue = increment ? 1 : -1;
+    const card = await Card.findByIdAndUpdate(
+      cardId,
+      { $inc: { helpfulCount: updateValue } },
+      { new: true }
+    );
+
+    if (!card) {
+      return res.status(404).json({ error: "Card not found" });
+    }
+
+    res.json(card);
+  } catch (error) {
+    console.error("Error updating helpful count:", error);
+    res.status(500).json({ error: "Failed to update helpful count" });
+  }
+};
+
+module.exports = {
+  generateRewardCard,
+  getUserCards,
+  getAllCards,
+  updateHelpfulCount,
 };

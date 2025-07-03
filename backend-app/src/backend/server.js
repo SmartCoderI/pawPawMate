@@ -73,7 +73,10 @@ io.on("connection", (socket) => {
 });
 
 //start server
-const PORT = process.env.PORT || 5001;
+
+// Use port from centralized configuration (set by start scripts via config.sh/config.bat)
+const PORT = process.env.BACKEND_PORT || process.env.PORT || 5001;
+
 
 //starts the HTTP + websocket server on the desired port
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
