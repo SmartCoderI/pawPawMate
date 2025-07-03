@@ -1,11 +1,25 @@
 import axios from 'axios';
 import { auth } from '../firebase';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+// Debug the environment variable more thoroughly
+const envUrl = process.env.REACT_APP_API_URL;
+const fallbackUrl = 'http://localhost:5001/api';
+
+console.log('API URL Debug:', {
+  'env_value': envUrl,
+  'env_value_length': envUrl ? envUrl.length : 0,
+  'env_value_charCodes': envUrl ? envUrl.split('').map((c, i) => `[${i}]='${c}'(${c.charCodeAt(0)})`) : [],
+  'env_value_trimmed': envUrl ? envUrl.trim() : null,
+  'using_fallback': !envUrl
+});
+
+// Use trimmed value to remove any spaces
+const API_BASE_URL = envUrl ? envUrl.trim() : fallbackUrl;
 
 console.log('API Configuration:', {
   'process.env.REACT_APP_API_URL': process.env.REACT_APP_API_URL,
-  'API_BASE_URL': API_BASE_URL
+  'API_BASE_URL': API_BASE_URL,
+  'API_BASE_URL_length': API_BASE_URL.length
 });
 
 // Create axios instance with default config
@@ -19,6 +33,15 @@ const api = axios.create({
 // Add auth token to requests if available (excluding places and reviews - they handle auth via frontend)
 api.interceptors.request.use(
   async (config) => {
+    // Debug the actual request URL being sent
+    console.log('API Request Debug:', {
+      baseURL: config.baseURL,
+      url: config.url,
+      fullURL: config.baseURL + config.url,
+      method: config.method,
+      urlCharCodes: config.url ? config.url.split('').map((c, i) => `[${i}]='${c}'(${c.charCodeAt(0)})`) : []
+    });
+    
     try {
       // Skip auth token for places and reviews endpoints (frontend handles login checks)
       const skipAuthEndpoints = ['/places', '/reviews'];

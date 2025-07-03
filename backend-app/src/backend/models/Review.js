@@ -185,6 +185,8 @@ const reviewSchema = new mongoose.Schema({
     },
 
     // 7. Reputation & Community Engagement
+
+    
     reputationAndCommunity: {
       onlineReputationConsistency: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
       wordOfMouthReputation: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
@@ -194,6 +196,126 @@ const reviewSchema = new mongoose.Schema({
       communityEvents: { type: Boolean, required: false },
       educationalPrograms: { type: Boolean, required: false },
       socialMediaPresence: { type: String, enum: ["excellent", "good", "fair", "poor", "none"], required: false },
+    },
+  },
+
+  // 6-category review system for PET STORE
+  petStoreReview: {
+    // 1. Access & Location
+    accessAndLocation: {
+      parkingDifficulty: { type: String, enum: ["easy", "moderate", "difficult"], required: false },
+      handicapFriendly: { type: Boolean, required: false },
+      parkingToParkDistance: { type: String, enum: ["close", "moderate", "far"], required: false },
+    },
+
+    // 2. Hours of Operation
+    hoursOfOperation: {
+      is24Hours: { type: Boolean, required: false },
+      dawnToDusk: { type: Boolean, required: false },
+      specificHours: { type: String, required: false }, // e.g., "6 AM - 10 PM"
+    },
+
+    // 3. Services & Conveniences
+    servicesAndConveniences: {
+      grooming: { type: Boolean, required: false },
+      veterinaryServices: { type: Boolean, required: false },
+      petTraining: { type: Boolean, required: false },
+      deliveryService: { type: Boolean, required: false },
+      onlineOrdering: { type: Boolean, required: false },
+      curbsidePickup: { type: Boolean, required: false },
+      returnPolicy: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+    },
+
+    // 4. Product Selection & Quality
+    productSelectionAndQuality: {
+      foodBrandVariety: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      toySelection: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      suppliesAvailability: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      productFreshness: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      organicNaturalOptions: { type: Boolean, required: false },
+      prescriptionDietAvailable: { type: Boolean, required: false },
+    },
+
+    // 5. Pricing & Value
+    pricingAndValue: {
+      overallPricing: { type: String, enum: ["low", "moderate", "high", "very_high"], required: false },
+      loyaltyProgram: { type: Boolean, required: false },
+      frequentSales: { type: Boolean, required: false },
+      priceMatching: { type: Boolean, required: false },
+      bulkDiscounts: { type: Boolean, required: false },
+      seniorDiscounts: { type: Boolean, required: false },
+    },
+
+    // 6. Staff Knowledge & Service
+    staffKnowledgeAndService: {
+      petKnowledge: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      productRecommendations: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      customerService: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      helpfulness: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      multilingual: { type: Boolean, required: false },
+      trainingCertified: { type: Boolean, required: false },
+    },
+  },
+
+  // 6-category review system for SHELTER
+  animalShelterReview: {
+    // 1. Access & Location
+    accessAndLocation: {
+      parkingDifficulty: { type: String, enum: ["easy", "moderate", "difficult"], required: false },
+      handicapFriendly: { type: Boolean, required: false },
+      parkingToParkDistance: { type: String, enum: ["close", "moderate", "far"], required: false },
+    },
+
+    // 2. Hours of Operation
+    hoursOfOperation: {
+      is24Hours: { type: Boolean, required: false },
+      dawnToDusk: { type: Boolean, required: false },
+      specificHours: { type: String, required: false }, // e.g., "6 AM - 10 PM"
+    },
+
+    // 3. Animal Type Selection
+    animalTypeSelection: {
+      availableAnimalTypes: {
+        type: [String],
+        enum: ["dogs", "cats", "rabbits", "birds", "reptiles", "small_mammals"],
+        required: false,
+      },
+      breedVariety: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      ageRange: {
+        type: [String],
+        enum: ["puppies_kittens", "young_adults", "adults", "seniors"],
+        required: false,
+      },
+    },
+
+    // 4. Animal Care & Welfare
+    animalCareAndWelfare: {
+      animalHealth: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      livingConditions: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      exercisePrograms: { type: Boolean, required: false },
+      medicalCare: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      behavioralAssessment: { type: Boolean, required: false },
+      specialNeedsCare: { type: Boolean, required: false },
+    },
+
+    // 5. Adoption Process & Support
+    adoptionProcessAndSupport: {
+      applicationProcess: { type: String, enum: ["easy", "moderate", "difficult"], required: false },
+      processingTime: { type: String, enum: ["same_day", "within_week", "1_2_weeks", "over_2_weeks"], required: false },
+      homeVisitRequired: { type: Boolean, required: false },
+      adoptionFees: { type: String, enum: ["low", "moderate", "high", "very_high"], required: false },
+      postAdoptionSupport: { type: Boolean, required: false },
+      returnPolicy: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+    },
+
+    // 6. Staff & Volunteer Quality
+    staffAndVolunteerQuality: {
+      staffKnowledge: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      animalHandling: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      customerService: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      volunteerProgram: { type: Boolean, required: false },
+      staffTraining: { type: Boolean, required: false },
+      compassionLevel: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
     },
   },
 
