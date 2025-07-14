@@ -1,4 +1,4 @@
-/* Global Styles - Neo-Brutalism */
+/* Global Styles - Neo-Brutalism with Vibrant Color Palette */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -9,7 +9,7 @@ body {
   font-family: 'Arial Black', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f0f0f0;
+  background-color: #FFF59F; /* yellow-200 */
   color: #000000;
 }
 
@@ -17,7 +17,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f0f0f0;
+  background: #FFF59F; /* yellow-200 */
 }
 
 .App-logo {
@@ -32,13 +32,13 @@ body {
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #918efa; /* violet-300 */
   padding: 20px;
   color: white;
 }
 
 .App-link {
-  color: #61dafb;
+  color: #79F7FF; /* cyan-300 */
 }
 
 @keyframes App-logo-spin {
@@ -52,8 +52,8 @@ body {
 
 /* Navigation Styles - Neo-Brutalism */
 .navbar {
-  background-color: #ffffff;
-  border-bottom: 4px solid #000000;
+  background-color: #FF965B; /* cyan-200 */
+  border-bottom: 4px solid #fa8543;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -79,12 +79,12 @@ body {
   gap: 8px;
   text-transform: uppercase;
   letter-spacing: 2px;
-  text-shadow: 3px 3px 0px #00ff00;
+  text-shadow: 3px 3px 0px #FFE500; /* lime-400 */
 }
 
 .nav-logo:hover {
-  color: #000000;
-  text-shadow: 3px 3px 0px #ff0080;
+  color: #A8A6FF;
+  text-shadow: 3px 3px 0px #807dfa; /* pink-400 */
 }
 
 .nav-menu {
@@ -115,20 +115,25 @@ body {
 }
 
 .nav-link:hover {
-  color: #ff0080;
-  background-color: #f0f0f0;
+  color: #fa7fee; /* pink-400 */
+  background-color: #FFF066; /* yellow-300 */
+  border-radius: 8px;
 }
 
 .signin-button {
-  background-color: #ff0080 !important;
-  color: #ffffff !important;
+  background-color: #fa7fee !important; /* pink-400 */
+  color: #000000 !important;
   padding: 12px 25px !important;
-  border: none !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 4px 4px 0px #000000;
+  border-radius: 8px;
 }
 
 .signin-button:hover {
-  background-color: #e6006e !important;
-  color: #ffffff !important;
+  background-color: #fa8cef !important; /* pink-300 */
+  color: #000000 !important;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000000;
 }
 
 /* User Menu Styles */
@@ -141,17 +146,21 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: none;
-  border: none;
+  background: #B8FF9F; /* lime-200 */
+  border: 2px solid #000000;
   cursor: pointer;
   padding: 8px 15px;
   transition: all 0.1s ease;
   font-weight: 900;
   position: relative;
+  box-shadow: 3px 3px 0px #000000;
+  border-radius: 8px;
 }
 
 .user-menu-button:hover {
-  background-color: #f0f0f0;
+  background-color: #9dfc7c; /* lime-300 */
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000;
 }
 
 .user-avatar {
@@ -159,6 +168,7 @@ body {
   height: 32px;
   object-fit: cover;
   border: 2px solid #000000;
+  border-radius: 50%;
 }
 
 .user-name {
@@ -180,16 +190,17 @@ body {
 }
 
 .user-dropdown {
-  position: absolute;
-  top: calc(100% + 5px);
-  right: 0;
-  background: #ffffff;
-  border: 3px solid #000000;
+  position: fixed;
+  top: 60px;
+  right: 10px;
+  left: auto;
+  min-width: 180px;
+  max-width: calc(100vw - 20px);
+  border: 2px solid #000000;
   box-shadow: 6px 6px 0px #000000;
-  min-width: 200px;
-  z-index: 1002;
+  z-index: 1004;
   margin-top: 0;
-  border-radius: 0;
+  border-radius: 8px;
 }
 
 .dropdown-item {
@@ -207,30 +218,35 @@ body {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 2px solid #000000;
 }
 
 .dropdown-item:hover {
-  background-color: #f0f0f0;
+  background-color: #918efa; /* violet-300 */
 }
 
 .dropdown-item:last-child {
   border-bottom: none;
+  border-radius: 0 0 5px 5px;
+}
+
+.dropdown-item:first-child {
+  border-radius: 5px 5px 0 0;
 }
 
 .logout-item {
   color: #000000;
-  background-color: #ff0080;
-  color: #ffffff;
+  background-color: #fa7a7a; /* red-300 */
+  color: #000000;
 }
 
 .logout-item:hover {
-  background-color: #e6006e;
+  background-color: #f76363; /* red-400 */
 }
 
 .main-content {
   min-height: calc(100vh - 70px);
-  background: #f0f0f0;
+  background: #FFF59F; /* yellow-200 */
 }
 
 /* Responsive */
@@ -256,19 +272,21 @@ body {
     min-height: 36px;
     display: flex;
     align-items: center;
+    border-radius: 6px;
   }
   
   .signin-button {
     padding: 8px 12px !important;
     font-size: 12px !important;
     min-height: 36px !important;
-    background-color: #ff0080 !important;
-    color: #ffffff !important;
+    background-color: #fa7fee !important; /* pink-400 */
+    color: #000000 !important;
     border: 2px solid #000000 !important;
-    border-radius: 4px;
+    border-radius: 6px;
     font-weight: 900 !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    box-shadow: 2px 2px 0px #000000;
   }
   
   .user-name {
@@ -292,18 +310,19 @@ body {
     padding: 4px 8px;
     min-height: 36px;
     border: 2px solid #000000;
-    border-radius: 4px;
-    background-color: #ffffff;
+    border-radius: 6px;
+    background-color: #B8FF9F; /* lime-200 */
+    box-shadow: 2px 2px 0px #000000;
   }
 
   .user-menu-button:hover {
-    background-color: #f0f0f0;
+    background-color: #9dfc7c; /* lime-300 */
   }
 
   .nav-logo {
     font-size: 16px;
     letter-spacing: 1px;
-    text-shadow: 2px 2px 0px #00ff00;
+    text-shadow: 2px 2px 0px #7df752; /* lime-400 */
   }
 
   .user-avatar {
@@ -319,12 +338,12 @@ body {
 
   .user-dropdown {
     position: fixed;
-    top: 60px;
-    right: 10px;
+    top: 55px;
+    right: 5px;
     left: auto;
-    min-width: 180px;
-    max-width: calc(100vw - 20px);
-    border: 3px solid #000000;
+    min-width: 150px;
+    max-width: calc(100vw - 10px);
+    border: 2px solid #000000;
     box-shadow: 6px 6px 0px #000000;
     z-index: 1004;
     margin-top: 0;
@@ -397,12 +416,12 @@ body {
 
   .user-dropdown {
     position: fixed;
-    top: 55px;
-    right: 5px;
+    top: 52px;
+    right: 6px;
     left: auto;
-    min-width: 150px;
-    max-width: calc(100vw - 10px);
-    border: 3px solid #000000;
+    min-width: 140px;
+    max-width: calc(100vw - 12px);
+    border: 2px solid #000000;
     box-shadow: 6px 6px 0px #000000;
     z-index: 1004;
     margin-top: 0;
@@ -481,7 +500,7 @@ body {
     left: auto;
     min-width: 140px;
     max-width: calc(100vw - 12px);
-    border: 3px solid #000000;
+    border: 2px solid #000000;
     box-shadow: 6px 6px 0px #000000;
     z-index: 1004;
     margin-top: 0;
@@ -498,74 +517,92 @@ body {
   .user-menu-button {
     touch-action: manipulation; /* Improves touch responsiveness */
   }
-
-  .signin-button {
-    touch-action: manipulation;
-    white-space: nowrap; /* Prevent text wrapping */
-  }
 }
 
-/* Portrait orientation optimizations */
-@media (max-width: 768px) and (orientation: portrait) {
-  .nav-container {
-    justify-content: space-between;
-  }
-
-  .nav-menu {
-    flex-wrap: nowrap;
-    overflow-x: hidden;
-  }
-
-  .user-menu-button,
-  .signin-button {
-    flex-shrink: 0; /* Prevent user button from shrinking */
-  }
+/* Additional Neo-Brutalism Effects */
+.signin-button:active,
+.user-menu-button:active {
+  transform: translate(3px, 3px);
+  box-shadow: none !important;
 }
 
-/* Specific fix for iPhone 12 Pro (390px width) */
-@media (max-width: 390px) and (min-width: 375px) {
-  .user-dropdown {
-    position: fixed;
-    top: 55px; /* Positioned below navbar */
-    right: 0; /* Align to right edge */
-    left: auto;
-    min-width: 140px; /* Reasonable size */
-    max-width: 180px; /* Reasonable max */
-    border: 3px solid #000000;
-    box-shadow: 6px 6px 0px #000000;
-    z-index: 1004;
-    margin-top: 0;
-    transform: translateX(-10px); /* Move left by 10px to account for shadow */
-  }
-
-  .dropdown-item {
-    padding: 7px 10px; /* Reasonable padding */
-    font-size: 9px; /* Readable font */
-    letter-spacing: 0.1px;
-    text-transform: uppercase;
-    font-weight: 900;
-  }
+/* Neo-Brutalism utility classes for other components */
+.neo-button {
+  background: #FFC29F; /* orange-200 */
+  border: 2px solid #000000;
+  color: #000000;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  box-shadow: 4px 4px 0px #000000;
+  border-radius: 8px;
 }
 
-/* iPhone 12 Pro specific fix (390x844) - Using transform for reliable positioning */
-@media (width: 390px) and (height: 844px) {
-  .user-dropdown {
-    position: fixed;
-    top: 55px;
-    right: 0; /* Align to right edge */
-    left: auto;
-    min-width: 130px; /* Compact but readable */
-    max-width: 170px; /* Max width that will fit */
-    border: 3px solid #000000;
-    box-shadow: 6px 6px 0px #000000;
-    z-index: 1004;
-    margin-top: 0;
-    transform: translateX(-12px); /* Move left to prevent shadow cutoff */
-  }
+.neo-button:hover {
+  background: #FF965B; /* orange-300 */
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000000;
+}
 
-  .dropdown-item {
-    padding: 8px 10px; /* Comfortable padding */
-    font-size: 9px; /* Good readability */
-    letter-spacing: 0.1px;
-  }
+.neo-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+.neo-card {
+  background: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: 8px 8px 0px #000000;
+  padding: 20px;
+  transition: all 0.1s ease;
+  border-radius: 12px;
+}
+
+.neo-card:hover {
+  transform: translate(4px, 4px);
+  box-shadow: 4px 4px 0px #000000;
+}
+
+/* Color variant buttons */
+.neo-button-primary {
+  background: #A5B4FB; /* violet-100 */
+}
+
+.neo-button-primary:hover {
+  background: #A8A6FF; /* violet-200 */
+}
+
+.neo-button-success {
+  background: #B8FF9F; /* lime-200 */
+}
+
+.neo-button-success:hover {
+  background: #9dfc7c; /* lime-300 */
+}
+
+.neo-button-danger {
+  background: #FF9F9F; /* red-200 */
+}
+
+.neo-button-danger:hover {
+  background: #fa7a7a; /* red-300 */
+}
+
+.neo-button-warning {
+  background: #FFF066; /* yellow-300 */
+}
+
+.neo-button-warning:hover {
+  background: #FFE500; /* yellow-400 */
+}
+
+.neo-button-info {
+  background: #79F7FF; /* cyan-300 */
+}
+
+.neo-button-info:hover {
+  background: #53f2fc; /* cyan-400 */
 }

@@ -24,10 +24,10 @@ const Home = () => {
   // Location types with icons - Dog Parks first for priority
   const locationTypes = {
     all: { label: 'All', icon: '🐾' },
-    dog_park: { label: 'Dog Park', icon: '🌳', color: '#22c55e' },
-    veterinary: { label: 'VET', icon: '🏥', color: '#3b82f6' },
-    pet_store: { label: 'Pet Store', icon: '🏪', color: '#f59e0b' },
-    animal_shelter: { label: 'Shelter', icon: '🏠', color: '#ef4444' }
+    dog_park: { label: 'Dog Park', icon: '🐕', color: '#B8FF9F' },
+    veterinary: { label: 'VET', icon: '🏥', color: '#53f2fc' },
+    pet_store: { label: 'Pet Store', icon: '🥣', color: '#FFE500' },
+    animal_shelter: { label: 'Shelter', icon: '🏠', color: '#eFF9F9F' }
   };
 
   // Fetch locations from OpenStreetMap using Overpass API
