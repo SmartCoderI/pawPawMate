@@ -64,7 +64,16 @@ const Navigation = () => {
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="nav-logo">
-            🐾 PawPawMate
+            <img 
+              src="/paw-logo.png" 
+              alt="PawPawMate Logo" 
+              className="nav-logo-image"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.textContent = '🐾 PawPawMate';
+              }}
+            />
+            <span>PawPawMate</span>
           </Link>
           <ul className="nav-menu">
             <li className="nav-item">
@@ -81,18 +90,27 @@ const Navigation = () => {
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="nav-logo">
-            🐾 PawPawMate
+            <img 
+              src="/paw-logo.png" 
+              alt="PawPawMate Logo" 
+              className="nav-logo-image"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.textContent = '🐾 PawPawMate';
+              }}
+            />
+            <span>PawPawMate</span>
           </Link>
           <ul className="nav-menu">
             {firebaseUser && (
               <>
                 <li className="nav-item">
-                  <Link to="/dashboard" className="nav-link">
+                  <Link to="/dashboard" className="nav-link-styled">
                     Dashboard
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link to="/lost-pets" className="nav-link">
+                  <Link to="/lost-pets" className="nav-link-styled">
                     Lost Pets
                   </Link>
                 </li>

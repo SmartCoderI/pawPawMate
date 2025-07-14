@@ -27,7 +27,7 @@ const Home = () => {
     dog_park: { label: 'Dog Park', icon: '🐕', color: '#B8FF9F' },
     veterinary: { label: 'VET', icon: '🏥', color: '#53f2fc' },
     pet_store: { label: 'Pet Store', icon: '🥣', color: '#FFE500' },
-    animal_shelter: { label: 'Shelter', icon: '🏠', color: '#eFF9F9F' }
+    animal_shelter: { label: 'Shelter', icon: '🏠', color: '#FFC29F' }
   };
 
   // Fetch locations from OpenStreetMap using Overpass API
