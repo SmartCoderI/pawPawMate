@@ -42,12 +42,12 @@ const Navigation = () => {
   }, []);
 
   // Close login modal when user becomes authenticated
-  useEffect(() => {
-    if (firebaseUser && showLogin) {
-      console.log("Navigation - User authenticated, closing login modal");
-      setShowLogin(false);
-    }
-  }, [firebaseUser, showLogin]);
+  // useEffect(() => {
+  //   if (firebaseUser && showLogin) {
+  //     console.log("Navigation - User authenticated, closing login modal");
+  //     setShowLogin(false);
+  //   }
+  // }, [firebaseUser, showLogin]);
 
   const handleLogout = async () => {
     try {
@@ -64,9 +64,9 @@ const Navigation = () => {
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="nav-logo">
-            <img 
-              src="/paw-logo.png" 
-              alt="PawPawMate Logo" 
+            <img
+              src="/paw-logo.png"
+              alt="PawPawMate Logo"
               className="nav-logo-image"
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -90,9 +90,9 @@ const Navigation = () => {
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="nav-logo">
-            <img 
-              src="/paw-logo.png" 
-              alt="PawPawMate Logo" 
+            <img
+              src="/paw-logo.png"
+              alt="PawPawMate Logo"
               className="nav-logo-image"
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -102,7 +102,7 @@ const Navigation = () => {
             <span>PawPawMate</span>
           </Link>
           <ul className="nav-menu">
-            {firebaseUser && (
+            {firebaseUser && mongoUser && (
               <>
                 <li className="nav-item">
                   <Link to="/dashboard" className="nav-link-styled">
@@ -116,7 +116,7 @@ const Navigation = () => {
                 </li>
               </>
             )}
-            {firebaseUser ? (
+            {firebaseUser && mongoUser ? (
               <li className="nav-item">
                 <div className="user-menu-container" ref={userMenuRef}>
                   <button className="user-menu-button" onClick={() => setShowUserMenu(!showUserMenu)}>
@@ -173,11 +173,11 @@ const Navigation = () => {
 // Login Page Component that wraps the Login modal
 const LoginPage = () => {
   const navigate = useNavigate();
-  
+
   return (
-    <Login 
-      isOpen={true} 
-      onClose={() => navigate("/")} 
+    <Login
+      isOpen={true}
+      onClose={() => navigate("/")}
     />
   );
 };

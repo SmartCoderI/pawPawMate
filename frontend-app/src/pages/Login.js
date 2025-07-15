@@ -10,15 +10,16 @@ const Login = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const { firebaseUser, loading: userLoading } = useUser();
+  const { firebaseUser, mongoUser, loading: userLoading } = useUser();
 
   useEffect(() => {
     console.log('Login modal - firebaseUser changed:', firebaseUser?.email);
     console.log('Login modal - isOpen:', isOpen);
-    
+
     // If user logs in successfully, close the modal
-    if (firebaseUser && isOpen && !userLoading) {
+    if (firebaseUser && mongoUser && isOpen && !userLoading) {
       console.log('User authenticated, closing modal');
       onClose();
     }
@@ -39,25 +40,30 @@ const Login = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
     setLoading(true);
 
     try {
-      console.log('Attempting authentication...');
       if (isSignUp) {
         // Sign up new user
         console.log('Signing up new user:', email);
         await signUp(email, password, displayName);
-        // UserContext will automatically create MongoDB user
-        // Modal will close via useEffect
+        // UserContext will automatically create MongoDB user once user verified their email 
+        setLoading(false);
+        setIsSignUp(false);
+        setMessage('A verification has been sent. Please verify your email before signing in.');
+        return;
+
       } else {
         // Sign in existing user
         console.log('Signing in user:', email);
+        await auth.signOut();
         await signIn(email, password);
-        // Modal will close via useEffect
+        onClose();
       }
-    } catch (error) {
-      console.error('Authentication error:', error);
-      setError(error.message);
+    } catch (e) {
+      console.error('Authentication error:', e);
+      setError(e.message);
       setLoading(false);
     }
   };
@@ -71,9 +77,9 @@ const Login = ({ isOpen, onClose }) => {
       await signInWithGoogle();
       // UserContext will handle MongoDB sync
       // Modal will close via useEffect
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-      setError(error.message);
+    } catch (e) {
+      console.error('Google sign-in error:', e);
+      setError(e.message);
       setLoading(false);
     }
   };
@@ -84,17 +90,18 @@ const Login = ({ isOpen, onClose }) => {
     <div className="auth-overlay" onClick={onClose}>
       <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
         <button className="close-button" onClick={onClose}>×</button>
-        
+
         <div className="auth-content">
           <h2>{isSignUp ? 'Create Account' : 'Welcome Back'}</h2>
           <p className="auth-subtitle">
-            {isSignUp 
-              ? 'Join PawPawMate to discover pet-friendly places' 
+            {isSignUp
+              ? 'Join PawPawMate to discover pet-friendly places'
               : 'Sign in to continue to PawPawMate'}
           </p>
-          
+
           {error && <div className="error-message">{error}</div>}
-          
+          {message && <div className="success-message">{message}</div>}
+
           <form onSubmit={handleSubmit} className="auth-form">
             {isSignUp && (
               <input
@@ -107,7 +114,7 @@ const Login = ({ isOpen, onClose }) => {
                 disabled={loading}
               />
             )}
-            
+
             <input
               type="email"
               placeholder="Email"
@@ -117,7 +124,7 @@ const Login = ({ isOpen, onClose }) => {
               className="auth-input"
               disabled={loading}
             />
-            
+
             <input
               type="password"
               placeholder="Password"
@@ -127,36 +134,36 @@ const Login = ({ isOpen, onClose }) => {
               className="auth-input"
               disabled={loading}
             />
-            
-            <button 
-              type="submit" 
+
+            <button
+              type="submit"
               className="auth-button primary"
               disabled={loading}
             >
               {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
             </button>
           </form>
-          
+
           <div className="auth-divider">
             <span>OR</span>
           </div>
-          
-          <button 
+
+          <button
             onClick={handleGoogleSignIn}
             className="auth-button google"
             disabled={loading}
           >
-            <img 
-              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-              alt="Google" 
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google"
               className="google-icon"
             />
             Continue with Google
           </button>
-          
+
           <p className="auth-switch">
             {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-            <button 
+            <button
               onClick={() => {
                 setIsSignUp(!isSignUp);
                 setError('');
