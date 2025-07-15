@@ -19,17 +19,27 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     console.log('Setting up auth state listener...');
-    
+
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       console.log('Auth state changed:', user ? `User: ${user.email}` : 'No user');
       setFirebaseUser(user);
-      
+
       if (user) {
+        await user.reload(); // Ensure we have the latest user data
+        const refreshedUser = auth.currentUser;
+        setFirebaseUser(refreshedUser);
+        // Early return if user is not verified
+        if (!refreshedUser.emailVerified) {
+          setMongoUser(null);
+          setLoading(false);
+          return;
+        }
+
         // Try to find or create MongoDB user
         try {
-          console.log('Looking for MongoDB user with UID:', user.uid);
-          let dbUser = await userAPI.getUserByFirebaseUid(user.uid);
-          
+          console.log('Looking for MongoDB user with UID:', refreshedUser.uid);
+          let dbUser = await userAPI.getUserByFirebaseUid(refreshedUser.uid);
+
           if (!dbUser) {
             console.log('MongoDB user not found, creating new user...');
             // Create new MongoDB user with correct structure - ensure data is stored in MongoDB Atlas
@@ -44,12 +54,12 @@ export const UserProvider = ({ children }) => {
             console.log('Created new MongoDB user in Atlas:', dbUser);
           } else {
             console.log('Found existing MongoDB user in Atlas:', dbUser);
-            
+
             // Ensure user has required fields (for backward compatibility)
             if (!dbUser.favoritePlaces) dbUser.favoritePlaces = [];
             if (!dbUser.collectedCards) dbUser.collectedCards = [];
           }
-          
+
           setMongoUser(dbUser);
         } catch (error) {
           console.error('Error syncing user with MongoDB Atlas:', error);
@@ -58,9 +68,10 @@ export const UserProvider = ({ children }) => {
         }
       } else {
         console.log('No Firebase user, clearing MongoDB user');
+        setFirebaseUser(null);
         setMongoUser(null);
       }
-      
+
       setLoading(false);
     });
 
@@ -75,7 +86,7 @@ export const UserProvider = ({ children }) => {
       console.error('Cannot update user: mongoUser._id is missing');
       return;
     }
-    
+
     try {
       console.log('Updating MongoDB user with:', updates);
       const updatedUser = await userAPI.updateUser(mongoUser._id, updates);
