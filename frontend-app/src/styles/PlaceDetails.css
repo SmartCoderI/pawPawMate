@@ -1,9 +1,9 @@
-/* Neo-Brutalism PlaceDetails Styles - Green Theme - Compact Version */
+/* Neo-Brutalism PlaceDetails Styles - Updated Design */
 
 .place-details-container {
   min-height: 100vh;
-  background: #f0f0f0;
-  padding: 10px;
+  background: #F5F5DC; /* Beige/cream background */
+  padding: 1.5rem;
   font-family: 'Arial Black', Arial, sans-serif;
   color: #000000;
 }
@@ -12,46 +12,47 @@
 .place-header {
   display: flex;
   align-items: flex-start;
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
   width: 100%;
 }
 
 .back-button {
-  background: #FFFF00;
-  border: 2px solid #000000;
-  padding: 10px 20px;
-  font-size: 16px;
+  background: #FFE500; /* Yellow background */
+  border: 4px solid #000000;
+  border-radius: 0.75rem; /* Added border radius */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
   font-weight: 900;
   color: #000000;
   cursor: pointer;
   transition: all 0.1s ease;
   text-transform: uppercase;
+  letter-spacing: 0.0625rem;
   flex-shrink: 0;
 }
 
 .back-button:hover {
-  background: #CCFF00;
-}
-
-.back-button:active {
-  background: #B8B800;
+  background: #CCCC00;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
 }
 
 .place-title h1 {
-  font-size: 20px;
+  font-size: 1.5rem;
   font-weight: 900;
   margin: 0;
-  text-shadow: 3px 3px 0px #FFFFFF;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
+  color: #000000;
 }
 
 .place-title-inline {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 1rem;
   flex: 1;
   min-width: 0;
   flex-wrap: wrap;
@@ -59,21 +60,21 @@
 }
 
 .place-title-inline h1 {
-  font-size: 20px;
+  font-size: 1.5rem;
   font-weight: 900;
   margin: 0;
-  text-shadow: 3px 3px 0px #FFFFFF;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
+  color: #000000;
   word-wrap: break-word;
   flex: 1 1 auto;
-  min-width: 150px;
+  min-width: 9.375rem;
 }
 
 .place-type {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   flex-shrink: 0;
   flex: 0 0 auto;
 }
@@ -81,125 +82,156 @@
 .place-address {
   display: flex;
   align-items: center;
-  margin-left: 15px;
+  margin-left: 1rem;
   flex: 0 1 auto;
-  min-width: 120px;
+  min-width: 7.5rem;
   justify-content: flex-end;
 }
 
 .address-line {
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 700;
-  color: #666666;
-  background: #F0F0F0;
-  padding: 4px 8px;
-  border: 2px solid #000000;
-  border-radius: 0;
+  color: #000000;
+  background: #F5F5DC;
+  padding: 0.5rem 0.75rem;
+  border: 3px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
   word-wrap: break-word;
 }
 
 .type-icon {
-  font-size: 16px;
-  background: #FF1493;
-  padding: 4px;
-  border: none;
+  font-size: 1.5rem;
+  background: #FF965B;
+  padding: 0.5rem;
+  border: 3px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
   transition: all 0.1s ease;
   cursor: pointer;
 }
 
 .type-icon:hover {
-  box-shadow: 3px 3px 0px #000000;
-  transform: translate(-1px, -1px);
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
 }
 
 .type-label {
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 900;
-  background: #00FFFF;
-  padding: 4px 8px;
-  border: none;
+  background: #FFE500; /* Changed from #32CD32 to match back button yellow */
+  color: #000000;
+  padding: 0.5rem 0.75rem;
+  border: 3px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
   text-transform: uppercase;
+  letter-spacing: 0.0625rem;
   transition: all 0.1s ease;
   cursor: pointer;
 }
 
 .type-label:hover {
-  box-shadow: 3px 3px 0px #000000;
-  transform: translate(-1px, -1px);
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
 }
 
 /* Hero Image Section */
 .hero-image-section {
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
 }
 
 .hero-placeholder {
-  background: #00FFFF;
-  border: 3px solid #000000;
-  height: 180px;
+  background: #20B2AA; /* Teal background */
+  border: 4px solid #000000;
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  height: 12rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 1rem;
 }
 
 .hero-icon {
-  font-size: 60px;
+  font-size: 4rem;
+  color: #000000;
 }
 
 .hero-placeholder h2 {
-  font-size: 24px;
+  font-size: 1.75rem;
   font-weight: 900;
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.125rem;
+  color: #000000;
 }
 
 /* Info Cards Grid */
 .info-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-  margin-bottom: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .info-card {
-  background: #FFC29F;
-  border: 2px solid #FF965B;
-  padding: 15px;
+  background: #F5F5DC;
+  border: 4px solid #000000;
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  padding: 1.5rem;
 }
 
 .info-card h3 {
-  font-size: 16px;
+  font-size: 1.125rem;
   font-weight: 900;
-  margin: 0 0 8px 0;
+  margin: 0 0 1rem 0;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
+  color: #000000;
 }
 
 .info-card p {
-  font-size: 12px;
+  font-size: 1rem;
   font-weight: 700;
-  margin: 4px 0;
+  margin: 0.5rem 0;
+  color: #000000;
 }
 
 .tags-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 .tag-chip {
-  background: #FF1493;
-  color: #FFFFFF;
-  padding: 4px 8px;
-  border: 2px solid #000000;
-  box-shadow: 2px 2px 0px #000000;
-  font-size: 10px;
+  background: #FFE500; /* Changed from #32CD32 to match back button yellow */
+  color: #000000;
+  padding: 0.5rem 0.75rem;
+  border: 3px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  font-size: 0.75rem;
   font-weight: 900;
   text-transform: uppercase;
+  letter-spacing: 0.0625rem;
+  transition: all 0.1s ease;
+}
+
+.tag-chip:hover {
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
+}
+
+.website-link {
+  color: #32CD32 !important;
+  text-decoration: none !important;
+  font-weight: 900 !important;
+}
+
+.website-link:hover {
+  text-decoration: underline !important;
 }
 
 .review-count {
@@ -217,16 +249,6 @@
 .address-text {
   color: #FF1493 !important;
   font-weight: 900 !important;
-}
-
-.website-link {
-  color: #32CD32 !important;
-  text-decoration: none !important;
-  font-weight: 900 !important;
-}
-
-.website-link:hover {
-  text-decoration: underline !important;
 }
 
 .osm-note {
@@ -261,100 +283,96 @@
   text-align: center;
 }
 
+.categories-overview {
+  margin-bottom: 2rem;
+}
+
 .category-tags-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1.5rem;
 }
 
 .category-section {
-  background-color: #f0f0f0;
-  border: 2px solid #000000;
-  padding: 10px;
+  background-color: #EEEDE7; /* Changed from #F5F5DC to be slightly different from main background */
+  border: 4px solid #000000;
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  padding: 1.5rem;
 }
 
 .category-section h3 {
-  margin: 0 0 6px 0;
+  margin: 0 0 1rem 0;
   color: #000000;
-  font-size: 12px;
+  font-size: 1.125rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid #000000;
-  padding-bottom: 3px;
-}
-
-.category-description {
-  font-size: 10px;
-  font-weight: bold;
-  color: #666666;
-  margin: 0 0 8px 0;
-  font-style: italic;
+  letter-spacing: 0.0625rem;
+  border-bottom: 3px solid #000000;
+  padding-bottom: 0.5rem;
 }
 
 .feature-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 0.75rem;
 }
 
 .feature-tag {
-  background-color: #00ff00;
+  background-color: #FFE500; /* Changed from #32CD32 to match back button yellow */
   color: #000000;
-  padding: 3px 6px;
-  border: 2px solid #000000;
-  font-size: 10px;
+  padding: 0.5rem 0.75rem;
+  border: 3px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  font-size: 0.75rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.0625rem;
   white-space: nowrap;
+  transition: all 0.1s ease;
+}
+
+.feature-tag:hover {
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
 }
 
 .feature-tag.good {
-  background-color: #00ff00;
+  background-color: #FFE500; /* Changed from #32CD32 to match back button yellow */
   color: #000000;
 }
 
 .feature-tag.neutral {
-  background-color: #ffff00;
+  background-color: #FFE500;
   color: #000000;
 }
 
 .feature-tag.bad {
-  background-color: #ff0080;
+  background-color: #FF4444;
   color: #ffffff;
 }
 
 /* Option tags for showing all available category options */
 .option-tag {
-  background-color: #f0f0f0;
+  background-color: #DDD8C7;
   color: #000000;
-  padding: 3px 6px;
-  border: 2px solid #000000;
-  font-size: 10px;
+  padding: 0.5rem 0.75rem;
+  border: 3px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  font-size: 0.75rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.0625rem;
   white-space: nowrap;
   opacity: 0.7;
+  transition: all 0.1s ease;
 }
 
-.option-tag.good {
-  background-color: #B8FF9F;
-  border-color: #7df752;
+.option-tag:hover {
   opacity: 1;
-}
-
-.option-tag.neutral {
-  background-color: #FFF066;
-  border-color: #FFE500;
-  opacity: 1;
-}
-
-.option-tag.bad {
-  background-color: #FF9F9F;
-  border-color: #f76363;
-  opacity: 1;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
 }
 
 /* Smart Tag System - Based on Review Frequency */
@@ -366,7 +384,7 @@
 }
 
 .option-tag.popular {
-  background-color: #00ff00;
+  background-color: #FFE500; /* Changed from #00ff00 to match back button yellow */
   color: #000000;
   border-color: #000000;
   opacity: 1;
@@ -375,7 +393,7 @@
 }
 
 .option-tag.common {
-  background-color: #ccff00;
+  background-color: #FFE500; /* Changed from #ccff00 to match back button yellow */
   color: #000000;
   border-color: #000000;
   opacity: 1;
@@ -424,26 +442,27 @@
 
 /* Review statistics summary */
 .review-stats-summary {
-  background-color: #ffff00;
-  border: 2px solid #000000;
-  padding: 10px;
-  margin-top: 15px;
+  background: #F5F5DC;
+  border: 4px solid #000000;
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
 .review-stats-summary h3 {
-  margin: 0 0 6px 0;
-  color: #000000;
-  font-size: 12px;
+  font-size: 1.25rem;
   font-weight: 900;
+  margin: 0 0 0.5rem 0;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.0625rem;
+  color: #000000;
 }
 
 .review-stats-summary p {
+  font-size: 1rem;
+  font-weight: 700;
   margin: 0;
-  font-size: 12px;
-  font-weight: bold;
   color: #000000;
 }
 
@@ -518,35 +537,34 @@
 
 /* OSM Review Call-to-Action */
 .osm-review-cta {
-  background: #FF9F9F;
-  border: 4px solid #f76363;
-  box-shadow: 6px 6px 0px #7e7b7b;
-  padding: 15px;
-  margin-bottom: 15px;
+  background: #FF965B; /* Orange/coral background */
+  border: 4px solid #000000;
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  padding: 2rem;
   text-align: center;
+  margin-bottom: 2rem;
 }
 
 .osm-review-cta h2 {
-  font-size: 18px;
+  font-size: 1.75rem;
   font-weight: 900;
-  margin: 0 0 8px 0;
+  margin: 0 0 1rem 0;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #FFFFFF;
-  text-shadow: 2px 2px 0px #000000;
+  letter-spacing: 0.125rem;
+  color: #000000;
 }
 
 .osm-review-cta p {
-  font-size: 12px;
+  font-size: 1.125rem;
   font-weight: 700;
-  color: #FFFFFF;
-  margin: 0 0 12px 0;
-  line-height: 1.3;
+  margin: 0;
+  color: #000000;
 }
 
 .big-review-button {
   background: #FFFF00;
   border: 2px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
   padding: 10px 20px;
   font-size: 14px;
   font-weight: 900;
@@ -566,94 +584,105 @@
 
 /* Reviews Section */
 .reviews-section {
-  background: #FFFFFF;
-  border: 3px solid #000000;
-  padding: 15px;
-  margin-bottom: 20px;
+  background: #F5F5DC;
+  border: 4px solid #000000;
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .reviews-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 1rem;
 }
 
 .reviews-header h2 {
-  font-size: 18px;
+  font-size: 1.5rem;
   font-weight: 900;
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
+  color: #000000;
 }
 
 .add-review-button {
-  background: #32CD32;
-  border: 2px solid #000000;
-  padding: 8px 16px;
-  font-size: 14px;
+  background: #FFE500; /* Yellow background */
+  border: 4px solid #000000;
+  border-radius: 0.75rem; /* Added border radius */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
   font-weight: 900;
   color: #000000;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #000000;
   transition: all 0.1s ease;
   text-transform: uppercase;
+  letter-spacing: 0.0625rem;
 }
 
 .add-review-button:hover {
-  background: #90EE90;
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0px #000000;
+  background: #CCCC00;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
 }
 
 /* Review Form */
 .review-form-card {
-  background: #F0FFF0;
-  border: 3px solid #000000;
-  box-shadow: 4px 4px 0px #000000;
-  padding: 15px;
-  margin-bottom: 15px;
+  background: #F5F5DC;
+  border: 4px solid #000000;
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .review-form-card h3 {
-  font-size: 16px;
+  font-size: 1.25rem;
   font-weight: 900;
-  margin: 0 0 10px 0;
+  margin: 0 0 1rem 0;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
+  color: #000000;
 }
 
 .form-group {
-  margin-bottom: 12px;
+  margin-bottom: 1rem;
 }
 
 .form-group label {
   display: block;
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: 900;
-  margin-bottom: 6px;
+  margin-bottom: 0.5rem;
   text-transform: uppercase;
+  letter-spacing: 0.0625rem;
+  color: #000000;
 }
 
 .rating-selector {
   display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .star-button {
-  background: #FFFFFF;
-  border: 2px solid #000000;
-  padding: 6px;
-  font-size: 16px;
+  background: #F5F5DC;
+  border: 3px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 0.5rem;
+  font-size: 1.25rem;
   cursor: pointer;
   transition: all 0.1s ease;
 }
 
 .star-button:hover {
-  background: #FFFF00;
+  background: #FFE500;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
 }
 
 .star-button.active {
@@ -663,9 +692,10 @@
 .form-group textarea {
   width: 100%;
   background: #FFFFFF;
-  border: 2px solid #000000;
-  padding: 10px;
-  font-size: 14px;
+  border: 3px solid #000000;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 0.75rem;
+  font-size: 1rem;
   font-weight: 700;
   font-family: 'Arial Black', Arial, sans-serif;
   resize: vertical;
@@ -674,16 +704,18 @@
 
 .form-group textarea:focus {
   outline: none;
-  background: #F0FFF0;
+  background: #F0F8FF;
+  border-color: #000000;
 }
 
 .form-group select,
 .form-group input[type="text"] {
   width: 100%;
   background: #FFFFFF;
-  border: 2px solid #000000;
-  padding: 8px;
-  font-size: 12px;
+  border: 3px solid #000000;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 0.75rem;
+  font-size: 1rem;
   font-weight: 700;
   font-family: 'Arial Black', Arial, sans-serif;
   box-sizing: border-box;
@@ -692,159 +724,130 @@
 .form-group select:focus,
 .form-group input[type="text"]:focus {
   outline: none;
-  background: #F0FFF0;
-}
-
-/* Dog Park Form */
-.dog-park-form {
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 4px solid #000000;
-}
-
-.dog-park-form h4 {
-  font-size: 18px;
-  font-weight: 900;
-  margin: 0 0 15px 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  background: #F0F8FF;
+  border-color: #000000;
 }
 
 .form-section {
-  margin-bottom: 15px;
-  background: #F0FFF0;
-  border: 2px solid #000000;
-  padding: 12px;
+  margin-bottom: 1.5rem;
+  background: #F5F5DC;
+  border: 3px solid #000000;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 1rem;
 }
 
 .form-section h5 {
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: 900;
-  margin: 0 0 8px 0;
+  margin: 0 0 0.75rem 0;
   text-transform: uppercase;
-}
-
-.checkbox-group {
-  display: grid;
-  gap: 8px;
-}
-
-.checkbox-group label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  text-transform: none !important;
-  margin-bottom: 0 !important;
-  cursor: pointer;
-}
-
-.checkbox-group input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #000000;
-  background: #FFFFFF;
-  cursor: pointer;
-  transform: scale(1.1);
+  letter-spacing: 0.0625rem;
+  color: #000000;
 }
 
 .submit-review-button {
-  background: #FF1493;
-  border: 2px solid #000000;
-  padding: 15px 30px;
-  font-size: 16px;
+  background: #32CD32;
+  border: 4px solid #000000;
+  border-radius: 0.75rem; /* Added border radius */
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
   font-weight: 900;
-  color: #FFFFFF;
+  color: #000000;
   cursor: pointer;
-  box-shadow: 6px 6px 0px #000000;
   transition: all 0.1s ease;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
   width: 100%;
-  margin-top: 15px;
+  margin-top: 1rem;
 }
 
 .submit-review-button:hover {
-  background: #FF69B4;
-  transform: translate(1px, 1px);
-  box-shadow: 5px 5px 0px #000000;
+  background: #228B22;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.375rem 0.375rem 0px #000000;
 }
 
 /* Reviews List */
 .reviews-list {
   display: grid;
-  gap: 4px;
+  gap: 1rem;
 }
 
 .empty-reviews {
   text-align: center;
-  background: #F0F0F0;
+  background: #F5F5DC;
   border: 4px solid #000000;
-  box-shadow: 6px 6px 0px #000000;
-  padding: 25px;
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  padding: 2rem;
 }
 
 .empty-reviews h3 {
-  font-size: 20px;
+  font-size: 1.5rem;
   font-weight: 900;
-  margin: 0 0 10px 0;
+  margin: 0 0 1rem 0;
   text-transform: uppercase;
+  letter-spacing: 0.0625rem;
+  color: #000000;
 }
 
 .empty-reviews p {
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: 700;
   margin: 0;
+  color: #000000;
 }
 
-/* Simplified Review Cards */
 .review-card-simple {
-  background: #F0FFF0;
-  border: 2px solid #000000;
-  box-shadow: 3px 3px 0px #000000;
-  padding: 8px;
-  margin-bottom: 2px;
+  background: #F5F5DC;
+  border: 3px solid #000000;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .review-simple-content {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
 .review-simple-content .reviewer-name {
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: 900;
   text-transform: uppercase;
+  letter-spacing: 0.0625rem;
   color: #000000;
-  min-width: 100px;
+  min-width: 6.25rem;
 }
 
 .review-simple-content .review-rating {
-  font-size: 16px;
-  min-width: 70px;
+  font-size: 1.125rem;
+  min-width: 4.375rem;
 }
 
 .review-simple-content .review-comment-text {
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 700;
   color: #333333;
   flex: 1;
-  min-width: 150px;
+  min-width: 9.375rem;
 }
 
 .review-simple-content .review-date {
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #666666;
-  background: #FFFFFF;
-  padding: 3px 6px;
-  border: 2px solid #000000;
-  box-shadow: 2px 2px 0px #000000;
-  min-width: 70px;
+  color: #000000;
+  background: #FFE500;
+  padding: 0.25rem 0.5rem;
+  border: 3px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  min-width: 4.375rem;
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.0625rem;
 }
 
 /* Original detailed review card styles (keep for compatibility) */
@@ -909,6 +912,7 @@
   color: #FFFFFF;
   padding: 4px 10px;
   border: 2px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
   box-shadow: 2px 2px 0px #000000;
   font-size: 12px;
   font-weight: 900;
@@ -965,6 +969,7 @@
   color: #FFFFFF;
   padding: 6px 12px;
   border: 3px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
   box-shadow: 3px 3px 0px #000000;
   font-size: 12px;
   font-weight: 900;
@@ -973,209 +978,164 @@
 
 /* Loading and Error States */
 .loading-card, .error-card {
-  background: #FFFF00;
-  border: 8px solid #000000;
-  box-shadow: 12px 12px 0px #000000;
-  padding: 60px;
+  background: #FFE500;
+  border: 4px solid #000000;
+  box-shadow: 0.75rem 0.75rem 0px #000000;
+  padding: 3rem;
   text-align: center;
-  margin: 50px auto;
-  max-width: 500px;
+  margin: 3rem auto;
+  max-width: 31.25rem;
 }
 
 .loading-card h2, .error-card h2 {
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 900;
-  margin: 0 0 20px 0;
+  margin: 0 0 1.5rem 0;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.125rem;
+  color: #000000;
 }
 
 .error-card p {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
-  margin: 0 0 30px 0;
+  margin: 0 0 2rem 0;
+  color: #000000;
 }
 
 .brutal-button {
-  background: #FF1493;
-  border: 2px solid #000000;
-  padding: 15px 30px;
-  font-size: 18px;
+  background: #32CD32;
+  border: 4px solid #000000;
+  border-radius: 0.75rem; /* Added border radius */
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
   font-weight: 900;
-  color: #FFFFFF;
+  color: #000000;
   cursor: pointer;
-  box-shadow: 8px 8px 0px #000000;
   transition: all 0.1s ease;
   text-transform: uppercase;
+  letter-spacing: 0.0625rem;
 }
 
 .brutal-button:hover {
-  background: #FF69B4;
-  transform: translate(2px, 2px);
-  box-shadow: 6px 6px 0px #000000;
+  background: #228B22;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.375rem 0.375rem 0px #000000;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .place-details-container {
+    padding: 1rem;
+  }
+  
   .place-header {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
     flex-wrap: nowrap;
   }
   
   .back-button {
-    padding: 8px 12px;
-    font-size: 14px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
   }
   
   .place-title-inline h1 {
-    font-size: 16px;
+    font-size: 1.125rem;
     flex: 1 1 auto;
-    min-width: 120px;
+    min-width: 7.5rem;
     word-wrap: break-word;
   }
   
   .type-icon {
-    font-size: 14px;
-    padding: 3px;
+    font-size: 1.25rem;
+    padding: 0.375rem;
   }
   
   .type-label {
-    font-size: 10px;
-    padding: 3px 6px;
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
   }
   
   .place-address {
-    margin-left: 8px;
+    margin-left: 0.5rem;
     flex: 0 1 auto;
-    min-width: 100px;
+    min-width: 6.25rem;
     justify-content: flex-end;
   }
   
   .address-line {
-    font-size: 10px;
-    padding: 3px 6px;
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
+  }
+  
+  .hero-placeholder {
+    height: 8rem;
+  }
+  
+  .hero-icon {
+    font-size: 2.5rem;
+  }
+  
+  .hero-placeholder h2 {
+    font-size: 1.25rem;
   }
   
   .info-cards-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  
-  .hero-placeholder {
-    height: 120px;
-  }
-  
-  .hero-icon {
-    font-size: 40px;
-  }
-  
-  .hero-placeholder h2 {
-    font-size: 18px;
+    gap: 1rem;
   }
   
   .category-tags-grid {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 1rem;
   }
   
   .category-section {
-    padding: 8px;
+    padding: 1rem;
   }
   
   .category-section h3 {
-    font-size: 11px;
+    font-size: 1rem;
   }
   
   .feature-tags {
-    gap: 4px;
+    gap: 0.5rem;
   }
   
   .feature-tag,
   .option-tag {
-    font-size: 9px;
-    padding: 2px 4px;
-  }
-}
-
-@media (max-width: 480px) {
-  .place-header {
-    gap: 6px;
+    font-size: 0.6875rem;
+    padding: 0.375rem 0.5rem;
   }
   
-  .place-title-inline h1 {
-    font-size: 14px;
-    flex: 1 1 auto;
-    min-width: 100px;
-    word-wrap: break-word;
+  .osm-review-cta {
+    padding: 1.5rem;
   }
   
-  .back-button {
-    padding: 6px 10px;
-    font-size: 12px;
+  .osm-review-cta h2 {
+    font-size: 1.5rem;
   }
   
-  .type-icon {
-    font-size: 12px;
-    padding: 2px;
+  .osm-review-cta p {
+    font-size: 1rem;
   }
   
-  .type-label {
-    font-size: 9px;
-    padding: 2px 4px;
+  .reviews-header h2 {
+    font-size: 1.25rem;
   }
   
-  .place-address {
-    margin-left: 6px;
-    flex: 0 1 auto;
-    min-width: 80px;
-    justify-content: flex-end;
+  .add-review-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
   }
   
-  .address-line {
-    font-size: 9px;
-    padding: 2px 4px;
-  }
-  
-  .hero-placeholder {
-    height: 100px;
-  }
-  
-  .hero-icon {
-    font-size: 30px;
-  }
-  
-  .hero-placeholder h2 {
-    font-size: 14px;
-  }
-  
-  .info-card h3 {
-    font-size: 14px;
-  }
-  
-  .info-card p {
-    font-size: 11px;
-  }
-  
-  .rating-selector {
-    flex-wrap: wrap;
-  }
-  
-  .star-button {
-    padding: 4px;
-    font-size: 14px;
-  }
-  
-  .form-section h5 {
-    font-size: 12px;
-  }
-  
-  /* Simplified reviews mobile styles */
   .review-simple-content {
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
+    gap: 0.5rem;
   }
   
   .review-simple-content .reviewer-name,
@@ -1189,53 +1149,150 @@
   .review-simple-content .review-date {
     align-self: flex-end;
     width: auto;
-    padding: 2px 4px;
-    font-size: 9px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .place-details-container {
+    padding: 0.75rem;
   }
   
-  .dog-park-stats h2 {
-    font-size: 16px;
+  .place-header {
+    gap: 0.375rem;
   }
   
-  .categories-description {
-    font-size: 10px;
+  .place-title-inline h1 {
+    font-size: 1rem;
+    flex: 1 1 auto;
+    min-width: 6.25rem;
+    word-wrap: break-word;
   }
   
-  .review-stats-summary h3 {
-    font-size: 11px;
+  .back-button {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
   }
   
-  .review-stats-summary p {
-    font-size: 10px;
+  .type-icon {
+    font-size: 1rem;
+    padding: 0.25rem;
+  }
+  
+  .type-label {
+    font-size: 0.6875rem;
+    padding: 0.25rem 0.375rem;
+  }
+  
+  .place-address {
+    margin-left: 0.375rem;
+    flex: 0 1 auto;
+    min-width: 5rem;
+    justify-content: flex-end;
+  }
+  
+  .address-line {
+    font-size: 0.6875rem;
+    padding: 0.25rem 0.375rem;
+  }
+  
+  .hero-placeholder {
+    height: 6.25rem;
+  }
+  
+  .hero-icon {
+    font-size: 2rem;
+  }
+  
+  .hero-placeholder h2 {
+    font-size: 1rem;
+  }
+  
+  .info-card h3 {
+    font-size: 1rem;
+  }
+  
+  .info-card p {
+    font-size: 0.875rem;
+  }
+  
+  .category-section h3 {
+    font-size: 0.875rem;
+  }
+  
+  .feature-tags {
+    gap: 0.375rem;
+  }
+  
+  .feature-tag,
+  .option-tag {
+    font-size: 0.625rem;
+    padding: 0.25rem 0.375rem;
   }
   
   .osm-review-cta {
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 3px solid #000000;
-    box-shadow: 4px 4px 0px #000000;
+    padding: 1rem;
   }
   
   .osm-review-cta h2 {
-    font-size: 14px;
-    margin-bottom: 6px;
+    font-size: 1.25rem;
   }
   
   .osm-review-cta p {
-    font-size: 10px;
-    margin-bottom: 8px;
+    font-size: 0.875rem;
   }
   
-  .big-review-button {
-    padding: 8px 16px;
-    font-size: 12px;
-    border: 2px solid #000000;
-    box-shadow: 3px 3px 0px #000000;
+  .reviews-header h2 {
+    font-size: 1.125rem;
+  }
+  
+  .add-review-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .rating-selector {
+    flex-wrap: wrap;
+  }
+  
+  .star-button {
+    padding: 0.375rem;
+    font-size: 1rem;
+  }
+  
+  .form-section h5 {
+    font-size: 0.875rem;
+  }
+  
+  .form-group label {
+    font-size: 0.875rem;
+  }
+  
+  .form-group textarea,
+  .form-group select,
+  .form-group input[type="text"] {
+    padding: 0.5rem;
+    font-size: 0.875rem;
   }
   
   .submit-review-button {
-    padding: 12px 20px;
-    font-size: 14px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .loading-card h2,
+  .error-card h2 {
+    font-size: 1.5rem;
+  }
+  
+  .error-card p {
+    font-size: 1rem;
+  }
+  
+  .brutal-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
   }
 }
 
@@ -1263,6 +1320,7 @@
   padding: 10px 20px;
   background: #00FFFF;
   border: 2px solid #000000;
+  border-radius: 0.5rem; /* Added border radius */
   color: #000000;
   font-weight: 900;
   font-size: 12px;
@@ -1342,6 +1400,7 @@
   background: #FF1493;
   color: #FFFFFF;
   border: 2px solid #000000;
+  border-radius: 0.25rem; /* Added border radius */
   font-size: 12px;
   font-weight: 900;
   cursor: pointer;
@@ -1433,6 +1492,7 @@
   background: #F0F0F0;
   padding: 3px 6px;
   border: 2px solid #CCCCCC;
+  border-radius: 0.25rem; /* Added border radius */
   display: inline-block;
   text-transform: uppercase;
 }
