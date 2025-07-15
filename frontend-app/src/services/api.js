@@ -234,8 +234,10 @@ export const placeAPI = {
   },
 
   // Delete place
-  deletePlace: async (placeId) => {
-    const response = await api.delete(`/places/${placeId}`);
+  deletePlace: async (placeId, userId) => {
+    const response = await api.delete(`/places/${placeId}`, {
+      data: { userId }
+    });
     return response.data;
   },
 };

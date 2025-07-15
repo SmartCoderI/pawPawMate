@@ -21,7 +21,8 @@ const PlaceDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
-
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Image upload state
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -658,6 +659,26 @@ const PlaceDetails = () => {
   }, [id]);
 
   // Handle review form submission
+  // Handle place deletion
+  const handleDeletePlace = async () => {
+    if (!mongoUser || !place) return;
+
+    setDeleteLoading(true);
+    try {
+      await placeAPI.deletePlace(place._id, mongoUser._id);
+      console.log('Place deleted successfully');
+      
+      // Navigate back to home after successful deletion
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting place:', error);
+      alert(error.response?.data?.error || 'Failed to delete place. Please try again.');
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     console.log("🔄 Starting review submission...");
@@ -1879,6 +1900,17 @@ const PlaceDetails = () => {
             {!place.address && !place.coordinates && <span className="address-line">📍 Address not available</span>}
           </div>
         </div>
+        
+        {/* Delete button - only show for place creator */}
+        {mongoUser && place.addedBy && place.addedBy === mongoUser._id && !place.isOSMLocation && (
+          <button 
+            className="delete-place-button"
+            onClick={() => setShowDeleteConfirm(true)}
+            title="Delete this place"
+          >
+            🗑️ Delete Place
+          </button>
+        )}
       </div>
 
       {/* Hero Image Section */}
@@ -4056,6 +4088,37 @@ const PlaceDetails = () => {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>⚠️ Delete Place</h2>
+            <p>
+              Are you sure you want to delete <strong>{place.name}</strong>?
+            </p>
+            <p className="warning-text">
+              This action cannot be undone. All reviews and cards associated with this place will also be deleted.
+            </p>
+            <div className="modal-actions">
+              <button 
+                className="cancel-button" 
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+              <button 
+                className="delete-button" 
+                onClick={handleDeletePlace}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete Place'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

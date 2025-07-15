@@ -3,23 +3,113 @@ import { useNavigate } from 'react-router-dom';
 import Map, { Marker, NavigationControl, GeolocateControl } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useUser } from '../contexts/UserContext';
+import { placeAPI } from '../services/api';
+import PlaceFormModal from '../components/PlaceFormModal';
+import SearchDropdown from '../components/SearchDropdown';
+import { searchPlaces, searchPetPlaces, getViewboxFromBounds, searchMajorCities } from '../services/geocoding';
 import '../styles/Home.css';
 
 const Home = () => {
-  const { firebaseUser } = useUser();
+  const { firebaseUser, mongoUser } = useUser();
   const navigate = useNavigate();
-  const [viewState, setViewState] = useState({
-    longitude: -87.6298,  // Chicago downtown longitude
-    latitude: 41.8781,    // Chicago downtown latitude
-    zoom: 13              // Slightly more zoomed in for city view
-  });
   
+  // Check for saved map state first
+  const getSavedMapState = () => {
+    try {
+      const savedState = sessionStorage.getItem('pawpawmate_map_state');
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        
+        // Check if saved state is less than 30 minutes old
+        const thirtyMinutes = 30 * 60 * 1000;
+        if (Date.now() - parsed.timestamp < thirtyMinutes) {
+          console.log('Restored saved map state:', parsed);
+          return parsed;
+        } else {
+          console.log('Saved map state expired, clearing');
+          sessionStorage.removeItem('pawpawmate_map_state');
+        }
+      }
+    } catch (error) {
+      console.error('Error loading saved map state:', error);
+    }
+    return {
+      longitude: -87.6298,  // Chicago downtown longitude (fallback)
+      latitude: 41.8781,    // Chicago downtown latitude (fallback)
+      zoom: 13              // Slightly more zoomed in for city view
+    };
+  };
+
+  const [viewState, setViewState] = useState(getSavedMapState());
+  const [locationPermissionChecked, setLocationPermissionChecked] = useState(false);
+  
+  // Restore saved filter and search query
+  const getInitialFilter = () => {
+    try {
+      const savedState = sessionStorage.getItem('pawpawmate_map_state');
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        // Check if saved state is less than 30 minutes old
+        const thirtyMinutes = 30 * 60 * 1000;
+        if (Date.now() - parsed.timestamp < thirtyMinutes) {
+          return parsed.filter || 'all';
+        }
+      }
+    } catch (error) {
+      console.error('Error loading saved filter:', error);
+    }
+    return 'all';
+  };
+
+  const getInitialSearchQuery = () => {
+    try {
+      const savedState = sessionStorage.getItem('pawpawmate_map_state');
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        // Check if saved state is less than 30 minutes old
+        const thirtyMinutes = 30 * 60 * 1000;
+        if (Date.now() - parsed.timestamp < thirtyMinutes) {
+          return parsed.searchQuery || '';
+        }
+      }
+    } catch (error) {
+      console.error('Error loading saved search query:', error);
+    }
+    return '';
+  };
+
   const [locations, setLocations] = useState([]);
-  const [filter, setFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilterState] = useState(getInitialFilter());
+  
+  // Wrapper function to save state when filter changes
+  const setFilter = (newFilter) => {
+    setFilterState(newFilter);
+    // Save state after filter changes
+    setTimeout(() => saveMapState(), 100);
+  };
+  const [searchQuery, setSearchQueryState] = useState(getInitialSearchQuery());
+  
+  // Wrapper function to save state when search query changes
+  const setSearchQuery = (newQuery) => {
+    setSearchQueryState(newQuery);
+    // Save state after search query changes
+    setTimeout(() => saveMapState(), 100);
+  };
   const [loading, setLoading] = useState(false);
+  const [showPlaceModal, setShowPlaceModal] = useState(false);
+  const [clickedCoordinates, setClickedCoordinates] = useState(null);
+  const [databasePlaces, setDatabasePlaces] = useState([]);
+  
+  // Search state
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [selectedSearchIndex, setSelectedSearchIndex] = useState(-1);
+  const [searchHistory, setSearchHistory] = useState([]);
+  
   const mapRef = useRef();
   const fetchTimeoutRef = useRef();
+  const searchTimeoutRef = useRef();
 
   // Location types with icons - Dog Parks first for priority
   const locationTypes = {
@@ -28,6 +118,48 @@ const Home = () => {
     veterinary: { label: 'VET', icon: '🏥', color: '#53f2fc' },
     pet_store: { label: 'Pet Store', icon: '🥣', color: '#FFE500' },
     animal_shelter: { label: 'Shelter', icon: '🏠', color: '#FFC29F' }
+  };
+
+  // Get user's current location
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      console.log('Geolocation is not supported by this browser');
+      setLocationPermissionChecked(true);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log('Current location obtained:', { latitude, longitude });
+        
+        // Only use current location if there's no saved map state
+        const savedState = sessionStorage.getItem('pawpawmate_map_state');
+        if (!savedState) {
+          setViewState(prev => ({
+            ...prev,
+            longitude,
+            latitude,
+            zoom: 13
+          }));
+          console.log('Using current location as no saved state found');
+        } else {
+          console.log('Keeping saved map state, ignoring current location');
+        }
+        setLocationPermissionChecked(true);
+      },
+      (error) => {
+        console.log('Error getting location:', error.message);
+        console.log('Falling back to Chicago location');
+        setLocationPermissionChecked(true);
+        // Keep default Chicago location
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // Cache for 5 minutes
+      }
+    );
   };
 
   // Fetch locations from OpenStreetMap using Overpass API
@@ -228,6 +360,9 @@ const Home = () => {
   const handleMapMove = (evt) => {
     setViewState(evt.viewState);
     
+    // Save map state after user moves the map
+    saveMapState(evt.viewState);
+    
     // Clear existing timeout
     if (fetchTimeoutRef.current) {
       clearTimeout(fetchTimeoutRef.current);
@@ -294,22 +429,34 @@ const Home = () => {
     }
   };
 
+  // Load database places
+  const loadDatabasePlaces = async () => {
+    try {
+      const dbPlaces = await placeAPI.getAllPlaces();
+      setDatabasePlaces(dbPlaces);
+      console.log('Loaded database places:', dbPlaces.length);
+    } catch (error) {
+      console.error('Error loading database places:', error);
+    }
+  };
+
   // Initial load
   useEffect(() => {
+    // Get user's current location first
+    getCurrentLocation();
+    
     // Test API first
     testOverpassAPI();
     
     // Test shelter query specifically
     testShelterQuery();
     
-    // Fetch initial locations after map loads
+    // Load database places
+    loadDatabasePlaces();
+    
+    // Initial setup (removed location fetching from here)
     const timer = setTimeout(() => {
-      if (mapRef.current) {
-        const bounds = mapRef.current.getBounds();
-        if (bounds) {
-          fetchLocations(bounds);
-        }
-      }
+      // This timer is just for cleanup purposes now
     }, 1000);
 
     return () => {
@@ -317,46 +464,418 @@ const Home = () => {
       if (fetchTimeoutRef.current) {
         clearTimeout(fetchTimeoutRef.current);
       }
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Fetch locations when location permission is checked and map is ready
+  useEffect(() => {
+    if (locationPermissionChecked && mapRef.current) {
+      const timer = setTimeout(() => {
+        const bounds = mapRef.current.getBounds();
+        if (bounds) {
+          fetchLocations(bounds);
+        }
+      }, 500); // Shorter delay since location is already determined
+
+      return () => clearTimeout(timer);
+    }
+  }, [locationPermissionChecked]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load search history from localStorage
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('pawpawmate_search_history');
+    if (savedHistory) {
+      try {
+        setSearchHistory(JSON.parse(savedHistory));
+      } catch (error) {
+        console.error('Error loading search history:', error);
+      }
+    }
+  }, []);
+
+  // Save search history to localStorage
+  const saveSearchHistory = (newHistory) => {
+    localStorage.setItem('pawpawmate_search_history', JSON.stringify(newHistory));
+    setSearchHistory(newHistory);
+  };
+
+  // Add item to search history
+  const addToSearchHistory = (searchTerm) => {
+    const newHistory = [
+      searchTerm,
+      ...searchHistory.filter(item => item !== searchTerm)
+    ].slice(0, 5); // Keep only last 5 searches
+    
+    saveSearchHistory(newHistory);
+  };
+
+  // Debounced search function
+  const performSearch = async (query) => {
+    if (!query || query.trim().length < 2) {
+      setSearchResults([]);
+      setShowSearchDropdown(false);
+      return;
+    }
+
+    setSearchLoading(true);
+    setShowSearchDropdown(true);
+
+    try {
+      // First, quickly show local results (database places + major cities)
+      const databaseResults = searchDatabasePlaces(query);
+      const majorCityResults = searchMajorCities(query);
+      
+      const immediateResults = [...databaseResults, ...majorCityResults];
+      if (immediateResults.length > 0) {
+        setSearchResults(immediateResults.slice(0, 6)); // Show first 6 immediate results
+      }
+
+      // Get current map bounds for prioritizing nearby results
+      const bounds = mapRef.current?.getBounds();
+      const viewbox = getViewboxFromBounds(bounds);
+
+      // Then perform external searches with timeout handling
+      const searchPromises = [
+        searchPlaces(query, { viewbox, limit: 6 }),
+        searchPetPlaces(query, viewbox)
+      ];
+
+      const [generalResults, petResults] = await Promise.allSettled(searchPromises);
+
+      // Extract successful results
+      const allExternalResults = [
+        ...(generalResults.status === 'fulfilled' ? generalResults.value : []),
+        ...(petResults.status === 'fulfilled' ? petResults.value : [])
+      ];
+
+      // Combine all results
+      const allResults = [...databaseResults, ...majorCityResults, ...allExternalResults];
+      const uniqueResults = allResults.filter((result, index, self) => 
+        index === self.findIndex(r => r.id === result.id)
+      );
+
+      // Sort by importance and relevance
+      const sortedResults = uniqueResults
+        .sort((a, b) => {
+          // Prioritize database results first
+          if (a.isFromDatabase && !b.isFromDatabase) return -1;
+          if (!a.isFromDatabase && b.isFromDatabase) return 1;
+          
+          // Then prioritize major cities
+          if (a.isMajorCity && !b.isMajorCity) return -1;
+          if (!a.isMajorCity && b.isMajorCity) return 1;
+          
+          // Then prioritize exact matches
+          if (a.name.toLowerCase().includes(query.toLowerCase()) && 
+              !b.name.toLowerCase().includes(query.toLowerCase())) {
+            return -1;
+          }
+          if (!a.name.toLowerCase().includes(query.toLowerCase()) && 
+              b.name.toLowerCase().includes(query.toLowerCase())) {
+            return 1;
+          }
+          // Then sort by importance
+          return (b.importance || 0) - (a.importance || 0);
+        })
+        .slice(0, 10);
+
+      setSearchResults(sortedResults);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  // Search database places
+  const searchDatabasePlaces = (query) => {
+    const results = databasePlaces
+      .filter(place => 
+        place.name.toLowerCase().includes(query.toLowerCase()) ||
+        place.address.toLowerCase().includes(query.toLowerCase())
+      )
+      .map(place => ({
+        id: `db-${place._id}`,
+        name: place.name,
+        type: place.type.replace(' ', '_'),
+        lat: place.coordinates?.lat || 0,
+        lng: place.coordinates?.lng || 0,
+        importance: 0.8, // High importance for database places
+        address: { display_name: place.address },
+        isFromDatabase: true,
+        originalPlace: place
+      }));
+
+    return results;
+  };
+
+  // Handle search input change with debouncing
+  const handleSearchInputChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    setSelectedSearchIndex(-1);
+
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Show dropdown immediately if query is long enough
+    if (query.trim().length >= 2) {
+      setShowSearchDropdown(true);
+    } else {
+      setShowSearchDropdown(false);
+      setSearchResults([]);
+    }
+
+    // Set new timeout for debounced search
+    searchTimeoutRef.current = setTimeout(() => {
+      performSearch(query);
+    }, 200); // Reduced debounce delay for faster response
+  };
+
+  // Handle search form submission
   const handleSearch = (e) => {
     e.preventDefault();
-    // Implement geocoding search functionality
-    console.log('Searching for:', searchQuery);
+    if (searchResults.length > 0) {
+      handleSearchResultSelect(searchResults[0]);
+    }
+  };
+
+  // Handle search result selection
+  const handleSearchResultSelect = (result) => {
+    console.log('Selected search result:', result);
+    
+    // Add to search history
+    addToSearchHistory(result.name);
+    
+    // Close dropdown
+    setShowSearchDropdown(false);
+    setSearchResults([]);
+    setSelectedSearchIndex(-1);
+    
+    // Always zoom to location on map (regardless of source)
+    const zoomLevel = result.type === 'city' ? 12 : 
+                     result.type === 'address' ? 16 : 
+                     15; // Default zoom for places
+    
+    const newViewState = {
+      longitude: result.lng,
+      latitude: result.lat,
+      zoom: zoomLevel,
+      transitionDuration: 1000
+    };
+    
+    setViewState(newViewState);
+    
+    // Update search query to selected result name
+    setSearchQuery(result.name);
+    
+    // Clear saved state since user navigated to a new location
+    clearSavedMapState();
+  };
+
+  // Handle keyboard navigation in search dropdown
+  const handleSearchKeyNavigation = (direction) => {
+    if (direction === 'down') {
+      setSelectedSearchIndex(prev => 
+        prev < searchResults.length - 1 ? prev + 1 : prev
+      );
+    } else if (direction === 'up') {
+      setSelectedSearchIndex(prev => prev > 0 ? prev - 1 : -1);
+    }
+  };
+
+  // Close search dropdown
+  const closeSearchDropdown = () => {
+    setShowSearchDropdown(false);
+    setSearchResults([]);
+    setSelectedSearchIndex(-1);
+  };
+
+  // Save current map state to sessionStorage
+  const saveMapState = (state = viewState) => {
+    try {
+      const stateToSave = {
+        longitude: state.longitude,
+        latitude: state.latitude,
+        zoom: state.zoom,
+        filter: filter,
+        searchQuery: searchQuery,
+        timestamp: Date.now()
+      };
+      sessionStorage.setItem('pawpawmate_map_state', JSON.stringify(stateToSave));
+      console.log('Saved map state:', stateToSave);
+    } catch (error) {
+      console.error('Error saving map state:', error);
+    }
+  };
+
+  // Clear saved map state
+  const clearSavedMapState = () => {
+    try {
+      sessionStorage.removeItem('pawpawmate_map_state');
+      console.log('Cleared saved map state');
+    } catch (error) {
+      console.error('Error clearing saved map state:', error);
+    }
   };
 
   const handleLocationClick = (location) => {
-    // Directly navigate to place details instead of showing popup
-    // For OSM locations, we'll use the OSM node ID directly if available, 
-    // otherwise create a coordinate-based ID
-    const locationId = location.id && location.id !== `location-${location.latitude}-${location.longitude}` 
-      ? location.id 
-      : `osm-${location.latitude}-${location.longitude}`;
-      
-    console.log('Navigating to place:', locationId, 'with data:', location);
-    navigate(`/place/${locationId}`, { state: { locationData: location } });
+    // Save current map state before navigating
+    saveMapState();
+    
+    // Check if this is a database place
+    if (location.isFromDatabase) {
+      console.log('Navigating to database place:', location.id);
+      navigate(`/place/${location.id}`);
+    } else {
+      // For OSM locations, we'll use the OSM node ID directly if available, 
+      // otherwise create a coordinate-based ID
+      const locationId = location.id && location.id !== `location-${location.latitude}-${location.longitude}` 
+        ? location.id 
+        : `osm-${location.latitude}-${location.longitude}`;
+        
+      console.log('Navigating to OSM place:', locationId, 'with data:', location);
+      navigate(`/place/${locationId}`, { state: { locationData: location } });
+    }
   };
 
-  const filteredLocations = locations.filter(location => 
-    filter === 'all' || location.type === filter
+  // Handle map clicks for creating new places
+  const handleMapClick = async (event) => {
+    // Don't create place if user is not logged in
+    if (!mongoUser || !firebaseUser) {
+      alert('Please log in to create a new place');
+      navigate('/login');
+      return;
+    }
+
+    const { lng, lat } = event.lngLat;
+    console.log('Map clicked at:', { lat, lng });
+
+    // Check if there's already a place at this location
+    const clickedLocationExists = await checkLocationExists(lat, lng);
+    
+    if (!clickedLocationExists) {
+      // No place exists, show the creation modal
+      setClickedCoordinates({ lat, lng });
+      setShowPlaceModal(true);
+    } else {
+      console.log('A place already exists at this location');
+    }
+  };
+
+  // Check if a place exists at the given coordinates
+  const checkLocationExists = async (lat, lng) => {
+    // Check OSM locations
+    const tolerance = 0.001; // roughly 100 meters
+    const osmLocationExists = locations.some(location => {
+      const latDiff = Math.abs(location.latitude - lat);
+      const lngDiff = Math.abs(location.longitude - lng);
+      return latDiff < tolerance && lngDiff < tolerance;
+    });
+
+    if (osmLocationExists) {
+      return true;
+    }
+
+    // Check database locations
+    try {
+      // Load database places if not already loaded
+      if (databasePlaces.length === 0) {
+        const dbPlaces = await placeAPI.getAllPlaces();
+        setDatabasePlaces(dbPlaces);
+        
+        // Check in the newly loaded places
+        return dbPlaces.some(place => {
+          if (!place.coordinates) return false;
+          const latDiff = Math.abs(place.coordinates.lat - lat);
+          const lngDiff = Math.abs(place.coordinates.lng - lng);
+          return latDiff < tolerance && lngDiff < tolerance;
+        });
+      } else {
+        // Check in already loaded database places
+        return databasePlaces.some(place => {
+          if (!place.coordinates) return false;
+          const latDiff = Math.abs(place.coordinates.lat - lat);
+          const lngDiff = Math.abs(place.coordinates.lng - lng);
+          return latDiff < tolerance && lngDiff < tolerance;
+        });
+      }
+    } catch (error) {
+      console.error('Error checking database places:', error);
+      return false;
+    }
+  };
+
+  // Handle successful place creation
+  const handlePlaceCreated = (newPlace) => {
+    console.log('New place created:', newPlace);
+    
+    // Add to database places
+    setDatabasePlaces(prev => [...prev, newPlace]);
+    
+    // Navigate to the new place
+    navigate(`/place/${newPlace._id}`);
+  };
+
+  // Combine OSM locations and database places
+  const combinedLocations = [
+    ...locations,
+    ...databasePlaces.map(place => ({
+      id: place._id,
+      name: place.name,
+      type: place.type.replace(' ', '_'), // Convert "dog park" to "dog_park" for consistency
+      latitude: place.coordinates?.lat || 0,
+      longitude: place.coordinates?.lng || 0,
+      description: place.description || '',
+      tags: place.tags || [],
+      address: place.address || '',
+      phone: place.phone || '',
+      website: place.website || '',
+      opening_hours: place.opening_hours || '',
+      isFromDatabase: true
+    }))
+  ];
+
+  const filteredLocations = combinedLocations.filter(location => 
+    filter === 'all' || location.type === filter || location.type.replace('_', ' ') === filter
   );
 
   return (
     <div className="home-container">
       <div className="map-controls">
-        <form onSubmit={handleSearch} className="search-bar">
-          <input
-            type="text"
-            placeholder="Search for pet-friendly places..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-          />
-          <button type="submit" className="search-button">
-            Search
-          </button>
-        </form>
+        <div className="search-container">
+          <form onSubmit={handleSearch} className="search-bar">
+            <input
+              type="text"
+              placeholder="Search for cities, addresses, or pet places..."
+              value={searchQuery}
+              onChange={handleSearchInputChange}
+              className="search-input"
+              autoComplete="off"
+            />
+            <button type="submit" className="search-button">
+              Search
+            </button>
+          </form>
+          
+          {showSearchDropdown && (
+            <SearchDropdown
+              results={searchResults}
+              loading={searchLoading}
+              onSelect={handleSearchResultSelect}
+              onClose={closeSearchDropdown}
+              selectedIndex={selectedSearchIndex}
+              onKeyNavigation={handleSearchKeyNavigation}
+              searchQuery={searchQuery}
+            />
+          )}
+        </div>
 
         <div className="filter-section">
           <div className="filter-buttons">
@@ -373,7 +892,7 @@ const Home = () => {
           
           <div className="location-count-display">
             {filteredLocations.length} locations found
-            {loading && <span className="loading-spinner">⟳</span>}
+            {loading && <span className="location-count-spinner">⟳</span>}
           </div>
         </div>
 
@@ -381,10 +900,20 @@ const Home = () => {
       </div>
 
       <div className="map-wrapper">
+        {!locationPermissionChecked && (
+          <div className="location-loading-overlay">
+            <div className="location-loading-content">
+              <div className="loading-spinner">⟳</div>
+              <p>Getting your location...</p>
+              <small>We'll show Chicago if location access is denied</small>
+            </div>
+          </div>
+        )}
         <Map
           ref={mapRef}
           {...viewState}
           onMove={handleMapMove}
+          onClick={handleMapClick}
           style={{ width: '100%', height: '100%' }}
           mapStyle={process.env.REACT_APP_MAPBOX_STYLE}
           mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
@@ -426,6 +955,17 @@ const Home = () => {
 
         </Map>
       </div>
+
+      {/* Place Creation Modal */}
+      <PlaceFormModal
+        isOpen={showPlaceModal}
+        onClose={() => {
+          setShowPlaceModal(false);
+          setClickedCoordinates(null);
+        }}
+        coordinates={clickedCoordinates}
+        onPlaceCreated={handlePlaceCreated}
+      />
     </div>
   );
 };
