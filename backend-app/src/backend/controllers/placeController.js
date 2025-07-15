@@ -29,6 +29,55 @@ exports.createPlace = async (req, res) => {
       return res.status(400).json({ error: 'Coordinates must be valid numbers' });
     }
     
+    // Check for duplicate places by name (case-insensitive)
+    const duplicateByName = await Place.findOne({ 
+      name: { $regex: new RegExp(`^${placeData.name.trim()}$`, 'i') }
+    });
+    
+    if (duplicateByName) {
+      console.log('Duplicate place found by name:', duplicateByName.name);
+      return res.status(400).json({ 
+        error: 'A place with this name already exists',
+        existingPlace: duplicateByName
+      });
+    }
+    
+    // Check for duplicate places by coordinates (within ~100 meters)
+    const tolerance = 0.001; // roughly 100 meters
+    const duplicateByLocation = await Place.findOne({
+      'coordinates.lat': { 
+        $gte: placeData.coordinates.lat - tolerance, 
+        $lte: placeData.coordinates.lat + tolerance 
+      },
+      'coordinates.lng': { 
+        $gte: placeData.coordinates.lng - tolerance, 
+        $lte: placeData.coordinates.lng + tolerance 
+      }
+    });
+    
+    if (duplicateByLocation) {
+      console.log('Duplicate place found by location:', duplicateByLocation.name);
+      return res.status(400).json({ 
+        error: 'A place already exists at this location',
+        existingPlace: duplicateByLocation
+      });
+    }
+    
+    // Check for duplicate by address if provided (case-insensitive, trimmed)
+    if (placeData.address && placeData.address.trim()) {
+      const duplicateByAddress = await Place.findOne({ 
+        address: { $regex: new RegExp(`^${placeData.address.trim()}$`, 'i') }
+      });
+      
+      if (duplicateByAddress) {
+        console.log('Duplicate place found by address:', duplicateByAddress.address);
+        return res.status(400).json({ 
+          error: 'A place with this address already exists',
+          existingPlace: duplicateByAddress
+        });
+      }
+    }
+    
     // Note: No authentication required here - frontend handles login check
     // If a userId is provided in the request body, use it (for logged-in users)
     if (req.body.userId) {
@@ -74,6 +123,56 @@ exports.getPlaceById = async (req, res) => {
     if (!place) return res.status(404).json({ error: "Place not found" });
     res.json(place);
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.deletePlace = async (req, res) => {
+  try {
+    const placeId = req.params.id;
+    const userId = req.body.userId; // User ID from request body
+    
+    console.log('Delete place request:', { placeId, userId });
+    
+    // Find the place first
+    const place = await Place.findById(placeId);
+    
+    if (!place) {
+      return res.status(404).json({ error: "Place not found" });
+    }
+    
+    // Check if the user is the creator of the place
+    if (!place.addedBy || place.addedBy.toString() !== userId) {
+      console.log('Unauthorized delete attempt:', {
+        placeCreator: place.addedBy,
+        requestingUser: userId
+      });
+      return res.status(403).json({ 
+        error: "You are not authorized to delete this place. Only the creator can delete it." 
+      });
+    }
+    
+    // Delete all reviews associated with this place
+    const Review = require("../models/Review");
+    const deletedReviews = await Review.deleteMany({ placeId: placeId });
+    console.log(`Deleted ${deletedReviews.deletedCount} reviews for place ${placeId}`);
+    
+    // Delete all cards associated with this place
+    const Card = require("../models/Card");
+    const deletedCards = await Card.deleteMany({ placeId: placeId });
+    console.log(`Deleted ${deletedCards.deletedCount} cards for place ${placeId}`);
+    
+    // Delete the place
+    await Place.findByIdAndDelete(placeId);
+    console.log('Place deleted successfully:', placeId);
+    
+    res.json({ 
+      message: "Place deleted successfully",
+      deletedReviews: deletedReviews.deletedCount,
+      deletedCards: deletedCards.deletedCount
+    });
+  } catch (err) {
+    console.error('Error deleting place:', err);
     res.status(500).json({ error: err.message });
   }
 };
