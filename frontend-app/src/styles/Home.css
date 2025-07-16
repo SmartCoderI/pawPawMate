@@ -1,13 +1,15 @@
 /* Home Page Styles - Updated Design */
 .home-container {
-  height: calc(100vh - 70px); /* Account for standard navigation height */
+  height: calc(100vh - 100px); /* Account for actual navigation height (100px) */
   display: flex;
   flex-direction: column;
   overflow: hidden;
   font-family: 'Arial Black', Arial, sans-serif;
   background: #F5F5DC; /* Beige/cream background */
   margin: 0;
-  padding: 0;
+  padding: 0 0 1rem 0; /* Add bottom padding to prevent map from touching bottom */
+  position: relative;
+  box-sizing: border-box;
 }
 
 /* Welcome Banner for non-logged-in users */
@@ -91,20 +93,23 @@
 
 .map-controls {
   background: #F5F5DC; /* Beige background */
-  padding: 1.5rem;
+  padding: 1rem;
   z-index: 10;
-  margin: 1.5rem;
+  margin: 1rem;
   border: 4px solid #000000;
   box-shadow: 0.5rem 0.5rem 0px #000000;
   flex: 0 0 auto; /* Don't allow shrinking */
-  min-height: 9rem; /* Make controls section larger */
   border-radius: 1rem; /* Rounded corners for map controls */
+}
+
+.search-container {
+  position: relative;
+  margin-bottom: 1rem;
 }
 
 .search-bar {
   display: flex;
   gap: 0.75rem;
-  margin-bottom: 1rem;
 }
 
 .search-input {
@@ -155,16 +160,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: nowrap;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .filter-buttons {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .location-count-display {
@@ -183,15 +188,22 @@
   letter-spacing: 0.0625rem;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.location-count-spinner {
+  font-size: 0.875rem; /* Match the location count text size exactly */
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  margin-left: 0.375rem;
   border-radius: 0.5rem; /* Rounded corners */
 }
 
 .filter-button {
-  padding: 0.625rem 1rem;
+  padding: 0.5rem 0.75rem;
   background-color: #F5F5DC; /* Beige background */
   border: 4px solid #000000;
   box-shadow: 0.25rem 0.25rem 0px #000000;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 900;
   font-family: 'Arial Black', Arial, sans-serif;
   cursor: pointer;
@@ -199,8 +211,6 @@
   letter-spacing: 0.0625rem;
   transition: all 0.1s ease;
   white-space: nowrap;
-  flex-shrink: 0;
-  min-width: fit-content;
   border-radius: 0.5rem; /* Rounded corners */
 }
 
@@ -220,13 +230,13 @@
   flex: 1;
   position: relative;
   overflow: hidden;
-  margin: 0 1.5rem 1.5rem 1.5rem;
-  min-height: 18.75rem; /* Ensure minimum height for map */
-  max-height: 31.25rem; /* Limit map height to make it smaller */
+  margin: 0 1rem 2rem 1rem;
+  min-height: 0; /* Allow map to shrink */
   border: 4px solid #000000;
   box-shadow: 0.5rem 0.5rem 0px #000000;
   background: #20B2AA; /* Teal background for map area */
   border-radius: 1rem; /* Rounded corners for map boundary */
+  display: flex;
 }
 
 .marker {
@@ -353,6 +363,48 @@
   border-radius: 0.5rem; /* Rounded corners */
 }
 
+/* Location loading overlay */
+.location-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.location-loading-content {
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 3px solid #000;
+}
+
+.location-loading-content .loading-spinner {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+.location-loading-content p {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.location-loading-content small {
+  color: #666;
+  font-size: 0.9rem;
+}
+
 .loading-spinner {
   display: inline-block;
   animation: spin 1s linear infinite;
@@ -433,10 +485,25 @@
   box-shadow: 2px 2px 0px #000000;
 }
 
-@media (max-width: 768px) {
+/* Responsive Design - Desktop First Approach */
+@media (max-width: 1200px) {
+  .nav-container {
+    height: 80px;
+  }
+  
   .home-container {
-    height: calc(100vh - 60px); /* Account for standard mobile navigation height */
-    background: #F5F5DC;
+    height: calc(100vh - 80px);
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    height: 70px;
+  }
+  
+  .home-container {
+    height: calc(100vh - 70px);
+    padding: 0 0 0.75rem 0; /* Slightly less padding on mobile */
   }
 
   .welcome-banner {
@@ -477,9 +544,12 @@
     flex-shrink: 0; /* Prevent controls from shrinking */
   }
 
+  .search-container {
+    margin-bottom: 8px;
+  }
+
   .search-bar {
     gap: 4px;
-    margin-bottom: 8px; /* Increased margin */
   }
 
   .search-input,
@@ -547,7 +617,7 @@
   }
 
   .map-wrapper {
-    margin: 0 6px 6px 6px; /* Increased margins */
+    margin: 0 6px 20px 6px; /* Increased bottom margin for mobile */
     border: 2px solid #000000;
     flex: 1;
     min-height: 0;
@@ -567,8 +637,13 @@
 }
 
 @media (max-width: 480px) {
+  .nav-container {
+    height: 60px;
+  }
+  
   .home-container {
-    height: calc(100vh - 50px); /* Account for smaller navigation height */
+    height: calc(100vh - 60px);
+    padding: 0 0 0.5rem 0; /* Smaller padding on small screens */
   }
 
   .map-controls {
@@ -609,6 +684,10 @@
     padding: 6px 8px;
     min-height: 32px;
   }
+  
+  .map-wrapper {
+    margin: 0 4px 16px 4px; /* Ensure bottom spacing on small screens */
+  }
 
   .welcome-content h1 {
     font-size: 18px;
@@ -636,8 +715,13 @@
 }
 
 @media (max-width: 360px) {
+  .nav-container {
+    height: 50px;
+  }
+  
   .home-container {
-    height: calc(100vh - 45px); /* Account for very small navigation height */
+    height: calc(100vh - 50px);
+    padding: 0 0 0.5rem 0; /* Minimal padding on very small screens */
   }
 
   .filter-buttons {
@@ -649,6 +733,10 @@
     padding: 4px 5px;
     min-height: 28px;
     letter-spacing: 0.1px;
+  }
+  
+  .map-wrapper {
+    margin: 0 2px 12px 2px; /* Ensure bottom spacing on very small screens */
   }
 }
 
