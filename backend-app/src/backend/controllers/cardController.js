@@ -6,16 +6,20 @@ const Place = require("../models/Place");
 // Generate a reward card for a user
 const generateRewardCard = async (userId, reviewId, placeId, locationName, contributionType) => {
   try {
-    // Get user data to access their pet information
-    const user = await User.findById(userId).populate('pets');
+    // Get user data
+    const user = await User.findById(userId);
     if (!user) {
       throw new Error("User not found");
     }
 
+    // Get user's pets (correct relationship)
+    const Pet = require("../models/Pet");
+    const userPets = await Pet.find({ owner: userId });
+
     // Get a random pet image from user's pets, or use a default
     let petImage = "/default-pet.png"; // fallback image
-    if (user.pets && user.pets.length > 0) {
-      const randomPet = user.pets[Math.floor(Math.random() * user.pets.length)];
+    if (userPets && userPets.length > 0) {
+      const randomPet = userPets[Math.floor(Math.random() * userPets.length)];
       petImage = randomPet.profileImage || "/default-pet.png";
     }
 
