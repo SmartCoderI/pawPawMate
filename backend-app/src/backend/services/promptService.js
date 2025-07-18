@@ -207,7 +207,7 @@ class PromptService {
 
     // Base style for all images
     const baseStyle =
-      "Studio Ghibli inspired anime style, whimsical and magical atmosphere, hand-drawn animation style, gentle lighting, dreamy and enchanting, Miyazaki-inspired art";
+      "Studio Ghibli inspired anime style, whimsical and magical atmosphere, hand-drawn animation style, watercolor, gentle lighting, dreamy and enchanting, Miyazaki-inspired art";
 
     // Pet description
     const petDescription = `${petInfo.species === "dog" ? "a" : "a"} ${petInfo.personality.join(" and ")} ${
