@@ -3476,10 +3476,10 @@ const PlaceDetails = () => {
                         }
                       >
                         <option value="">Select...</option>
-                        <option value="very_affordable">Very Affordable</option>
-                        <option value="affordable">Affordable</option>
-                        <option value="expensive">Expensive</option>
-                        <option value="very_expensive">Very Expensive</option>
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                        <option value="very_high">Very High</option>
                       </select>
                     </div>
                     <div className="checkbox-group">
@@ -3569,10 +3569,10 @@ const PlaceDetails = () => {
                         }
                       >
                         <option value="">Select...</option>
-                        <option value="expert">Expert</option>
-                        <option value="knowledgeable">Knowledgeable</option>
-                        <option value="basic">Basic</option>
-                        <option value="limited">Limited</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
                       </select>
                     </div>
                     <div className="checkbox-group">
