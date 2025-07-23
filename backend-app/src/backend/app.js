@@ -12,6 +12,7 @@ const petRoutes = require("./routes/petRoutes");
 const placeRoutes = require("./routes/placeRoutes");
 const cardRoutes = require("./routes/cardRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
+const lostPetRoutes = require("./routes/lostPetRoutes");
 
 //initialize the Express app instance
 const app = express();
@@ -26,6 +27,7 @@ app.use("/api/pets", petRoutes);
 app.use("/api/places", placeRoutes);
 app.use("/api/cards", cardRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/lostpets", lostPetRoutes);
 
 // Export app to be used by server.js
 module.exports = app;

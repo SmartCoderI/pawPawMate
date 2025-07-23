@@ -1,86 +1,621 @@
 /* Lost Pets Styles */
 .lost-pets-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  background: #f3f4f6;
 }
 
-.lost-pets-header {
+/* Map Controls Section */
+.map-controls {
+  background: white;
+  border-bottom: 3px solid #1f2937;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.controls-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 1rem;
 }
 
-.lost-pets-header h1 {
+.controls-header h1 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #1f2937;
   margin: 0;
-  font-size: 32px;
-  color: #333;
+}
+
+.report-buttons {
+  display: flex;
+  gap: 1rem;
 }
 
 .report-button {
-  padding: 12px 24px;
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
+  border: 3px solid #1f2937;
+  padding: 0.75rem 1.5rem;
+  font-weight: bold;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  color: white;
 }
 
 .report-button:hover {
-  background-color: #d32f2f;
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px #1f2937;
 }
 
-.report-form-container {
+.lost-button {
+  background: #ef4444;
+}
+
+.lost-button:hover {
+  background: #dc2626;
+}
+
+.seen-button {
+  background: #eab308;
+}
+
+.seen-button:hover {
+  background: #d97706;
+}
+
+/* Filter Section */
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-weight: bold;
+  color: #1f2937;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-button {
   background: white;
-  border: 1px solid #eee;
+  color: #1f2937;
+  border: 2px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.filter-button:hover {
+  border-color: #1f2937;
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px #1f2937;
+}
+
+.filter-button.active {
+  background: #1f2937;
+  color: white;
+  border-color: #1f2937;
+  box-shadow: 2px 2px 0px #4b5563;
+}
+
+/* Status-specific button colors */
+.filter-button.status-missing.active {
+  background: #dc2626;
+  border-color: #991b1b;
+  box-shadow: 2px 2px 0px #991b1b;
+}
+
+.filter-button.status-seen.active {
+  background: #eab308;
+  border-color: #a16207;
+  box-shadow: 2px 2px 0px #a16207;
+}
+
+.filter-button.status-found.active {
+  background: #22c55e;
+  border-color: #16a34a;
+  box-shadow: 2px 2px 0px #16a34a;
+}
+
+.filter-icon {
+  font-size: 1.1em;
+}
+
+.location-count-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
+  color: #4b5563;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.location-count-spinner {
+  animation: spin 1s linear infinite;
+  font-size: 1.2em;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Map Instructions */
+.map-instructions {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.map-instructions p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.map-instructions p:first-child {
+  margin-top: 0;
+}
+
+.map-instructions p:last-child {
+  margin-bottom: 0;
+}
+
+/* Map Wrapper */
+.map-wrapper {
+  flex: 1;
+  position: relative;
+  height: calc(100vh - 280px);
+  min-height: 400px;
+}
+
+/* Location Loading Overlay */
+.location-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.location-loading-content {
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border: 3px solid #1f2937;
   border-radius: 12px;
-  padding: 30px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 4px 4px 0px #1f2937;
 }
 
-.report-form-container h2 {
-  margin: 0 0 20px 0;
-  color: #333;
+.loading-spinner {
+  font-size: 3rem;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 
+.location-loading-content p {
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0.5rem 0;
+}
+
+.location-loading-content small {
+  color: #6b7280;
+}
+
+/* Lost Pet Markers */
+.lost-pet-marker {
+  transition: transform 0.2s;
+}
+
+.lost-pet-marker:hover {
+  transform: scale(1.1);
+  z-index: 1000;
+}
+
+/* Popup Styles */
+.pet-popup {
+  font-family: inherit;
+  max-width: 400px;
+}
+
+.pet-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.pet-popup-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.status-badge.status-missing {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.status-badge.status-seen {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.status-badge.status-found {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.pet-popup-photo {
+  margin-bottom: 1rem;
+}
+
+.pet-popup-details {
+  margin-bottom: 1rem;
+}
+
+.pet-popup-details p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.pet-popup-details strong {
+  color: #1f2937;
+}
+
+.location-time-info {
+  background: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin: 0.75rem 0;
+  border-left: 4px solid #3b82f6;
+}
+
+.contact-info {
+  background: #f0f9ff;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin: 0.75rem 0;
+  border-left: 4px solid #0ea5e9;
+}
+
+.reward-info {
+  background: #fef7cd;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin: 0.75rem 0;
+  border-left: 4px solid #eab308;
+}
+
+.sightings-info {
+  background: #f3e8ff;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin: 0.75rem 0;
+  border-left: 4px solid #8b5cf6;
+}
+
+.pet-popup-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+.sighting-button, .found-button {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 2px solid;
+  transition: all 0.2s;
+}
+
+.sighting-button {
+  background: #fbbf24;
+  color: #1f2937;
+  border-color: #f59e0b;
+}
+
+.sighting-button:hover {
+  background: #f59e0b;
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px #d97706;
+}
+
+.found-button {
+  background: #34d399;
+  color: #1f2937;
+  border-color: #10b981;
+}
+
+.found-button:hover {
+  background: #10b981;
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px #059669;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border: 3px solid #1f2937;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 8px 8px 0px #1f2937;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.modal-header button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.25rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-header button:hover {
+  color: #1f2937;
+  background: #e5e7eb;
+  border-radius: 50%;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .controls-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .controls-header h1 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .report-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filter-buttons {
+    justify-content: center;
+  }
+
+  .filter-button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .map-wrapper {
+    height: calc(100vh - 350px);
+  }
+
+  .pet-popup-actions {
+    flex-direction: column;
+  }
+
+  .modal-content {
+    margin: 0.5rem;
+  }
+
+  .location-loading-content {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-controls {
+    padding: 0.75rem;
+  }
+
+  .filter-group {
+    gap: 0.25rem;
+  }
+
+  .filter-buttons {
+    gap: 0.25rem;
+  }
+
+  .filter-button {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .map-instructions {
+    padding: 0.75rem;
+  }
+
+  .map-instructions p {
+    font-size: 0.8rem;
+  }
+
+  .map-wrapper {
+    height: calc(100vh - 380px);
+  }
+}
+
+/* Mapbox popup overrides */
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  border-radius: 8px !important;
+  border: 2px solid #1f2937 !important;
+  box-shadow: 4px 4px 0px rgba(31, 41, 55, 0.3) !important;
+}
+
+.mapboxgl-popup-close-button {
+  font-size: 18px !important;
+  padding: 8px !important;
+  color: #6b7280 !important;
+}
+
+.mapboxgl-popup-close-button:hover {
+  background: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: #1f2937 !important;
+}
+
+/* Loading states */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  color: #6b7280;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+/* Report Form Styles */
 .report-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.5rem;
+}
+
+.form-section {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #f9fafb;
+}
+
+.form-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #1f2937;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  gap: 1rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
 .form-group label {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 5px;
-  font-weight: 500;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.9rem;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
+  padding: 0.75rem;
+  border: 2px solid #d1d5db;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 0.9rem;
+  font-family: inherit;
   transition: border-color 0.2s;
 }
 
@@ -88,7 +623,8 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #f44336;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .form-group textarea {
@@ -96,154 +632,226 @@
   min-height: 80px;
 }
 
-.submit-button {
-  padding: 12px 24px;
-  background-color: #7a8e7a;
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #9ca3af;
+}
+
+.location-info {
+  background: #e0f2fe;
+  border: 2px solid #0891b2;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+}
+
+.location-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.location-info strong {
+  color: #0c4a6e;
+}
+
+.location-info small {
+  color: #64748b;
+  font-style: italic;
+}
+
+.selected-pet-info {
+  background: #dbeafe;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.selected-pet-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #1e40af;
+}
+
+.no-pet-selected-info {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.no-pet-selected-info p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #92400e;
+}
+
+.no-pet-selected-info p:first-child {
+  margin-top: 0;
+}
+
+.no-pet-selected-info p:last-child {
+  margin-bottom: 0;
+}
+
+.address-input-container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.address-input-container input {
+  flex: 1;
+}
+
+.geocode-button {
+  padding: 0.75rem 1rem;
+  background: #10b981;
   color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
+  border: 2px solid #059669;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.2s;
-  align-self: flex-start;
+  transition: all 0.2s;
+  min-width: 60px;
+}
+
+.geocode-button:hover:not(:disabled) {
+  background: #059669;
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px #047857;
+}
+
+.geocode-button:disabled {
+  background: #9ca3af;
+  border-color: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.address-help {
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* Location selection marker animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e5e7eb;
+  margin-top: 1rem;
+}
+
+.cancel-button,
+.submit-button {
+  padding: 0.75rem 1.5rem;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border: 2px solid;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.cancel-button {
+  background: white;
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+
+.cancel-button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.submit-button {
+  background: #3b82f6;
+  color: white;
+  border-color: #2563eb;
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: #6b7d6b;
+  background: #2563eb;
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px #1e40af;
 }
 
 .submit-button:disabled {
-  opacity: 0.6;
+  background: #9ca3af;
+  border-color: #6b7280;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-.lost-pets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
-}
-
-.lost-pet-card {
-  background: white;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.lost-pet-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.pet-photo {
-  width: 100%;
-  height: 250px;
-  object-fit: cover;
-}
-
-.pet-info {
-  padding: 20px;
-}
-
-.pet-info h3 {
-  margin: 0 0 10px 0;
-  font-size: 24px;
-  color: #333;
-}
-
-.pet-details {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.pet-type,
-.pet-size,
-.pet-breed {
-  display: inline-block;
-  background-color: #f5f5f5;
-  padding: 4px 10px;
-  border-radius: 16px;
-  font-size: 12px;
-  color: #666;
-}
-
-.pet-color {
-  color: #555;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.last-seen {
-  color: #f44336;
-  font-weight: 500;
-  font-size: 14px;
-  margin-bottom: 10px;
-}
-
-.pet-description {
-  color: #666;
-  font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 10px;
-}
-
-.reward {
-  background-color: #fff3cd;
-  color: #856404;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-weight: 500;
-  margin-bottom: 10px;
-  display: inline-block;
-}
-
-.contact-info {
-  background-color: #e3f2fd;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 10px;
-}
-
-.contact-info p {
-  margin: 2px 0;
-  font-size: 14px;
-  color: #1976d2;
-}
-
-.posted-date {
-  color: #999;
-  font-size: 12px;
-  text-align: right;
-}
-
-.empty-state {
-  text-align: center;
-  color: #999;
-  font-size: 16px;
-  padding: 60px 20px;
-}
-
-/* Responsive */
+/* Form responsive design */
 @media (max-width: 768px) {
-  .lost-pets-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-
   .form-row {
     grid-template-columns: 1fr;
   }
-
-  .lost-pets-grid {
-    grid-template-columns: 1fr;
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .cancel-button,
+  .submit-button {
+    width: 100%;
   }
 
-  .report-form-container {
-    padding: 20px;
+  .address-input-container {
+    flex-direction: column;
+  }
+
+  .geocode-button {
+    width: 100%;
+  }
+  
+  .modal-content {
+    max-height: 85vh;
+  }
+  
+  .form-section {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .form-section h3 {
+    font-size: 1rem;
+  }
+  
+  .location-info {
+    padding: 0.75rem;
   }
 } 
