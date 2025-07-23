@@ -24,14 +24,13 @@ const generateRewardCard = async (userId, reviewId, placeId, locationName, contr
     const Review = require("../models/Review");
     const review = await Review.findById(reviewId);
 
-    // Initialize AI image generation services
-    const promptService = require("../services/promptService");
-    const openaiService = require("../services/openaiService");
-
     let petImage = "/default-pet.png"; // fallback image
 
-    // Try to generate AI image first
+    // Try to generate AI image first (optional - gracefully handle missing dependencies)
     try {
+      const promptService = require("../services/promptService");
+      const openaiService = require("../services/openaiService");
+      
       if (openaiService.isConfigured()) {
         console.log("🎨 Attempting AI image generation for reward card...");
 
@@ -51,7 +50,11 @@ const generateRewardCard = async (userId, reviewId, placeId, locationName, contr
         }
       }
     } catch (aiError) {
-      console.error("❌ AI image generation failed, falling back to user pet image:", aiError);
+      if (aiError.code === 'MODULE_NOT_FOUND') {
+        console.log("ℹ️  AI image generation not available (missing dependencies), using fallback image");
+      } else {
+        console.error("❌ AI image generation failed, falling back to user pet image:", aiError.message);
+      }
 
       // Fallback to user's pet image
       if (userPets && userPets.length > 0) {
@@ -161,7 +164,7 @@ const updateHelpfulCount = async (req, res) => {
     }
 
     res.json(card);
-  } catch (error) {
+  } catch (error) {  contributionType = "milestone_achievement";
     console.error("Error updating helpful count:", error);
     res.status(500).json({ error: "Failed to update helpful count" });
   }
