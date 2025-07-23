@@ -78,18 +78,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>My Dashboard</h1>
-        <div className="user-info">
-          <img 
-            src={firebaseUser?.photoURL || mongoUser?.profileImage || "/default-avatar.png"} 
-            alt="Profile" 
-            className="user-avatar" 
-          />
-          <span>{mongoUser?.name || firebaseUser?.displayName || firebaseUser?.email || "User"}</span>
-        </div>
-      </div>
-
       <div className="dashboard-stats">
         <div className="stat-card">
           <h3>{userStats.cardsCount}</h3>
