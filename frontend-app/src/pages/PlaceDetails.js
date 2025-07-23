@@ -21,7 +21,8 @@ const PlaceDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
-
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Image upload state
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -658,6 +659,66 @@ const PlaceDetails = () => {
   }, [id]);
 
   // Handle review form submission
+  // Handle place deletion
+  const handleDeletePlace = async () => {
+    if (!mongoUser || !place) return;
+
+    setDeleteLoading(true);
+    try {
+      await placeAPI.deletePlace(place._id, mongoUser._id);
+      console.log('Place deleted successfully');
+      
+      // Navigate back to home after successful deletion
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting place:', error);
+      alert(error.response?.data?.error || 'Failed to delete place. Please try again.');
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  // Handle review deletion
+  const handleDeleteReview = async (reviewId) => {
+    if (!mongoUser) return;
+
+    const confirmDelete = window.confirm("Are you sure you want to delete this review? This action cannot be undone.");
+    if (!confirmDelete) return;
+
+    try {
+      await reviewAPI.deleteReview(reviewId, mongoUser._id);
+      console.log('Review deleted successfully');
+      
+      // Reload reviews to reflect the deletion
+      const updatedReviews = await reviewAPI.getReviewsByPlace(id);
+      setReviews(updatedReviews);
+
+      // Also reload stats if needed
+      if (place.type === "dog park" || place.type === "dog_park" || place.type === "leisure") {
+        const updatedStats = await reviewAPI.getDogParkStats(id);
+        setDogParkStats(updatedStats);
+      }
+      if (place.type === "vet" || place.type === "veterinary") {
+        const updatedStats = await reviewAPI.getVetClinicStats(id);
+        setVetClinicStats(updatedStats);
+      }
+      if (place.type === "pet store" || place.type === "pet_store") {
+        const updatedStats = await reviewAPI.getPetStoreStats(id);
+        setPetStoreStats(updatedStats);
+      }
+      if (place.type === "shelter" || place.type === "animal_shelter") {
+        const updatedStats = await reviewAPI.getAnimalShelterStats(id);
+        setAnimalShelterStats(updatedStats);
+      }
+
+      alert('Review deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      alert(error.response?.data?.error || 'Failed to delete review. Please try again.');
+    }
+  };
+
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     console.log("🔄 Starting review submission...");
@@ -1860,13 +1921,24 @@ const PlaceDetails = () => {
     <div className="place-details-container">
       {/* Header Section */}
       <div className="place-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          ← BACK
-        </button>
+        <div className="header-row">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            ← BACK
+          </button>
+          {/* Delete button - only show for place creator */}
+          {mongoUser && place.addedBy && place.addedBy === mongoUser._id && !place.isOSMLocation && (
+            <button 
+              className="delete-place-button"
+              onClick={() => setShowDeleteConfirm(true)}
+              title="Delete this place"
+            >
+              DELETE PLACE
+            </button>
+          )}
+        </div>
         <div className="place-title-inline">
           <h1>{place.name}</h1>
           <div className="place-type">
-
             <span className="type-label">{locationTypes[place.type]?.label || place.type}</span>
           </div>
           <div className="place-address">
@@ -3444,10 +3516,10 @@ const PlaceDetails = () => {
                         }
                       >
                         <option value="">Select...</option>
-                        <option value="very_affordable">Very Affordable</option>
-                        <option value="affordable">Affordable</option>
-                        <option value="expensive">Expensive</option>
-                        <option value="very_expensive">Very Expensive</option>
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                        <option value="very_high">Very High</option>
                       </select>
                     </div>
                     <div className="checkbox-group">
@@ -3537,10 +3609,10 @@ const PlaceDetails = () => {
                         }
                       >
                         <option value="">Select...</option>
-                        <option value="expert">Expert</option>
-                        <option value="knowledgeable">Knowledgeable</option>
-                        <option value="basic">Basic</option>
-                        <option value="limited">Limited</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
                       </select>
                     </div>
                     <div className="checkbox-group">
@@ -4029,6 +4101,16 @@ const PlaceDetails = () => {
                   <span className="review-rating">{"⭐".repeat(review.rating)}</span>
                   <span className="review-comment-text">{review.comment || "No comment"}</span>
                   <span className="review-date">{new Date(review.createdAt).toLocaleDateString()}</span>
+                  {/* Delete button - only show for user's own reviews */}
+                  {mongoUser && review.userId?._id === mongoUser._id && (
+                    <button
+                      className="delete-review-button"
+                      onClick={() => handleDeleteReview(review._id)}
+                      title="Delete your review"
+                    >
+                      DELETE
+                    </button>
+                  )}
                 </div>
                 {/* Display review images if any */}
                 {review.photos && review.photos.length > 0 && (
@@ -4056,6 +4138,37 @@ const PlaceDetails = () => {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>⚠️ Delete Place</h2>
+            <p>
+              Are you sure you want to delete <strong>{place.name}</strong>?
+            </p>
+            <p className="warning-text">
+              This action cannot be undone. All reviews and cards associated with this place will also be deleted.
+            </p>
+            <div className="modal-actions">
+              <button 
+                className="cancel-button" 
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+              <button 
+                className="delete-button" 
+                onClick={handleDeletePlace}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete Place'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,13 +1,14 @@
 import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signOut, 
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile
+  updateProfile,
+  sendEmailVerification
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
@@ -49,6 +50,9 @@ export const signUp = async (email, password, displayName) => {
     if (displayName) {
       await updateProfile(result.user, { displayName });
     }
+    // Send verification email to the user's email
+    await sendEmailVerification(result.user);
+    console.log('Verification email sent to:', result.user.email);
     return result.user;
   } catch (error) {
     console.error("Error signing up:", error);
@@ -59,7 +63,14 @@ export const signUp = async (email, password, displayName) => {
 export const signIn = async (email, password) => {
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
-    return result.user;
+    await result.user.reload();
+    const refreshedUser = auth.currentUser;
+    if (!refreshedUser.emailVerified) {
+      // Resend verification email if not verified
+      await sendEmailVerification(result.user);
+      throw new Error('Please verify your email before signing in. A verification email has been sent.');
+    }
+    return refreshedUser;
   } catch (error) {
     console.error("Error signing in:", error);
     throw error;

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 import { UserProvider, useUser } from "./contexts/UserContext";
-import { logOut } from "./firebase";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -14,8 +13,6 @@ import "./App.css";
 const Navigation = () => {
   const { firebaseUser, mongoUser, loading } = useUser();
   const [showLogin, setShowLogin] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const userMenuRef = useRef(null);
 
   // Debug logging
   useEffect(() => {
@@ -27,36 +24,17 @@ const Navigation = () => {
     });
   }, [firebaseUser, mongoUser, loading]);
 
-  // Close user menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setShowUserMenu(false);
-      }
-    };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   // Close login modal when user becomes authenticated
-  useEffect(() => {
-    if (firebaseUser && showLogin) {
-      console.log("Navigation - User authenticated, closing login modal");
-      setShowLogin(false);
-    }
-  }, [firebaseUser, showLogin]);
+  // useEffect(() => {
+  //   if (firebaseUser && showLogin) {
+  //     console.log("Navigation - User authenticated, closing login modal");
+  //     setShowLogin(false);
+  //   }
+  // }, [firebaseUser, showLogin]);
 
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      setShowUserMenu(false);
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
+
 
   // Show loading state while authentication is being determined
   if (loading) {
@@ -64,9 +42,9 @@ const Navigation = () => {
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="nav-logo">
-            <img 
-              src="/paw-logo.png" 
-              alt="PawPawMate Logo" 
+            <img
+              src="/paw-logo.png"
+              alt="PawPawMate Logo"
               className="nav-logo-image"
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -90,9 +68,9 @@ const Navigation = () => {
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="nav-logo">
-            <img 
-              src="/paw-logo.png" 
-              alt="PawPawMate Logo" 
+            <img
+              src="/paw-logo.png"
+              alt="PawPawMate Logo"
               className="nav-logo-image"
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -102,11 +80,11 @@ const Navigation = () => {
             <span>PawPawMate</span>
           </Link>
           <ul className="nav-menu">
-            {firebaseUser && (
+            {firebaseUser && mongoUser && (
               <>
                 <li className="nav-item">
                   <Link to="/dashboard" className="nav-link-styled">
-                    Dashboard
+                    Reward Cards
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -116,29 +94,11 @@ const Navigation = () => {
                 </li>
               </>
             )}
-            {firebaseUser ? (
+            {firebaseUser && mongoUser ? (
               <li className="nav-item">
-                <div className="user-menu-container" ref={userMenuRef}>
-                  <button className="user-menu-button" onClick={() => setShowUserMenu(!showUserMenu)}>
-                    <img
-                      src={mongoUser?.profileImage || firebaseUser?.photoURL || "/default-avatar.png"}
-                      alt="Profile"
-                      className="user-avatar"
-                    />
-                    <span className="user-name">{mongoUser?.name || firebaseUser?.displayName || "User"}</span>
-                    <span className="dropdown-arrow">▼</span>
-                  </button>
-                  {showUserMenu && (
-                    <div className="user-dropdown">
-                      <Link to="/profile" className="dropdown-item" onClick={() => setShowUserMenu(false)}>
-                        View Profile
-                      </Link>
-                      <button className="dropdown-item logout-item" onClick={handleLogout}>
-                        Sign Out
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <Link to="/profile" className="nav-link-styled">
+                  {mongoUser?.name || firebaseUser?.displayName || "User"}
+                </Link>
               </li>
             ) : (
               <li className="nav-item">
@@ -173,11 +133,11 @@ const Navigation = () => {
 // Login Page Component that wraps the Login modal
 const LoginPage = () => {
   const navigate = useNavigate();
-  
+
   return (
-    <Login 
-      isOpen={true} 
-      onClose={() => navigate("/")} 
+    <Login
+      isOpen={true}
+      onClose={() => navigate("/")}
     />
   );
 };

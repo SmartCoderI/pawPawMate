@@ -18,6 +18,15 @@
   width: 100%;
 }
 
+.header-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem;
+}
+
 .back-button {
   background: #FFE500; /* Yellow background */
   border: 4px solid #000000;
@@ -56,7 +65,7 @@
   flex: 1;
   min-width: 0;
   flex-wrap: wrap;
-  width: 100%;
+  max-width: calc(100% - 150px); /* Reserve space for smaller delete button */
 }
 
 .place-title-inline h1 {
@@ -850,6 +859,39 @@
   letter-spacing: 0.0625rem;
 }
 
+.delete-review-button {
+  background: #FF6B6B;
+  border: 3px solid #000000;
+  border-radius: 0.5rem;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'Arial Black', Arial, sans-serif;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  color: #000000;
+  min-width: 2rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.0625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-review-button:hover {
+  background: #FF5555;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
+}
+
+.delete-review-button:active {
+  background: #FF4444;
+  transform: translate(0.25rem, 0.25rem);
+  box-shadow: 0px 0px 0px #000000;
+}
+
 /* Original detailed review card styles (keep for compatibility) */
 .review-card {
   background: #F0FFF0;
@@ -1034,7 +1076,11 @@
     flex-direction: row;
     align-items: center;
     gap: 0.5rem;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+  }
+  
+  .place-title-inline {
+    max-width: calc(100% - 120px);
   }
   
   .back-button {
@@ -1161,13 +1207,49 @@
   
   .place-header {
     gap: 0.375rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.375rem;
+    justify-content: space-between;
+    min-height: 3rem;
+  }
+  
+  .place-title-inline {
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.25rem 0;
+  }
+  
+  .delete-place-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    min-width: 100px;
+    border-width: 3px;
+    box-shadow: 0.25rem 0.25rem 0px #000000;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .place-title-inline h1 {
-    font-size: 1rem;
+    font-size: 0.875rem;
     flex: 1 1 auto;
-    min-width: 6.25rem;
+    min-width: 8rem;
     word-wrap: break-word;
+    display: block;
+    margin: 0;
+    line-height: 1.2;
   }
   
   .back-button {
@@ -1182,19 +1264,38 @@
   
   .type-label {
     font-size: 0.6875rem;
-    padding: 0.25rem 0.375rem;
+    padding: 0.25rem 0.5rem;
+    display: inline-block;
+    flex-shrink: 0;
+    margin: 0;
   }
   
   .place-address {
-    margin-left: 0.375rem;
-    flex: 0 1 auto;
-    min-width: 5rem;
-    justify-content: flex-end;
+    margin-left: 0;
+    flex: 0 0 auto;
+    min-width: auto;
+    display: flex;
+    align-items: center;
+    order: 2;
+  }
+  
+  .place-type {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    order: 1;
   }
   
   .address-line {
     font-size: 0.6875rem;
-    padding: 0.25rem 0.375rem;
+    padding: 0.25rem 0.5rem;
+    display: inline-block;
+    flex-shrink: 0;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
   }
   
   .hero-placeholder {
@@ -1542,5 +1643,140 @@
   .address-line {
     font-size: 8px;
     padding: 1px 3px;
+  }
+}
+
+/* Delete Place Button */
+.delete-place-button {
+  background: #FF4444;
+  border: 4px solid #000000;
+  border-radius: 0.75rem;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 900;
+  font-family: 'Arial Black', Arial, sans-serif;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.0625rem;
+  flex-shrink: 0;
+  margin-left: auto;
+  white-space: nowrap;
+  height: auto;
+}
+
+.delete-place-button:hover {
+  background: #CC0000;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
+}
+
+/* Delete Confirmation Modal */
+.delete-confirm-modal {
+  background: #FFFFFF;
+  border: 4px solid #000000;
+  border-radius: 1rem;
+  box-shadow: 0.5rem 0.5rem 0px #000000;
+  max-width: 500px;
+  width: 100%;
+  padding: 2rem;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.delete-confirm-modal h2 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  color: #FF4444;
+}
+
+.delete-confirm-modal p {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.delete-confirm-modal .warning-text {
+  color: #666666;
+  font-size: 0.875rem;
+  background: #FFF3CD;
+  padding: 1rem;
+  border: 2px solid #000000;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.delete-confirm-modal .modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.delete-confirm-modal .cancel-button {
+  background: #F5F5DC;
+  border: 3px solid #000000;
+  border-radius: 0.5rem;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+}
+
+.delete-confirm-modal .cancel-button:hover:not(:disabled) {
+  background: #E5E5CC;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
+}
+
+.delete-confirm-modal .delete-button {
+  background: #FF4444;
+  border: 3px solid #000000;
+  border-radius: 0.5rem;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+}
+
+.delete-confirm-modal .delete-button:hover:not(:disabled) {
+  background: #CC0000;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
+}
+
+.delete-confirm-modal button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile responsiveness for delete functionality */
+@media (max-width: 768px) {
+  .delete-place-button {
+    margin-left: 0;
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  .delete-confirm-modal {
+    padding: 1.5rem;
+  }
+
+  .delete-confirm-modal .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .delete-confirm-modal button {
+    width: 100%;
   }
 }

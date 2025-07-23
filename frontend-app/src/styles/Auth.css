@@ -103,6 +103,22 @@
   text-align: center;
 }
 
+.success-message {
+  background-color: #d1fae5;
+  color: #059669;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.success-message::before {
+  content: "✅";
+}
+
 .auth-button {
   padding: 12px 20px;
   border: none;

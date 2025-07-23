@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { updateProfile } from 'firebase/auth';
 import { logOut } from '../firebase';
 import { useUser } from '../contexts/UserContext';
@@ -6,6 +7,7 @@ import { petAPI, cardAPI, userAPI } from '../services/api';
 import '../styles/Profile.css';
 
 const Profile = () => {
+  const navigate = useNavigate();
   const { firebaseUser, mongoUser, loading: userLoading, updateMongoUser, mongoUserId } = useUser();
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -452,16 +454,9 @@ const Profile = () => {
             <div className="profile-display">
               <h2>{profileData.name || 'Anonymous User'}</h2>
               <p className="email">{profileData.email}</p>
-              
-              <div className="profile-section">
-                <h3>Account Information</h3>
-                {mongoUser?.joinedAt && (
-                  <p><strong>Member since:</strong> {new Date(mongoUser.joinedAt).toLocaleDateString()}</p>
-                )}
-                {!mongoUser?.joinedAt && (
-                  <p><strong>Account Status:</strong> Active</p>
-                )}
-              </div>
+              {mongoUser?.joinedAt && (
+                <p className="member-since">Member since {new Date(mongoUser.joinedAt).toLocaleDateString()}</p>
+              )}
 
               {/* My Pets Section */}
               <div className="profile-section">
@@ -599,10 +594,10 @@ const Profile = () => {
                       </div>
 
                       <div className="form-actions">
-                        <button type="submit" disabled={loading}>
+                        <button type="submit" className="save-button" disabled={loading}>
                           {loading ? 'Saving...' : (editingPet ? 'Update Pet' : 'Add Pet')}
                         </button>
-                        <button type="button" onClick={resetPetForm}>
+                        <button type="button" className="cancel-button" onClick={resetPetForm}>
                           Cancel
                         </button>
                       </div>
@@ -664,62 +659,15 @@ const Profile = () => {
               </div>
 
               {/* My Cards Section */}
-              <div className="profile-section">
-                <div className="cards-section-header">
-                  <h3>My Cards ({cards.length})</h3>
-                </div>
-
-                {cards.length > 0 ? (
-                  <div className="cards-grid">
-                    {cards.map(card => (
-                      <div key={card._id} className="card-profile-item">
-                        <div className="card-image">
-                          <img 
-                            src={card.imageUrl || '/placeholder-card.png'} 
-                            alt={card.caption || 'Place card'}
-                            className="card-preview-image"
-                          />
-                        </div>
-                        <div className="card-details">
-                          <h4>{card.place?.name || 'Unknown Place'}</h4>
-                          {card.caption && <p className="card-caption">{card.caption}</p>}
-                          <div className="card-meta">
-                            <p className="card-date">Created: {new Date(card.createdAt).toLocaleDateString()}</p>
-                            {card.helpfulCount > 0 && (
-                              <p className="card-helpful">❤️ {card.helpfulCount} helpful</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="empty-cards">
-                    <p>No cards collected yet.</p>
-                    <p>Visit places and create memories to collect cards!</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Collections Summary */}
-              <div className="profile-section">
-                <h3>Collections Summary</h3>
-                <div className="collections-grid">
-                  <div className="collection-item">
-                    <h4>Favorite Places</h4>
-                    <p className="collection-count">{mongoUser?.favoritePlaces?.length || 0} places</p>
-                  </div>
-                  
-                  <div className="collection-item">
-                    <h4>Collected Cards</h4>
-                    <p className="collection-count">{cards.length} cards</p>
-                  </div>
-
-                  <div className="collection-item">
-                    <h4>My Pets</h4>
-                    <p className="collection-count">{pets.length} pets</p>
-                  </div>
-                </div>
+              <div className="profile-section cards-section">
+                <h3>My Cards ({cards.length})</h3>
+                <p>View your collected reward cards in the dashboard.</p>
+                <button 
+                  className="view-cards-button"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  Click here to see your cards
+                </button>
               </div>
 
               <button className="logout-button" onClick={handleLogout}>
