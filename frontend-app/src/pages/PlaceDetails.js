@@ -679,6 +679,46 @@ const PlaceDetails = () => {
     }
   };
 
+  // Handle review deletion
+  const handleDeleteReview = async (reviewId) => {
+    if (!mongoUser) return;
+
+    const confirmDelete = window.confirm("Are you sure you want to delete this review? This action cannot be undone.");
+    if (!confirmDelete) return;
+
+    try {
+      await reviewAPI.deleteReview(reviewId, mongoUser._id);
+      console.log('Review deleted successfully');
+      
+      // Reload reviews to reflect the deletion
+      const updatedReviews = await reviewAPI.getReviewsByPlace(id);
+      setReviews(updatedReviews);
+
+      // Also reload stats if needed
+      if (place.type === "dog park" || place.type === "dog_park" || place.type === "leisure") {
+        const updatedStats = await reviewAPI.getDogParkStats(id);
+        setDogParkStats(updatedStats);
+      }
+      if (place.type === "vet" || place.type === "veterinary") {
+        const updatedStats = await reviewAPI.getVetClinicStats(id);
+        setVetClinicStats(updatedStats);
+      }
+      if (place.type === "pet store" || place.type === "pet_store") {
+        const updatedStats = await reviewAPI.getPetStoreStats(id);
+        setPetStoreStats(updatedStats);
+      }
+      if (place.type === "shelter" || place.type === "animal_shelter") {
+        const updatedStats = await reviewAPI.getAnimalShelterStats(id);
+        setAnimalShelterStats(updatedStats);
+      }
+
+      alert('Review deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      alert(error.response?.data?.error || 'Failed to delete review. Please try again.');
+    }
+  };
+
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     console.log("🔄 Starting review submission...");
@@ -1881,13 +1921,24 @@ const PlaceDetails = () => {
     <div className="place-details-container">
       {/* Header Section */}
       <div className="place-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          ← BACK
-        </button>
+        <div className="header-row">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            ← BACK
+          </button>
+          {/* Delete button - only show for place creator */}
+          {mongoUser && place.addedBy && place.addedBy === mongoUser._id && !place.isOSMLocation && (
+            <button 
+              className="delete-place-button"
+              onClick={() => setShowDeleteConfirm(true)}
+              title="Delete this place"
+            >
+              DELETE PLACE
+            </button>
+          )}
+        </div>
         <div className="place-title-inline">
           <h1>{place.name}</h1>
           <div className="place-type">
-
             <span className="type-label">{locationTypes[place.type]?.label || place.type}</span>
           </div>
           <div className="place-address">
@@ -1900,17 +1951,6 @@ const PlaceDetails = () => {
             {!place.address && !place.coordinates && <span className="address-line">📍 Address not available</span>}
           </div>
         </div>
-        
-        {/* Delete button - only show for place creator */}
-        {mongoUser && place.addedBy && place.addedBy === mongoUser._id && !place.isOSMLocation && (
-          <button 
-            className="delete-place-button"
-            onClick={() => setShowDeleteConfirm(true)}
-            title="Delete this place"
-          >
-            🗑️ Delete Place
-          </button>
-        )}
       </div>
 
       {/* Hero Image Section */}
@@ -4061,6 +4101,16 @@ const PlaceDetails = () => {
                   <span className="review-rating">{"⭐".repeat(review.rating)}</span>
                   <span className="review-comment-text">{review.comment || "No comment"}</span>
                   <span className="review-date">{new Date(review.createdAt).toLocaleDateString()}</span>
+                  {/* Delete button - only show for user's own reviews */}
+                  {mongoUser && review.userId?._id === mongoUser._id && (
+                    <button
+                      className="delete-review-button"
+                      onClick={() => handleDeleteReview(review._id)}
+                      title="Delete your review"
+                    >
+                      DELETE
+                    </button>
+                  )}
                 </div>
                 {/* Display review images if any */}
                 {review.photos && review.photos.length > 0 && (

@@ -14,6 +14,7 @@ const {
   getPetStoreReviewStats,
   getAnimalShelterReviewStats,
   uploadReviewImages,
+  deleteReview,
 } = require("../controllers/reviewController");
 const { reviewImageUpload } = require("../utils/upload");
 const verifyToken = require("../middleware/auth");
@@ -54,6 +55,9 @@ reviewRouter.get("/:placeId", getReviewsForPlace);
 
 // Get all reviews by a specific user
 reviewRouter.get("/user/:userId", getReviewsByUser);
+
+// Delete a review by ID (only by author)
+reviewRouter.delete("/:reviewId", deleteReview);
 
 // Get dog park specific review statistics
 reviewRouter.get("/:placeId/dog-park-stats", getDogParkReviewStats);

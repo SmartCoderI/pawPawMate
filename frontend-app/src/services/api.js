@@ -258,6 +258,22 @@ export const reviewAPI = {
     }
   },
 
+  // Delete a review (only by the review author)
+  deleteReview: async (reviewId, userId) => {
+    console.log('API: Sending review deletion request:', { reviewId, userId });
+    try {
+      const response = await api.delete(`/reviews/${reviewId}`, {
+        data: { userId }
+      });
+      console.log('API: Review deletion response received:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API: Review deletion failed:', error);
+      console.error('API: Error response:', error.response?.data);
+      throw error;
+    }
+  },
+
   // Get reviews for a place
   getReviewsByPlace: async (placeId) => {
     const response = await api.get(`/reviews/${placeId}`);
