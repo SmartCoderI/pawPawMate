@@ -1896,3 +1896,42 @@ exports.uploadReviewImages = async (req, res) => {
     });
   }
 };
+
+// Delete a review (only by the review author)
+exports.deleteReview = async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const { userId } = req.body; // User ID from request body
+    
+    console.log('Delete review request:', { reviewId, userId });
+    
+    // Find the review first
+    const review = await Review.findById(reviewId);
+    
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+    
+    // Check if the user is the author of the review
+    if (!review.userId || review.userId.toString() !== userId) {
+      console.log('Unauthorized delete attempt:', {
+        reviewAuthor: review.userId,
+        requestingUser: userId
+      });
+      return res.status(403).json({ 
+        error: "You are not authorized to delete this review. Only the author can delete it." 
+      });
+    }
+    
+    // Delete the review
+    await Review.findByIdAndDelete(reviewId);
+    console.log('Review deleted successfully:', reviewId);
+    
+    res.json({ 
+      message: "Review deleted successfully"
+    });
+  } catch (err) {
+    console.error('Error deleting review:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
