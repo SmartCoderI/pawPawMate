@@ -78,28 +78,89 @@ class PromptService {
     let selectedPet = null;
 
     if (userPets && userPets.length > 0) {
-      // Use a random pet from user's pets
-      selectedPet = userPets[Math.floor(Math.random() * userPets.length)];
+      // Prefer the first pet, or use a random one if multiple pets
+      selectedPet = userPets[0];
+      console.log(
+        `🐾 Using user's pet: ${selectedPet.name || "Unnamed"} (${selectedPet.species}/${selectedPet.breed})`
+      );
     }
 
     // Default pets if user has none
     const defaultPets = [
-      { species: "dog", breed: "Golden Retriever", personalityTraits: ["friendly", "playful"] },
-      { species: "cat", breed: "Tabby", personalityTraits: ["curious", "independent"] },
-      { species: "dog", breed: "Labrador", personalityTraits: ["energetic", "loyal"] },
-      { species: "cat", breed: "Persian", personalityTraits: ["calm", "affectionate"] },
+      { species: "dog", breed: "Golden Retriever", personalityTraits: ["friendly", "playful"], gender: "unknown" },
+      { species: "cat", breed: "British Shorthair", personalityTraits: ["curious", "independent"], gender: "unknown" },
+      { species: "dog", breed: "Shiba Inu", personalityTraits: ["energetic", "loyal"], gender: "unknown" },
+      { species: "cat", breed: "Maine Coon", personalityTraits: ["calm", "affectionate"], gender: "unknown" },
     ];
 
     if (!selectedPet) {
       selectedPet = defaultPets[Math.floor(Math.random() * defaultPets.length)];
+      console.log(`🎲 Using default pet: ${selectedPet.breed} ${selectedPet.species}`);
     }
+
+    // Extract physical characteristics
+    const physicalTraits = this.getPhysicalTraits(selectedPet);
 
     return {
       species: selectedPet.species || "dog",
       breed: selectedPet.breed || (selectedPet.species === "cat" ? "Domestic Cat" : "Mixed Breed"),
       personality: this.translatePersonalityTraits(selectedPet.personalityTraits) || ["friendly", "happy"],
       name: selectedPet.name || null,
+      gender: selectedPet.gender || "unknown",
+      physicalTraits: physicalTraits,
+      age: this.getAgeCategory(selectedPet.birthDate),
     };
+  }
+
+  /**
+   * Get physical traits based on breed and species
+   * @param {Object} pet - Pet object
+   * @returns {Object} - Physical traits object
+   */
+  getPhysicalTraits(pet) {
+    const breedTraits = {
+      // Dogs
+      "Golden Retriever": { size: "large", coat: "long golden", build: "athletic" },
+      Labrador: { size: "large", coat: "short", build: "muscular" },
+      "Shiba Inu": { size: "medium", coat: "fluffy", build: "compact" },
+      Corgi: { size: "small", coat: "short", build: "short-legged" },
+      Husky: { size: "large", coat: "thick fluffy", build: "athletic" },
+      Poodle: { size: "medium", coat: "curly", build: "elegant" },
+      Bulldog: { size: "medium", coat: "short", build: "stocky" },
+      "Border Collie": { size: "medium", coat: "medium length", build: "agile" },
+
+      // Cats
+      "British Shorthair": { size: "medium", coat: "short dense", build: "robust" },
+      "Maine Coon": { size: "large", coat: "long fluffy", build: "muscular" },
+      Persian: { size: "medium", coat: "long silky", build: "compact" },
+      Siamese: { size: "medium", coat: "short", build: "slender" },
+      Ragdoll: { size: "large", coat: "semi-long", build: "large-boned" },
+      "Scottish Fold": { size: "medium", coat: "short", build: "rounded" },
+      Tabby: { size: "medium", coat: "striped", build: "average" },
+    };
+
+    const defaultTraits =
+      pet.species === "cat"
+        ? { size: "medium", coat: "short", build: "average" }
+        : { size: "medium", coat: "short", build: "average" };
+
+    return breedTraits[pet.breed] || defaultTraits;
+  }
+
+  /**
+   * Get age category from birth date
+   * @param {Date} birthDate - Pet's birth date
+   * @returns {string} - Age category
+   */
+  getAgeCategory(birthDate) {
+    if (!birthDate) return "adult";
+
+    const age = (Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365);
+
+    if (age < 1) return "puppy/kitten";
+    if (age < 3) return "young";
+    if (age < 7) return "adult";
+    return "senior";
   }
 
   /**
@@ -108,37 +169,58 @@ class PromptService {
    * @returns {Object} - Place context object
    */
   getPlaceContext(place) {
-    const placeType = place.type || "dog park";
+    const placeType = place?.type || "dog park";
+    const placeName = place?.name || "a pet-friendly place";
 
-    // Place-specific contexts
+    console.log(`📍 Generating context for place: ${placeName} (${placeType})`);
+
+    // Place-specific contexts with more detailed descriptions
     const placeContexts = {
       "dog park": {
-        setting: "dog park",
-        activity: "playing and running",
-        atmosphere: "outdoor, grassy, with other dogs",
-        props: "grass, trees, fence, dog toys",
+        setting: "beautiful dog park",
+        activity: "playing freely and socializing",
+        atmosphere: "sunny outdoor environment with green grass, trees, and happy dogs playing together",
+        props: "lush grass, shade trees, wooden benches, dog agility equipment, water fountains",
+        mood: "joyful and energetic",
+        colors: "vibrant greens and natural earth tones",
+        lighting: "bright natural sunlight filtering through trees",
       },
       vet: {
-        setting: "veterinary clinic",
-        activity: "getting healthy checkup",
-        atmosphere: "clean, caring, professional",
-        props: "stethoscope, medical equipment, caring hands",
+        setting: "modern veterinary clinic",
+        activity: "receiving gentle care and attention",
+        atmosphere: "clean, professional, and caring environment with friendly staff",
+        props: "examination table, stethoscope, medical charts, caring veterinarian hands",
+        mood: "calm and reassuring",
+        colors: "clean whites and soft blues",
+        lighting: "bright, clean medical lighting",
       },
       "pet store": {
-        setting: "pet store",
-        activity: "shopping for treats and toys",
-        atmosphere: "colorful, filled with pet supplies",
-        props: "pet food, toys, leashes, treats",
+        setting: "colorful pet store",
+        activity: "exploring toys and treats",
+        atmosphere: "vibrant retail space filled with pet supplies and excitement",
+        props: "shelves of pet food, colorful toys, leashes, treats, pet accessories",
+        mood: "excited and curious",
+        colors: "bright and colorful with warm lighting",
+        lighting: "warm retail lighting highlighting products",
       },
       shelter: {
-        setting: "animal shelter",
-        activity: "finding a new home",
-        atmosphere: "hopeful, caring, welcoming",
-        props: "adoption signs, volunteers, other animals",
+        setting: "welcoming animal shelter",
+        activity: "meeting potential new families",
+        atmosphere: "hopeful and caring environment with dedicated volunteers",
+        props: "cozy kennels, adoption signs, volunteer badges, blankets, toys",
+        mood: "hopeful and loving",
+        colors: "warm and inviting pastels",
+        lighting: "soft, warm lighting creating a homey feel",
       },
     };
 
-    return placeContexts[placeType] || placeContexts["dog park"];
+    const context = placeContexts[placeType] || placeContexts["dog park"];
+
+    // Add specific place name to context
+    context.placeName = placeName;
+    context.placeType = placeType;
+
+    return context;
   }
 
   /**
@@ -209,26 +291,32 @@ class PromptService {
     const baseStyle =
       "Studio Ghibli inspired anime style, whimsical and magical atmosphere, hand-drawn animation style, watercolor, gentle lighting, dreamy and enchanting, Miyazaki-inspired art";
 
-    // Pet description
-    const petDescription = `${petInfo.species === "dog" ? "a" : "a"} ${petInfo.personality.join(" and ")} ${
-      petInfo.breed
-    } ${petInfo.species}`;
+    // Detailed pet description including physical traits
+    const physicalDesc = `${petInfo.physicalTraits.size} ${petInfo.physicalTraits.build} ${petInfo.species} with ${petInfo.physicalTraits.coat} coat`;
+    const personalityDesc = petInfo.personality.join(" and ");
+    const ageDesc = petInfo.age !== "adult" ? `${petInfo.age} ` : "";
 
-    // Place and activity
-    const placeActivity = `at ${placeContext.setting} ${contributionContext.action}`;
+    const petDescription = `${ageDesc}${physicalDesc}, ${personalityDesc} in nature`;
 
-    // Mood and atmosphere
-    const moodDescription = `looking ${contributionContext.mood} and ${reviewContext?.mood || "joyful"}`;
+    // Place-specific activity with detailed context
+    const placeActivity = `at ${placeContext.placeName}, a ${placeContext.setting}, ${contributionContext.action}`;
 
-    // Environmental details
-    const environment = `surrounded by ${placeContext.atmosphere}, with ${placeContext.props}`;
+    // Enhanced mood description
+    const moodDescription = `expressing ${contributionContext.mood} emotions, ${placeContext.mood} in the ${placeContext.atmosphere}`;
 
-    // Celebration element
+    // Rich environmental details
+    const environment = `The scene features ${placeContext.props}, with ${placeContext.colors} and ${placeContext.lighting}`;
+
+    // Celebration element with context
     const celebration = `celebrating ${contributionContext.celebration} ${contributionContext.emoji}`;
 
-    // Combine all elements
-    const prompt = `${petDescription} ${placeActivity}, ${moodDescription}, ${celebration}. ${environment}. ${baseStyle}. No text, words, or letters in the image.`;
+    // Technical specifications
+    const technicalSpecs = "High quality illustration, detailed character design, expressive eyes, dynamic pose";
 
+    // Combine all elements with better flow
+    const prompt = `${petDescription} ${placeActivity}, ${moodDescription}, ${celebration}. ${environment}. ${baseStyle}. ${technicalSpecs}. No text, words, or letters in the image.`;
+
+    console.log("🎨 Final generated prompt:", prompt);
     return prompt;
   }
 
