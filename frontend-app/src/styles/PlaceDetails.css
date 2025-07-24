@@ -1266,7 +1266,7 @@
   }
   
   .hero-placeholder {
-    height: 8rem;
+    height: 240px;
   }
   
   .hero-icon {
@@ -1507,7 +1507,7 @@
   }
   
   .hero-placeholder {
-    height: 6.25rem;
+    height: 240px;
   }
   
   .hero-icon {
@@ -2141,8 +2141,7 @@
 
 .barrage-review {
   position: absolute;
-  left: 0;
-  transform: translateX(-100%);
+  transform: translateX(100vw);
   white-space: nowrap;
   font-size: 18px;
   color: #fff;
@@ -2153,7 +2152,50 @@
   z-index: 10;
 }
 
-@keyframes barrage-move {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100vw); }
+.barrage-desktop-horizontal {
+  left: 0;
+  animation-name: barrage-move-horizontal;
+}
+
+@keyframes barrage-move-horizontal {
+  from { transform: translateX(100vw); }
+  to { transform: translateX(-100%); }
+}
+
+@media (max-width: 480px) {
+  .hero-placeholder {
+    height: 200px;
+    overflow: hidden;
+  }
+
+  .barrage-mobile-vertical {
+    left: 10px;
+    right: 10px;
+    width: calc(100% - 20px);
+    white-space: normal;
+    animation-name: barrage-move-vertical;
+    font-size: 14px;
+    max-height: 60px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+  }
+
+  @keyframes barrage-move-vertical {
+    from {
+      transform: translateY(50px);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-100px);
+      opacity: 0;
+    }
+  }
 }
