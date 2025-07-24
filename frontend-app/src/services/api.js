@@ -376,6 +376,7 @@ export const lostPetAPI = {
   getAllLostPets: async (filters = {}) => {
     try {
       const params = new URLSearchParams();
+
       if (filters.status) params.append("status", filters.status);
       if (filters.species) params.append("species", filters.species);
       if (filters.bounds) params.append("bounds", JSON.stringify(filters.bounds));
@@ -390,6 +391,7 @@ export const lostPetAPI = {
       return response.data;
     } catch (error) {
       console.error("Error fetching lost pets:", error);
+
       return [];
     }
   },
@@ -397,6 +399,7 @@ export const lostPetAPI = {
   // Create a new lost pet report
   createLostPetReport: async (reportData) => {
     try {
+
       console.log("API: Creating lost pet report:", reportData);
       const response = await api.post("/lostpets", reportData);
       console.log("API: Lost pet report created successfully:", response.data);
@@ -404,6 +407,7 @@ export const lostPetAPI = {
     } catch (error) {
       console.error("API: Error creating lost pet report:", error);
       console.error("API: Error response:", error.response?.data);
+
       throw error;
     }
   },
@@ -414,7 +418,9 @@ export const lostPetAPI = {
       const response = await api.get(`/lostpets/${lostPetId}`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching lost pet:", error);
+
+      console.error('Error fetching lost pet:', error);
+
       throw error;
     }
   },
@@ -422,13 +428,15 @@ export const lostPetAPI = {
   // Add a sighting report to an existing lost pet
   addSightingReport: async (lostPetId, sightingData) => {
     try {
-      console.log("API: Adding sighting report for pet:", lostPetId, sightingData);
+
+      console.log('API: Adding sighting report for pet:', lostPetId, sightingData);
       const response = await api.post(`/lostpets/${lostPetId}/sightings`, sightingData);
-      console.log("API: Sighting report added successfully:", response.data);
+      console.log('API: Sighting report added successfully:', response.data);
       return response.data;
     } catch (error) {
-      console.error("API: Error adding sighting report:", error);
-      console.error("API: Error response:", error.response?.data);
+      console.error('API: Error adding sighting report:', error);
+      console.error('API: Error response:', error.response?.data);
+
       throw error;
     }
   },
@@ -436,13 +444,15 @@ export const lostPetAPI = {
   // Update lost pet status (mark as found, etc.)
   updateLostPetStatus: async (lostPetId, statusData) => {
     try {
-      console.log("API: Updating lost pet status:", lostPetId, statusData);
+
+      console.log('API: Updating lost pet status:', lostPetId, statusData);
       const response = await api.put(`/lostpets/${lostPetId}/status`, statusData);
-      console.log("API: Lost pet status updated successfully:", response.data);
+      console.log('API: Lost pet status updated successfully:', response.data);
       return response.data;
     } catch (error) {
-      console.error("API: Error updating lost pet status:", error);
-      console.error("API: Error response:", error.response?.data);
+      console.error('API: Error updating lost pet status:', error);
+      console.error('API: Error response:', error.response?.data);
+
       throw error;
     }
   },
@@ -450,6 +460,7 @@ export const lostPetAPI = {
   // Delete a lost pet report
   deleteLostPetReport: async (lostPetId, userId) => {
     try {
+
       console.log("API: Deleting lost pet report:", lostPetId, userId);
       const response = await api.delete(`/lostpets/${lostPetId}`, {
         data: { userId },
@@ -459,6 +470,7 @@ export const lostPetAPI = {
     } catch (error) {
       console.error("API: Error deleting lost pet report:", error);
       console.error("API: Error response:", error.response?.data);
+
       throw error;
     }
   },
@@ -466,20 +478,24 @@ export const lostPetAPI = {
   // Get lost pets statistics
   getLostPetStats: async () => {
     try {
-      const response = await api.get("/lostpets/stats");
+
+      const response = await api.get('/lostpets/stats');
       return response.data;
     } catch (error) {
-      console.error("Error fetching lost pet stats:", error);
+      console.error('Error fetching lost pet stats:', error);
+
       return {
         total: 0,
         missing: 0,
         seen: 0,
         found: 0,
         speciesBreakdown: [],
-        recentReports: 0,
+
+        recentReports: 0
       };
     }
   },
 };
 
-export default api;
+export default api; 
+
