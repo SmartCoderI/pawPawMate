@@ -13,7 +13,7 @@ const Home = () => {
   const { firebaseUser, mongoUser } = useUser();
   const navigate = useNavigate();
   
-  // Check for saved map state first
+  // Check for saved map state first.
   const getSavedMapState = () => {
     try {
       const savedState = sessionStorage.getItem('pawpawmate_map_state');
