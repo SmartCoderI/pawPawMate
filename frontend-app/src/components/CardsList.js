@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useUser } from "../contexts/UserContext";
 import Card from "./Card";
 import "./CardsList.css";
-import api from '../services/api';
+import api from "../services/api";
 
 const CardsList = () => {
   const { mongoUser } = useUser();
@@ -41,13 +41,9 @@ const CardsList = () => {
       }
 
       const updatedCard = await response.json();
-      
+
       // Update the card in the local state
-      setCards(prevCards => 
-        prevCards.map(card => 
-          card._id === cardId ? updatedCard : card
-        )
-      );
+      setCards((prevCards) => prevCards.map((card) => (card._id === cardId ? updatedCard : card)));
     } catch (err) {
       console.error("Error updating helpful count:", err);
     }
@@ -110,11 +106,7 @@ const CardsList = () => {
       ) : (
         <div className="cards-grid">
           {cards.map((card) => (
-            <Card 
-              key={card._id} 
-              card={card} 
-              onHelpfulClick={handleHelpfulClick}
-            />
+            <Card key={card._id} card={card} onHelpfulClick={handleHelpfulClick} />
           ))}
         </div>
       )}
@@ -122,4 +114,4 @@ const CardsList = () => {
   );
 };
 
-export default CardsList; 
+export default CardsList;

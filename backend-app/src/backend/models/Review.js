@@ -10,6 +10,10 @@ const reviewSchema = new mongoose.Schema({
   tags: [String], // e.g. ["low cost", "clean", "gentle vet"]
   photos: [String], // Array of image URLs
 
+  // Like functionality
+  likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Array of user IDs who liked this review
+  likeCount: { type: Number, default: 0 }, // Total number of likes
+
   // 8-category review system for dog parks
   dogParkReview: {
     // 1. Access & Location
@@ -103,7 +107,11 @@ const reviewSchema = new mongoose.Schema({
     // 1. Clinic Environment & Facilities
     clinicEnvironmentAndFacilities: {
       cleanliness: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
-      comfortLevel: { type: String, enum: ["very_comfortable", "comfortable", "neutral", "uncomfortable"], required: false },
+      comfortLevel: {
+        type: String,
+        enum: ["very_comfortable", "comfortable", "neutral", "uncomfortable"],
+        required: false,
+      },
       facilitySize: { type: String, enum: ["small", "medium", "large"], required: false },
     },
 
@@ -115,7 +123,7 @@ const reviewSchema = new mongoose.Schema({
       spayNeuterCost: { type: String, enum: ["low", "moderate", "high", "very_high"], required: false },
       dentalCleaningCost: { type: String, enum: ["low", "moderate", "high", "very_high"], required: false },
       emergencyVisitCost: { type: String, enum: ["low", "moderate", "high", "very_high"], required: false },
-      
+
       // Price Transparency
       feesExplainedUpfront: { type: Boolean, required: false },
       printedEstimatesAvailable: { type: Boolean, required: false },
@@ -129,7 +137,7 @@ const reviewSchema = new mongoose.Schema({
       veterinarianAttitude: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
       veterinarianCompetence: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
       technicianNursePerformance: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
-      
+
       // Services & Specializations
       onSiteDiagnostics: {
         type: [String],
@@ -144,8 +152,16 @@ const reviewSchema = new mongoose.Schema({
     // 4. Scheduling & Communication
     schedulingAndCommunication: {
       responseTime: { type: String, enum: ["immediate", "same_day", "next_day", "several_days"], required: false },
-      appointmentWaitTime: { type: String, enum: ["same_day", "within_week", "1_2_weeks", "over_2_weeks"], required: false },
-      inClinicWaitingTime: { type: String, enum: ["under_15_min", "15_30_min", "30_60_min", "over_1_hour"], required: false },
+      appointmentWaitTime: {
+        type: String,
+        enum: ["same_day", "within_week", "1_2_weeks", "over_2_weeks"],
+        required: false,
+      },
+      inClinicWaitingTime: {
+        type: String,
+        enum: ["under_15_min", "15_30_min", "30_60_min", "over_1_hour"],
+        required: false,
+      },
       followUpCommunication: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
     },
 
@@ -155,24 +171,30 @@ const reviewSchema = new mongoose.Schema({
       openWeekends: { type: Boolean, required: false },
       openEvenings: { type: Boolean, required: false },
       onCallEmergencyNumber: { type: Boolean, required: false },
-      
+
       // Referral Process
       connectedToEmergencyHospitals: { type: Boolean, required: false },
       clearHandoffsToSpecialists: { type: Boolean, required: false },
-      
+
       // Urgency Response
-      emergencyTriageSpeed: { type: String, enum: ["immediate", "within_30_min", "within_1_hour", "over_1_hour"], required: false },
+      emergencyTriageSpeed: {
+        type: String,
+        enum: ["immediate", "within_30_min", "within_1_hour", "over_1_hour"],
+        required: false,
+      },
       crisisHandlingConfidence: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
     },
 
     // Emergency Experiences & Photos
-    emergencyExperiences: [{
-      situationType: { type: String, required: false }, // e.g., "Poisoning", "Broken bone", "Allergic reaction"
-      description: { type: String, required: false },
-      photos: [String], // Array of image URLs for this specific emergency
-      outcome: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
-      dateOfIncident: { type: Date, required: false },
-    }],
+    emergencyExperiences: [
+      {
+        situationType: { type: String, required: false }, // e.g., "Poisoning", "Broken bone", "Allergic reaction"
+        description: { type: String, required: false },
+        photos: [String], // Array of image URLs for this specific emergency
+        outcome: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+        dateOfIncident: { type: Date, required: false },
+      },
+    ],
 
     // 6. Owner Involvement
     ownerInvolvement: {
@@ -186,7 +208,6 @@ const reviewSchema = new mongoose.Schema({
 
     // 7. Reputation & Community Engagement
 
-    
     reputationAndCommunity: {
       onlineReputationConsistency: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
       wordOfMouthReputation: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },

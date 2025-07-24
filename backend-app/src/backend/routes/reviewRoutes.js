@@ -15,6 +15,8 @@ const {
   getAnimalShelterReviewStats,
   uploadReviewImages,
   deleteReview,
+  likeReview,
+  getReviewLikeStatus,
 } = require("../controllers/reviewController");
 const { reviewImageUpload } = require("../utils/upload");
 const verifyToken = require("../middleware/auth");
@@ -70,5 +72,11 @@ reviewRouter.get("/:placeId/pet-store-stats", getPetStoreReviewStats);
 
 // Get animal shelter specific review statistics
 reviewRouter.get("/:placeId/animal-shelter-stats", getAnimalShelterReviewStats);
+
+// Like or unlike a review
+reviewRouter.post("/:reviewId/like", likeReview);
+
+// Get like status for a review by a specific user
+reviewRouter.get("/:reviewId/like-status", getReviewLikeStatus);
 
 module.exports = reviewRouter;
