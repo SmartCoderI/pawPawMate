@@ -30,9 +30,10 @@ const validatePetStoreReview = (petStoreReview) => {
 
   // Validate productSelectionAndQuality
   if (petStoreReview.productSelectionAndQuality) {
-    const { foodBrandVariety, toySelection, suppliesAvailability, productFreshness } = petStoreReview.productSelectionAndQuality;
+    const { foodBrandVariety, toySelection, suppliesAvailability, productFreshness } =
+      petStoreReview.productSelectionAndQuality;
     const qualityValues = ["excellent", "good", "fair", "poor"];
-    
+
     if (foodBrandVariety && !qualityValues.includes(foodBrandVariety)) {
       errors.push("Invalid foodBrandVariety value");
     }
@@ -57,9 +58,10 @@ const validatePetStoreReview = (petStoreReview) => {
 
   // Validate staffKnowledgeAndService
   if (petStoreReview.staffKnowledgeAndService) {
-    const { petKnowledge, productRecommendations, customerService, helpfulness } = petStoreReview.staffKnowledgeAndService;
+    const { petKnowledge, productRecommendations, customerService, helpfulness } =
+      petStoreReview.staffKnowledgeAndService;
     const serviceValues = ["excellent", "good", "fair", "poor"];
-    
+
     if (petKnowledge && !serviceValues.includes(petKnowledge)) {
       errors.push("Invalid petKnowledge value");
     }
@@ -99,7 +101,7 @@ const validateAnimalShelterReview = (animalShelterReview) => {
     const { availableAnimalTypes, breedVariety, ageRange } = animalShelterReview.animalTypeSelection;
     const validAnimalTypes = ["dogs", "cats", "rabbits", "birds", "reptiles", "small_mammals"];
     const validAgeRanges = ["puppies_kittens", "young_adults", "adults", "seniors"];
-    
+
     if (availableAnimalTypes && Array.isArray(availableAnimalTypes)) {
       availableAnimalTypes.forEach((type, index) => {
         if (!validAnimalTypes.includes(type)) {
@@ -107,11 +109,11 @@ const validateAnimalShelterReview = (animalShelterReview) => {
         }
       });
     }
-    
+
     if (breedVariety && !["excellent", "good", "fair", "poor"].includes(breedVariety)) {
       errors.push("Invalid breedVariety value");
     }
-    
+
     if (ageRange && Array.isArray(ageRange)) {
       ageRange.forEach((age, index) => {
         if (!validAgeRanges.includes(age)) {
@@ -125,7 +127,7 @@ const validateAnimalShelterReview = (animalShelterReview) => {
   if (animalShelterReview.animalCareAndWelfare) {
     const { animalHealth, livingConditions, medicalCare } = animalShelterReview.animalCareAndWelfare;
     const careValues = ["excellent", "good", "fair", "poor"];
-    
+
     if (animalHealth && !careValues.includes(animalHealth)) {
       errors.push("Invalid animalHealth value");
     }
@@ -139,8 +141,9 @@ const validateAnimalShelterReview = (animalShelterReview) => {
 
   // Validate adoptionProcessAndSupport
   if (animalShelterReview.adoptionProcessAndSupport) {
-    const { applicationProcess, processingTime, adoptionFees, returnPolicy } = animalShelterReview.adoptionProcessAndSupport;
-    
+    const { applicationProcess, processingTime, adoptionFees, returnPolicy } =
+      animalShelterReview.adoptionProcessAndSupport;
+
     if (applicationProcess && !["easy", "moderate", "difficult"].includes(applicationProcess)) {
       errors.push("Invalid applicationProcess value");
     }
@@ -157,9 +160,10 @@ const validateAnimalShelterReview = (animalShelterReview) => {
 
   // Validate staffAndVolunteerQuality
   if (animalShelterReview.staffAndVolunteerQuality) {
-    const { staffKnowledge, animalHandling, customerService, compassionLevel } = animalShelterReview.staffAndVolunteerQuality;
+    const { staffKnowledge, animalHandling, customerService, compassionLevel } =
+      animalShelterReview.staffAndVolunteerQuality;
     const qualityValues = ["excellent", "good", "fair", "poor"];
-    
+
     if (staffKnowledge && !qualityValues.includes(staffKnowledge)) {
       errors.push("Invalid staffKnowledge value");
     }
@@ -300,9 +304,10 @@ const validateVetClinicReview = (vetClinicReview) => {
 
   // Validate costAndTransparency
   if (vetClinicReview.costAndTransparency) {
-    const { routineCheckupCost, vaccinationCost, spayNeuterCost, dentalCleaningCost, emergencyVisitCost } = vetClinicReview.costAndTransparency;
+    const { routineCheckupCost, vaccinationCost, spayNeuterCost, dentalCleaningCost, emergencyVisitCost } =
+      vetClinicReview.costAndTransparency;
     const costValues = ["low", "moderate", "high", "very_high"];
-    
+
     if (routineCheckupCost && !costValues.includes(routineCheckupCost)) {
       errors.push("Invalid routineCheckupCost value");
     }
@@ -322,9 +327,10 @@ const validateVetClinicReview = (vetClinicReview) => {
 
   // Validate medicalStaffAndServices
   if (vetClinicReview.medicalStaffAndServices) {
-    const { veterinarianAttitude, veterinarianCompetence, technicianNursePerformance, onSiteDiagnostics } = vetClinicReview.medicalStaffAndServices;
+    const { veterinarianAttitude, veterinarianCompetence, technicianNursePerformance, onSiteDiagnostics } =
+      vetClinicReview.medicalStaffAndServices;
     const performanceValues = ["excellent", "good", "fair", "poor"];
-    
+
     if (veterinarianAttitude && !performanceValues.includes(veterinarianAttitude)) {
       errors.push("Invalid veterinarianAttitude value");
     }
@@ -336,7 +342,7 @@ const validateVetClinicReview = (vetClinicReview) => {
     }
     if (onSiteDiagnostics && Array.isArray(onSiteDiagnostics)) {
       const validDiagnostics = ["xray", "ultrasound", "bloodwork", "none"];
-      const invalidDiagnostics = onSiteDiagnostics.filter(d => !validDiagnostics.includes(d));
+      const invalidDiagnostics = onSiteDiagnostics.filter((d) => !validDiagnostics.includes(d));
       if (invalidDiagnostics.length > 0) {
         errors.push("Invalid onSiteDiagnostics values: " + invalidDiagnostics.join(", "));
       }
@@ -345,15 +351,22 @@ const validateVetClinicReview = (vetClinicReview) => {
 
   // Validate schedulingAndCommunication
   if (vetClinicReview.schedulingAndCommunication) {
-    const { responseTime, appointmentWaitTime, inClinicWaitingTime, followUpCommunication } = vetClinicReview.schedulingAndCommunication;
-    
+    const { responseTime, appointmentWaitTime, inClinicWaitingTime, followUpCommunication } =
+      vetClinicReview.schedulingAndCommunication;
+
     if (responseTime && !["immediate", "same_day", "next_day", "several_days"].includes(responseTime)) {
       errors.push("Invalid responseTime value");
     }
-    if (appointmentWaitTime && !["same_day", "within_week", "1_2_weeks", "over_2_weeks"].includes(appointmentWaitTime)) {
+    if (
+      appointmentWaitTime &&
+      !["same_day", "within_week", "1_2_weeks", "over_2_weeks"].includes(appointmentWaitTime)
+    ) {
       errors.push("Invalid appointmentWaitTime value");
     }
-    if (inClinicWaitingTime && !["under_15_min", "15_30_min", "30_60_min", "over_1_hour"].includes(inClinicWaitingTime)) {
+    if (
+      inClinicWaitingTime &&
+      !["under_15_min", "15_30_min", "30_60_min", "over_1_hour"].includes(inClinicWaitingTime)
+    ) {
       errors.push("Invalid inClinicWaitingTime value");
     }
     if (followUpCommunication && !["excellent", "good", "fair", "poor"].includes(followUpCommunication)) {
@@ -364,8 +377,11 @@ const validateVetClinicReview = (vetClinicReview) => {
   // Validate emergencyAndAfterHours
   if (vetClinicReview.emergencyAndAfterHours) {
     const { emergencyTriageSpeed, crisisHandlingConfidence } = vetClinicReview.emergencyAndAfterHours;
-    
-    if (emergencyTriageSpeed && !["immediate", "within_30_min", "within_1_hour", "over_1_hour"].includes(emergencyTriageSpeed)) {
+
+    if (
+      emergencyTriageSpeed &&
+      !["immediate", "within_30_min", "within_1_hour", "over_1_hour"].includes(emergencyTriageSpeed)
+    ) {
       errors.push("Invalid emergencyTriageSpeed value");
     }
     if (crisisHandlingConfidence && !["excellent", "good", "fair", "poor"].includes(crisisHandlingConfidence)) {
@@ -386,7 +402,7 @@ const validateVetClinicReview = (vetClinicReview) => {
   if (vetClinicReview.ownerInvolvement) {
     const { communicationDuringAnesthesia, communicationDuringSurgery } = vetClinicReview.ownerInvolvement;
     const communicationValues = ["excellent", "good", "fair", "poor"];
-    
+
     if (communicationDuringAnesthesia && !communicationValues.includes(communicationDuringAnesthesia)) {
       errors.push("Invalid communicationDuringAnesthesia value");
     }
@@ -397,9 +413,10 @@ const validateVetClinicReview = (vetClinicReview) => {
 
   // Validate reputationAndCommunity
   if (vetClinicReview.reputationAndCommunity) {
-    const { onlineReputationConsistency, wordOfMouthReputation, communityInvolvement, socialMediaPresence } = vetClinicReview.reputationAndCommunity;
+    const { onlineReputationConsistency, wordOfMouthReputation, communityInvolvement, socialMediaPresence } =
+      vetClinicReview.reputationAndCommunity;
     const reputationValues = ["excellent", "good", "fair", "poor"];
-    
+
     if (onlineReputationConsistency && !reputationValues.includes(onlineReputationConsistency)) {
       errors.push("Invalid onlineReputationConsistency value");
     }
@@ -560,7 +577,19 @@ const cleanAnimalShelterReview = (animalShelterReview) => {
 exports.addReview = async (req, res) => {
   try {
     console.log("Review creation request received:", req.body);
-    const { placeId, rating, comment, tags, dogParkReview, vetClinicReview, petStoreReview, animalShelterReview, userId, placeData, photos } = req.body;
+    const {
+      placeId,
+      rating,
+      comment,
+      tags,
+      dogParkReview,
+      vetClinicReview,
+      petStoreReview,
+      animalShelterReview,
+      userId,
+      placeData,
+      photos,
+    } = req.body;
 
     // Validate required fields
     if (!rating) {
@@ -754,23 +783,23 @@ exports.addReview = async (req, res) => {
     try {
       // Step 1: Content Validity Check (Anti-spam)
       const isValidContent = (comment && comment.length >= 20) || (tags && tags.length > 0) || rating;
-      
+
       if (isValidContent) {
         console.log("Review meets content validity requirements");
-        
+
         // Step 2: Reward Eligibility Check
         let shouldGenerateCard = false;
         let contributionType = "";
-        
+
         // Check if this is the user's first review ever
         const userReviewCount = await Review.countDocuments({ userId: userId });
         console.log(`User review count: ${userReviewCount}`);
-        
+
         // Check existing cards to prevent duplicates
         const existingCards = await Card.find({ earnedBy: userId });
-        const hasFirstReviewCard = existingCards.some(card => card.contributionType === 'first_review');
-        const hasMilestoneCard = existingCards.some(card => card.contributionType === 'milestone_achievement');
-        
+        const hasFirstReviewCard = existingCards.some((card) => card.contributionType === "first_review");
+        const hasMilestoneCard = existingCards.some((card) => card.contributionType === "milestone_achievement");
+
         if (userReviewCount === 1 && !hasFirstReviewCard) {
           // This is their first review and they don't have a first review card yet
           shouldGenerateCard = true;
@@ -782,24 +811,20 @@ exports.addReview = async (req, res) => {
           contributionType = "milestone_achievement";
           console.log("User earned card for milestone achievement (3 reviews)");
         }
-        
+
         // Generate the card if eligible
         if (shouldGenerateCard) {
           // Get place name for the card
           const place = await Place.findById(finalPlaceId);
           const locationName = place ? place.name : "Unknown Location";
-          
-          await generateRewardCard(
-            userId,
-            review._id,
-            finalPlaceId,
-            locationName,
-            contributionType
-          );
-          
+
+          await generateRewardCard(userId, review._id, finalPlaceId, locationName, contributionType);
+
           console.log(`✅ Reward card generated for user ${userId} - ${contributionType}`);
         } else {
-          console.log(`No card generated - Review count: ${userReviewCount}, Has first card: ${hasFirstReviewCard}, Has milestone card: ${hasMilestoneCard}`);
+          console.log(
+            `No card generated - Review count: ${userReviewCount}, Has first card: ${hasFirstReviewCard}, Has milestone card: ${hasMilestoneCard}`
+          );
         }
       }
     } catch (cardError) {
@@ -824,28 +849,28 @@ exports.getReviewsForPlace = async (req, res) => {
   try {
     const { placeId } = req.params;
     console.log("Fetching reviews for place:", placeId);
-    
+
     // First, get reviews without population to see if they exist
     const reviewsRaw = await Review.find({ placeId });
     console.log(`Found ${reviewsRaw.length} reviews for place ${placeId}`);
-    
+
     if (reviewsRaw.length === 0) {
       console.log("No reviews found, returning empty array");
       return res.json([]);
     }
-    
+
     // Then populate user data with error handling
     const reviews = await Review.find({ placeId })
       .populate({
         path: "userId",
         select: "name email profileImage",
         // Handle cases where user might not exist
-        options: { strictPopulate: false }
+        options: { strictPopulate: false },
       })
       .sort({ createdAt: -1 });
 
     // Filter out reviews with invalid user references
-    const validReviews = reviews.filter(review => {
+    const validReviews = reviews.filter((review) => {
       if (!review.userId) {
         console.warn(`Review ${review._id} has invalid userId reference`);
         // Keep the review but with null user data
@@ -868,9 +893,7 @@ exports.getReviewsForPlace = async (req, res) => {
 exports.getReviewsByUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const reviews = await Review.find({ userId })
-      .populate("userId", "name email profileImage")
-      .sort({ createdAt: -1 });
+    const reviews = await Review.find({ userId }).populate("userId", "name email profileImage").sort({ createdAt: -1 });
 
     res.json(reviews);
   } catch (err) {
@@ -1266,10 +1289,13 @@ exports.getVetClinicReviewStats = async (req, res) => {
             categoryStats.costAndTransparency.emergencyVisitCost[emergencyVisitCost] =
               (categoryStats.costAndTransparency.emergencyVisitCost[emergencyVisitCost] || 0) + 1;
           }
-          if (feesExplainedUpfront !== undefined) categoryStats.costAndTransparency.feesExplainedUpfront[feesExplainedUpfront]++;
-          if (printedEstimatesAvailable !== undefined) categoryStats.costAndTransparency.printedEstimatesAvailable[printedEstimatesAvailable]++;
+          if (feesExplainedUpfront !== undefined)
+            categoryStats.costAndTransparency.feesExplainedUpfront[feesExplainedUpfront]++;
+          if (printedEstimatesAvailable !== undefined)
+            categoryStats.costAndTransparency.printedEstimatesAvailable[printedEstimatesAvailable]++;
           if (insuranceAccepted !== undefined) categoryStats.costAndTransparency.insuranceAccepted[insuranceAccepted]++;
-          if (paymentPlansOffered !== undefined) categoryStats.costAndTransparency.paymentPlansOffered[paymentPlansOffered]++;
+          if (paymentPlansOffered !== undefined)
+            categoryStats.costAndTransparency.paymentPlansOffered[paymentPlansOffered]++;
         }
 
         // 3. Medical Staff & Services
@@ -1302,15 +1328,19 @@ exports.getVetClinicReviewStats = async (req, res) => {
                 (categoryStats.medicalStaffAndServices.onSiteDiagnostics[diagnostic] || 0) + 1;
             });
           }
-          if (surgeryOrthopedics !== undefined) categoryStats.medicalStaffAndServices.surgeryOrthopedics[surgeryOrthopedics]++;
-          if (behavioralCounseling !== undefined) categoryStats.medicalStaffAndServices.behavioralCounseling[behavioralCounseling]++;
-          if (nutritionConsultation !== undefined) categoryStats.medicalStaffAndServices.nutritionConsultation[nutritionConsultation]++;
+          if (surgeryOrthopedics !== undefined)
+            categoryStats.medicalStaffAndServices.surgeryOrthopedics[surgeryOrthopedics]++;
+          if (behavioralCounseling !== undefined)
+            categoryStats.medicalStaffAndServices.behavioralCounseling[behavioralCounseling]++;
+          if (nutritionConsultation !== undefined)
+            categoryStats.medicalStaffAndServices.nutritionConsultation[nutritionConsultation]++;
         }
 
         // 4. Scheduling & Communication
         if (vetClinicReview.schedulingAndCommunication) {
-          const { responseTime, appointmentWaitTime, inClinicWaitingTime, followUpCommunication } = vetClinicReview.schedulingAndCommunication;
-          
+          const { responseTime, appointmentWaitTime, inClinicWaitingTime, followUpCommunication } =
+            vetClinicReview.schedulingAndCommunication;
+
           if (responseTime) {
             categoryStats.schedulingAndCommunication.responseTime[responseTime] =
               (categoryStats.schedulingAndCommunication.responseTime[responseTime] || 0) + 1;
@@ -1343,10 +1373,13 @@ exports.getVetClinicReviewStats = async (req, res) => {
 
           if (openWeekends !== undefined) categoryStats.emergencyAndAfterHours.openWeekends[openWeekends]++;
           if (openEvenings !== undefined) categoryStats.emergencyAndAfterHours.openEvenings[openEvenings]++;
-          if (onCallEmergencyNumber !== undefined) categoryStats.emergencyAndAfterHours.onCallEmergencyNumber[onCallEmergencyNumber]++;
-          if (connectedToEmergencyHospitals !== undefined) categoryStats.emergencyAndAfterHours.connectedToEmergencyHospitals[connectedToEmergencyHospitals]++;
-          if (clearHandoffsToSpecialists !== undefined) categoryStats.emergencyAndAfterHours.clearHandoffsToSpecialists[clearHandoffsToSpecialists]++;
-          
+          if (onCallEmergencyNumber !== undefined)
+            categoryStats.emergencyAndAfterHours.onCallEmergencyNumber[onCallEmergencyNumber]++;
+          if (connectedToEmergencyHospitals !== undefined)
+            categoryStats.emergencyAndAfterHours.connectedToEmergencyHospitals[connectedToEmergencyHospitals]++;
+          if (clearHandoffsToSpecialists !== undefined)
+            categoryStats.emergencyAndAfterHours.clearHandoffsToSpecialists[clearHandoffsToSpecialists]++;
+
           if (emergencyTriageSpeed) {
             categoryStats.emergencyAndAfterHours.emergencyTriageSpeed[emergencyTriageSpeed] =
               (categoryStats.emergencyAndAfterHours.emergencyTriageSpeed[emergencyTriageSpeed] || 0) + 1;
@@ -1360,7 +1393,7 @@ exports.getVetClinicReviewStats = async (req, res) => {
         // Emergency Experiences
         if (vetClinicReview.emergencyExperiences && Array.isArray(vetClinicReview.emergencyExperiences)) {
           categoryStats.emergencyExperiences.totalExperiences += vetClinicReview.emergencyExperiences.length;
-          
+
           vetClinicReview.emergencyExperiences.forEach((experience) => {
             if (experience.situationType) {
               categoryStats.emergencyExperiences.situationTypes[experience.situationType] =
@@ -1377,7 +1410,7 @@ exports.getVetClinicReviewStats = async (req, res) => {
         if (vetClinicReview.ownerInvolvement) {
           const { communicationDuringAnesthesia, communicationDuringSurgery } = vetClinicReview.ownerInvolvement;
           const communicationValues = ["excellent", "good", "fair", "poor"];
-          
+
           if (communicationDuringAnesthesia && !communicationValues.includes(communicationDuringAnesthesia)) {
             errors.push("Invalid communicationDuringAnesthesia value");
           }
@@ -1388,9 +1421,10 @@ exports.getVetClinicReviewStats = async (req, res) => {
 
         // Reputation & Community
         if (vetClinicReview.reputationAndCommunity) {
-          const { onlineReputationConsistency, wordOfMouthReputation, communityInvolvement, socialMediaPresence } = vetClinicReview.reputationAndCommunity;
+          const { onlineReputationConsistency, wordOfMouthReputation, communityInvolvement, socialMediaPresence } =
+            vetClinicReview.reputationAndCommunity;
           const reputationValues = ["excellent", "good", "fair", "poor"];
-          
+
           if (onlineReputationConsistency && !reputationValues.includes(onlineReputationConsistency)) {
             errors.push("Invalid onlineReputationConsistency value");
           }
@@ -1522,10 +1556,18 @@ exports.getPetStoreReviewStats = async (req, res) => {
 
         // 3. Services & Conveniences
         if (petStoreReview.servicesAndConveniences) {
-          const { grooming, veterinaryServices, petTraining, deliveryService, onlineOrdering, curbsidePickup, returnPolicy } =
-            petStoreReview.servicesAndConveniences;
+          const {
+            grooming,
+            veterinaryServices,
+            petTraining,
+            deliveryService,
+            onlineOrdering,
+            curbsidePickup,
+            returnPolicy,
+          } = petStoreReview.servicesAndConveniences;
           if (grooming !== undefined) categoryStats.servicesAndConveniences.grooming[grooming]++;
-          if (veterinaryServices !== undefined) categoryStats.servicesAndConveniences.veterinaryServices[veterinaryServices]++;
+          if (veterinaryServices !== undefined)
+            categoryStats.servicesAndConveniences.veterinaryServices[veterinaryServices]++;
           if (petTraining !== undefined) categoryStats.servicesAndConveniences.petTraining[petTraining]++;
           if (deliveryService !== undefined) categoryStats.servicesAndConveniences.deliveryService[deliveryService]++;
           if (onlineOrdering !== undefined) categoryStats.servicesAndConveniences.onlineOrdering[onlineOrdering]++;
@@ -1538,8 +1580,14 @@ exports.getPetStoreReviewStats = async (req, res) => {
 
         // 4. Product Selection & Quality
         if (petStoreReview.productSelectionAndQuality) {
-          const { foodBrandVariety, toySelection, suppliesAvailability, productFreshness, organicNaturalOptions, prescriptionDietAvailable } =
-            petStoreReview.productSelectionAndQuality;
+          const {
+            foodBrandVariety,
+            toySelection,
+            suppliesAvailability,
+            productFreshness,
+            organicNaturalOptions,
+            prescriptionDietAvailable,
+          } = petStoreReview.productSelectionAndQuality;
           if (foodBrandVariety) {
             categoryStats.productSelectionAndQuality.foodBrandVariety[foodBrandVariety] =
               (categoryStats.productSelectionAndQuality.foodBrandVariety[foodBrandVariety] || 0) + 1;
@@ -1556,8 +1604,10 @@ exports.getPetStoreReviewStats = async (req, res) => {
             categoryStats.productSelectionAndQuality.productFreshness[productFreshness] =
               (categoryStats.productSelectionAndQuality.productFreshness[productFreshness] || 0) + 1;
           }
-          if (organicNaturalOptions !== undefined) categoryStats.productSelectionAndQuality.organicNaturalOptions[organicNaturalOptions]++;
-          if (prescriptionDietAvailable !== undefined) categoryStats.productSelectionAndQuality.prescriptionDietAvailable[prescriptionDietAvailable]++;
+          if (organicNaturalOptions !== undefined)
+            categoryStats.productSelectionAndQuality.organicNaturalOptions[organicNaturalOptions]++;
+          if (prescriptionDietAvailable !== undefined)
+            categoryStats.productSelectionAndQuality.prescriptionDietAvailable[prescriptionDietAvailable]++;
         }
 
         // 5. Pricing & Value
@@ -1577,8 +1627,14 @@ exports.getPetStoreReviewStats = async (req, res) => {
 
         // 6. Staff Knowledge & Service
         if (petStoreReview.staffKnowledgeAndService) {
-          const { petKnowledge, productRecommendations, customerService, helpfulness, multilingual, trainingCertified } =
-            petStoreReview.staffKnowledgeAndService;
+          const {
+            petKnowledge,
+            productRecommendations,
+            customerService,
+            helpfulness,
+            multilingual,
+            trainingCertified,
+          } = petStoreReview.staffKnowledgeAndService;
           if (petKnowledge) {
             categoryStats.staffKnowledgeAndService.petKnowledge[petKnowledge] =
               (categoryStats.staffKnowledgeAndService.petKnowledge[petKnowledge] || 0) + 1;
@@ -1596,7 +1652,8 @@ exports.getPetStoreReviewStats = async (req, res) => {
               (categoryStats.staffKnowledgeAndService.helpfulness[helpfulness] || 0) + 1;
           }
           if (multilingual !== undefined) categoryStats.staffKnowledgeAndService.multilingual[multilingual]++;
-          if (trainingCertified !== undefined) categoryStats.staffKnowledgeAndService.trainingCertified[trainingCertified]++;
+          if (trainingCertified !== undefined)
+            categoryStats.staffKnowledgeAndService.trainingCertified[trainingCertified]++;
         }
       }
     });
@@ -1733,8 +1790,14 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
 
         // 4. Animal Care & Welfare
         if (animalShelterReview.animalCareAndWelfare) {
-          const { animalHealth, livingConditions, exercisePrograms, medicalCare, behavioralAssessment, specialNeedsCare } =
-            animalShelterReview.animalCareAndWelfare;
+          const {
+            animalHealth,
+            livingConditions,
+            exercisePrograms,
+            medicalCare,
+            behavioralAssessment,
+            specialNeedsCare,
+          } = animalShelterReview.animalCareAndWelfare;
           if (animalHealth) {
             categoryStats.animalCareAndWelfare.animalHealth[animalHealth] =
               (categoryStats.animalCareAndWelfare.animalHealth[animalHealth] || 0) + 1;
@@ -1748,14 +1811,21 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
             categoryStats.animalCareAndWelfare.medicalCare[medicalCare] =
               (categoryStats.animalCareAndWelfare.medicalCare[medicalCare] || 0) + 1;
           }
-          if (behavioralAssessment !== undefined) categoryStats.animalCareAndWelfare.behavioralAssessment[behavioralAssessment]++;
+          if (behavioralAssessment !== undefined)
+            categoryStats.animalCareAndWelfare.behavioralAssessment[behavioralAssessment]++;
           if (specialNeedsCare !== undefined) categoryStats.animalCareAndWelfare.specialNeedsCare[specialNeedsCare]++;
         }
 
         // 5. Adoption Process & Support
         if (animalShelterReview.adoptionProcessAndSupport) {
-          const { applicationProcess, processingTime, homeVisitRequired, adoptionFees, postAdoptionSupport, returnPolicy } =
-            animalShelterReview.adoptionProcessAndSupport;
+          const {
+            applicationProcess,
+            processingTime,
+            homeVisitRequired,
+            adoptionFees,
+            postAdoptionSupport,
+            returnPolicy,
+          } = animalShelterReview.adoptionProcessAndSupport;
           if (applicationProcess) {
             categoryStats.adoptionProcessAndSupport.applicationProcess[applicationProcess] =
               (categoryStats.adoptionProcessAndSupport.applicationProcess[applicationProcess] || 0) + 1;
@@ -1764,12 +1834,14 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
             categoryStats.adoptionProcessAndSupport.processingTime[processingTime] =
               (categoryStats.adoptionProcessAndSupport.processingTime[processingTime] || 0) + 1;
           }
-          if (homeVisitRequired !== undefined) categoryStats.adoptionProcessAndSupport.homeVisitRequired[homeVisitRequired]++;
+          if (homeVisitRequired !== undefined)
+            categoryStats.adoptionProcessAndSupport.homeVisitRequired[homeVisitRequired]++;
           if (adoptionFees) {
             categoryStats.adoptionProcessAndSupport.adoptionFees[adoptionFees] =
               (categoryStats.adoptionProcessAndSupport.adoptionFees[adoptionFees] || 0) + 1;
           }
-          if (postAdoptionSupport !== undefined) categoryStats.adoptionProcessAndSupport.postAdoptionSupport[postAdoptionSupport]++;
+          if (postAdoptionSupport !== undefined)
+            categoryStats.adoptionProcessAndSupport.postAdoptionSupport[postAdoptionSupport]++;
           if (returnPolicy) {
             categoryStats.adoptionProcessAndSupport.returnPolicy[returnPolicy] =
               (categoryStats.adoptionProcessAndSupport.returnPolicy[returnPolicy] || 0) + 1;
@@ -1792,7 +1864,8 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
             categoryStats.staffAndVolunteerQuality.customerService[customerService] =
               (categoryStats.staffAndVolunteerQuality.customerService[customerService] || 0) + 1;
           }
-          if (volunteerProgram !== undefined) categoryStats.staffAndVolunteerQuality.volunteerProgram[volunteerProgram]++;
+          if (volunteerProgram !== undefined)
+            categoryStats.staffAndVolunteerQuality.volunteerProgram[volunteerProgram]++;
           if (staffTraining !== undefined) categoryStats.staffAndVolunteerQuality.staffTraining[staffTraining]++;
           if (compassionLevel) {
             categoryStats.staffAndVolunteerQuality.compassionLevel[compassionLevel] =
@@ -1902,36 +1975,120 @@ exports.deleteReview = async (req, res) => {
   try {
     const { reviewId } = req.params;
     const { userId } = req.body; // User ID from request body
-    
-    console.log('Delete review request:', { reviewId, userId });
-    
+
+    console.log("Delete review request:", { reviewId, userId });
+
     // Find the review first
     const review = await Review.findById(reviewId);
-    
+
     if (!review) {
       return res.status(404).json({ error: "Review not found" });
     }
-    
+
     // Check if the user is the author of the review
     if (!review.userId || review.userId.toString() !== userId) {
-      console.log('Unauthorized delete attempt:', {
+      console.log("Unauthorized delete attempt:", {
         reviewAuthor: review.userId,
-        requestingUser: userId
+        requestingUser: userId,
       });
-      return res.status(403).json({ 
-        error: "You are not authorized to delete this review. Only the author can delete it." 
+      return res.status(403).json({
+        error: "You are not authorized to delete this review. Only the author can delete it.",
       });
     }
-    
+
     // Delete the review
     await Review.findByIdAndDelete(reviewId);
-    console.log('Review deleted successfully:', reviewId);
-    
-    res.json({ 
-      message: "Review deleted successfully"
+    console.log("Review deleted successfully:", reviewId);
+
+    res.json({
+      message: "Review deleted successfully",
     });
   } catch (err) {
-    console.error('Error deleting review:', err);
+    console.error("Error deleting review:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Like or unlike a review
+exports.likeReview = async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const { userId } = req.body;
+
+    console.log("Like review request:", { reviewId, userId });
+
+    // Find the review
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    // Check if user already liked the review
+    const userLikedIndex = review.likedBy.indexOf(userId);
+    let liked = false;
+
+    if (userLikedIndex === -1) {
+      // User hasn't liked the review, add like
+      review.likedBy.push(userId);
+      review.likeCount = review.likedBy.length;
+      liked = true;
+      console.log("User liked the review");
+    } else {
+      // User already liked the review, remove like
+      review.likedBy.splice(userLikedIndex, 1);
+      review.likeCount = review.likedBy.length;
+      liked = false;
+      console.log("User unliked the review");
+    }
+
+    // Save the updated review
+    const updatedReview = await review.save();
+
+    // Update corresponding card's helpful count if it exists
+    try {
+      const card = await Card.findOne({ reviewId: reviewId });
+      if (card) {
+        await Card.findByIdAndUpdate(card._id, { helpfulCount: updatedReview.likeCount });
+        console.log(`Updated card ${card._id} helpful count to ${updatedReview.likeCount}`);
+      }
+    } catch (cardError) {
+      console.error("Error updating card helpful count:", cardError);
+    }
+
+    res.json({
+      liked: liked,
+      likeCount: updatedReview.likeCount,
+      message: liked ? "Review liked successfully" : "Review unliked successfully",
+    });
+  } catch (err) {
+    console.error("Error liking/unliking review:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get like status for a review by a specific user
+exports.getReviewLikeStatus = async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const { userId } = req.query;
+
+    console.log("Get review like status request:", { reviewId, userId });
+
+    // Find the review
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    // Check if user liked the review
+    const liked = review.likedBy.includes(userId);
+
+    res.json({
+      liked: liked,
+      likeCount: review.likeCount,
+    });
+  } catch (err) {
+    console.error("Error getting review like status:", err);
     res.status(500).json({ error: err.message });
   }
 };
