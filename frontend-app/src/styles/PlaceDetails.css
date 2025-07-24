@@ -2161,14 +2161,23 @@
   from { transform: translateX(100vw); }
   to { transform: translateX(-100%); }
 }
-
-@media (max-width: 480px) {
-  .hero-placeholder {
-    height: 200px;
-    overflow: hidden;
+@keyframes barrage-move-vertical {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
   }
-
-  .barrage-mobile-vertical {
+  20% {
+    opacity: 1;
+  }
+   80% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+}
+.barrage-mobile-vertical {
     left: 10px;
     right: 10px;
     width: calc(100% - 20px);
@@ -2182,20 +2191,9 @@
     justify-content: left;
   }
 
-  @keyframes barrage-move-vertical {
-    from {
-      transform: translateY(50px);
-      opacity: 0;
-    }
-    20% {
-      opacity: 1;
-    }
-    80% {
-      opacity: 1;
-    }
-    to {
-      transform: translateY(-100px);
-      opacity: 0;
-    }
+@media (max-width: 480px) {
+  .hero-placeholder {
+    height: 200px;
+    overflow: hidden;
   }
 }
