@@ -33,30 +33,35 @@ const PlaceDetails = () => {
   // Barrage 
   const [barrageQueue, setBarrageQueue] = useState([]);
 
+  console.log(reviews)
   useEffect(() => {
     if (!reviews || reviews.length === 0) return;
 
     const addReview = () => {
-      const available = reviews.filter(r => !barrageQueue.some(q => q.id === r._id));
-      if (available.length === 0) return;
-      const review = available[Math.floor(Math.random() * available.length)];
-      const top = Math.random() * 220 + 20;
-      const duration = Math.random() * 6 + 8; // 8-14 seconds
 
-      setBarrageQueue(prev => [
-        ...prev,
-        { ...review, top, duration, key: Date.now() + Math.random() }
-      ]);
+      setBarrageQueue(prev => {
+        const available = reviews.filter(r => !prev.some(q => q._id === r._id));
+        if (available.length === 0) return prev;
+        const review = available[Math.floor(Math.random() * available.length)];
+
+        // This need to be adjusted based on the height of the barrage container
+        const top = Math.random() * 220 + 20; // Random number between 20 - 240 pixels. Container is set to fixed 300px height.
+        const duration = Math.random() * 6 + 8; // 8-14 seconds
+
+        return [
+          ...prev,
+          { ...review, top, duration, key: Date.now() + Math.random() }
+        ]
+      })
     }
 
     const interval = setInterval(() => {
-      if (barrageQueue.length < 4) addReview();
+      if (barrageQueue.length < 4) addReview(); // Current barrage limit is 4
     }, 2000);
 
     return () => clearInterval(interval);
 
   }, [reviews, barrageQueue]);
-
 
 
   // Image upload handlers
