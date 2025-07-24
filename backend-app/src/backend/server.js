@@ -22,6 +22,7 @@ const petRoutes = require("./routes/petRoutes");
 const placeRoutes = require("./routes/placeRoutes");
 const cardRoutes = require("./routes/cardRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
+const lostPetRoutes = require("./routes/lostPetRoutes");
 
 // Connect to MongoDB before starting the server
 connectDB();
@@ -55,6 +56,7 @@ app.use("/api/pets", petRoutes);
 app.use("/api/places", placeRoutes);
 app.use("/api/cards", cardRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/lostpets", lostPetRoutes);
 
 //Set up socket.io for real-time lost pet alerts, handle real-time communication (Optional)
 const io = socketio(server, {
