@@ -30,6 +30,35 @@ const PlaceDetails = () => {
   // Review likes state
   const [reviewLikes, setReviewLikes] = useState({});
 
+  // Barrage 
+  const [barrageQueue, setBarrageQueue] = useState([]);
+
+  useEffect(() => {
+    if (!reviews || reviews.length === 0) return;
+
+    const addReview = () => {
+      const available = reviews.filter(r => !barrageQueue.some(q => q.id === r._id));
+      if (available.length === 0) return;
+      const review = available[Math.floor(Math.random() * available.length)];
+      const top = Math.random() * 220 + 20;
+      const duration = Math.random() * 6 + 8; // 8-14 seconds
+
+      setBarrageQueue(prev => [
+        ...prev,
+        { ...review, top, duration, key: Date.now() + Math.random() }
+      ]);
+    }
+
+    const interval = setInterval(() => {
+      if (barrageQueue.length < 4) addReview();
+    }, 2000);
+
+    return () => clearInterval(interval);
+
+  }, [reviews, barrageQueue]);
+
+
+
   // Image upload handlers
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
@@ -2215,6 +2244,21 @@ const PlaceDetails = () => {
         <div className="hero-placeholder">
           <span className="hero-icon">{locationTypes[place.type]?.icon || "📍"}</span>
           <h2>PLACE IMAGE</h2>
+
+          {barrageQueue.map((review, _) => (
+            <div
+              key={review.key}
+              className="barrage-review"
+              style={{
+                top: `${review.top}px`,
+                animationDuration: `${review.duration}s`
+              }}
+              onAnimationEnd={() => setBarrageQueue(queue => queue.filter(q => q.key !== review.key))}
+            >
+              {review.comment}
+            </div>
+          ))}
+
         </div>
       </div>
 
