@@ -8,6 +8,12 @@ const userSchema = new mongoose.Schema({
   joinedAt: { type: Date, default: Date.now },
   favoritePlaces: [{ type: mongoose.Schema.Types.ObjectId, ref: "Place" }],
   collectedCards: [{ type: mongoose.Schema.Types.ObjectId, ref: "Card" }],
+
+  lastLoginLocation: {
+    lat: { type: Number },
+    lng: { type: Number },
+    updatedAt: { type: Date, default: Date.now }
+  }
 });
 
 module.exports = mongoose.model("User", userSchema);
