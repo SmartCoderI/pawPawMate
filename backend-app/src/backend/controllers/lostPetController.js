@@ -1,11 +1,12 @@
 const LostPet = require("../models/LostPet");
 const User = require("../models/User");
+const { findUserNearLocation } = require("./userController");
 
 // Create a new lost pet report
 exports.createLostPetReport = async (req, res) => {
   try {
     console.log('Lost pet report creation request:', req.body);
-    
+
     const {
       petName,
       species,
@@ -26,8 +27,8 @@ exports.createLostPetReport = async (req, res) => {
 
     // Validate required fields
     if (!petName || !species || !color || !size || !lastSeenLocation || !lastSeenTime || !ownerContact || !userId) {
-      return res.status(400).json({ 
-        error: "Missing required fields: petName, species, color, size, lastSeenLocation, lastSeenTime, ownerContact, userId" 
+      return res.status(400).json({
+        error: "Missing required fields: petName, species, color, size, lastSeenLocation, lastSeenTime, ownerContact, userId"
       });
     }
 
@@ -69,7 +70,19 @@ exports.createLostPetReport = async (req, res) => {
     // Populate the reporter information
     await lostPet.populate("reportedBy", "name email profileImage");
 
-    console.log('Lost pet report created successfully:', lostPet);
+    try {
+      const nearbyUsers = await findUserNearLocation(lostPet.lastSeenLocation.lat, lostPet.lastSeenLocation.lng, 10);
+      console.log('Nearby users found:', nearbyUsers.length);
+      console.log('Nearby users:', nearbyUsers.map(user => ({
+        name: user.name,
+        email: user.email,
+        location: user.lastLoginLocation
+      })));
+    } catch (error) {
+      console.error('Error finding nearby users:', error);
+    }
+
+    // console.log('Lost pet report created successfully:', lostPet);
     res.status(201).json(lostPet);
   } catch (error) {
     console.error('Error creating lost pet report:', error);
@@ -80,12 +93,12 @@ exports.createLostPetReport = async (req, res) => {
 // Get all lost pet reports with optional filtering
 exports.getAllLostPets = async (req, res) => {
   try {
-    const { 
-      status, 
-      species, 
+    const {
+      status,
+      species,
       bounds, // For map bounds filtering
       dateRange, // For time filtering
-      limit = 100 
+      limit = 100
     } = req.query;
 
     // Build query object
@@ -150,7 +163,7 @@ exports.getAllLostPets = async (req, res) => {
 exports.getLostPetById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const lostPet = await LostPet.findById(id)
       .populate("reportedBy", "name email profileImage")
       .populate("sightings.reportedBy", "name email profileImage");
@@ -180,8 +193,8 @@ exports.addSightingReport = async (req, res) => {
 
     // Validate required fields
     if (!location || !sightingTime || !userId) {
-      return res.status(400).json({ 
-        error: "Missing required fields: location, sightingTime, userId" 
+      return res.status(400).json({
+        error: "Missing required fields: location, sightingTime, userId"
       });
     }
 
@@ -241,10 +254,10 @@ exports.addSightingReport = async (req, res) => {
 exports.updateLostPetStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { 
-      status, 
+    const {
+      status,
       reunionInfo,
-      userId 
+      userId
     } = req.body;
 
     // Validate required fields
@@ -338,8 +351,8 @@ exports.getLostPetStats = async (req, res) => {
     // Get recent reports (last 7 days)
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
-    const recentReports = await LostPet.countDocuments({ 
-      createdAt: { $gte: weekAgo } 
+    const recentReports = await LostPet.countDocuments({
+      createdAt: { $gte: weekAgo }
     });
 
     res.json({
