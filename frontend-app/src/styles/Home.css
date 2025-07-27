@@ -158,36 +158,37 @@
 
 .filter-section {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-wrap: nowrap !important; /* Force no wrapping */
 }
 
 .filter-buttons {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  flex: 1;
-  min-width: 0;
+  gap: 0.1rem; /* Minimal gap between buttons */
+  flex-wrap: nowrap;
+  flex: 1; /* Take full width to allow positioning */
+  align-items: center;
+  overflow-x: auto; /* Allow horizontal scrolling if needed */
 }
 
 .location-count-display {
-  font-size: 0.875rem;
+  font-size: 0.6rem; /* Match filter button font size */
   color: #000000;
   font-weight: 900;
   font-family: 'Arial Black', Arial, sans-serif;
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  background: #F5F5DC; /* Yellow background */
-  padding: 0.5rem 1rem;
-  border: 4px solid #000000;
-  box-shadow: 0.25rem 0.25rem 0px #000000;
+  gap: 0.1rem; /* Minimal gap */
+  background: #E8E8E8; /* Light gray background to distinguish from buttons */
+  padding: 0.25rem 0.4rem; /* Match filter button padding */
+  border: 2px solid #000000; /* Match filter button border */
+  box-shadow: 0.125rem 0.125rem 0px #000000; /* Match filter button shadow */
   text-transform: uppercase;
-  letter-spacing: 0.0625rem;
-  white-space: nowrap;
-  flex-shrink: 0;
+  letter-spacing: 0.02rem; /* Match filter button letter spacing */
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  border-radius: 0.25rem; /* Match filter button corners */
+  margin-left: auto; /* Push to align with search button above */
 }
 
 .location-count-spinner {
@@ -199,25 +200,26 @@
 }
 
 .filter-button {
-  padding: 0.5rem 0.75rem;
+  padding: 0.25rem 0.4rem; /* Much smaller padding */
   background-color: #F5F5DC; /* Beige background */
-  border: 4px solid #000000;
-  box-shadow: 0.25rem 0.25rem 0px #000000;
-  font-size: 0.75rem;
+  border: 2px solid #000000; /* Thinner border */
+  box-shadow: 0.125rem 0.125rem 0px #000000; /* Smaller shadow */
+  font-size: 0.6rem; /* Even smaller font */
   font-weight: 900;
   font-family: 'Arial Black', Arial, sans-serif;
   cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 0.0625rem;
+  letter-spacing: 0.02rem; /* Minimal letter spacing */
   transition: all 0.1s ease;
   white-space: nowrap;
-  border-radius: 0.5rem; /* Rounded corners */
+  flex-shrink: 0; /* Prevent buttons from shrinking */
+  border-radius: 0.25rem; /* Smaller rounded corners */
 }
 
 .filter-button:hover {
   background-color: #DDD8C7; /* Slightly darker beige */
-  transform: translate(0.125rem, 0.125rem);
-  box-shadow: 0.125rem 0.125rem 0px #000000;
+  transform: translate(0.0625rem, 0.0625rem); /* Smaller transform to match smaller shadow */
+  box-shadow: 0.0625rem 0.0625rem 0px #000000; /* Match the smaller button style */
 }
 
 .filter-button.active {
@@ -573,15 +575,15 @@
 
   .filter-section {
     gap: 4px;
-    flex-wrap: wrap;
-    align-items: stretch;
+    flex-wrap: nowrap; /* Keep items on same line */
+    align-items: center; /* Center align items */
   }
 
   .filter-buttons {
     gap: 2px; /* Reduced gap for mobile */
     flex-wrap: nowrap; /* Never wrap - keep in one row */
-    width: 100%;
-    margin-bottom: 6px; /* Increased margin */
+    flex: 1; /* Take available space */
+    margin-bottom: 0; /* Remove bottom margin */
     overflow-x: auto; /* Allow horizontal scrolling if needed */
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Hide scrollbar on Firefox */
@@ -606,14 +608,15 @@
 
   .location-count-display {
     font-size: 11px;
-    padding: 8px 10px; /* Increased padding */
+    padding: 6px 8px; /* Reduced padding to fit better */
     letter-spacing: 0.3px;
-    min-height: 34px; /* Increased height */
+    min-height: 32px; /* Match filter button height */
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    flex-shrink: 0; /* Don't shrink */
     border: 2px solid #000000;
+    white-space: nowrap; /* Keep text on one line */
   }
 
   .map-wrapper {
@@ -808,9 +811,10 @@
 
   .filter-buttons {
     gap: 1px;
-    margin-bottom: 4px;
+    margin-bottom: 0; /* Remove bottom margin to keep on same line */
     overflow-x: auto;
     flex-wrap: nowrap;
+    flex: 1; /* Take available space */
   }
 
   .search-input,

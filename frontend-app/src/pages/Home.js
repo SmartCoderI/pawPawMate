@@ -888,11 +888,10 @@ const Home = () => {
                 {label}
               </button>
             ))}
-          </div>
-          
-          <div className="location-count-display">
-            {filteredLocations.length} locations found
-            {loading && <span className="location-count-spinner">⟳</span>}
+            <div className="location-count-display">
+              {filteredLocations.length} locations found
+              {loading && <span className="location-count-spinner">⟳</span>}
+            </div>
           </div>
         </div>
 

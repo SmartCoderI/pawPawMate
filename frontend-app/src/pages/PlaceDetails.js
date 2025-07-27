@@ -30,6 +30,68 @@ const PlaceDetails = () => {
   // Review likes state
   const [reviewLikes, setReviewLikes] = useState({});
 
+  // Barrage 
+  const [barrageQueue, setBarrageQueue] = useState([]);
+
+  // Helper function to get barrage top position based on screen width
+  const getBarrageTop = () => {
+    let topRange, topOffset;
+    const screenWidth = window.innerWidth;
+    if (screenWidth <= 768) {  // mid screen size, hero-placeholder height is 240px;
+      topRange = 180; topOffset = 15;
+    } else { // large screen size, hero-placeholder height is 300px;
+      topRange = 220; topOffset = 20;
+    }
+    return Math.random() * topRange + topOffset;
+  };
+
+
+  useEffect(() => {
+    if (!reviews || reviews.length === 0) return;
+
+    const addReview = () => {
+      setBarrageQueue(prev => {
+        const available = reviews.filter(r => !prev.some(q => q._id === r._id));
+        if (available.length === 0) return prev;
+        const review = available[Math.floor(Math.random() * available.length)];
+
+        const screenWidth = window.innerWidth;
+
+        let top, animationClass, duration;
+
+        if (screenWidth <= 480) {
+          duration = 8;
+          const containerHeight = 200;
+          top = containerHeight - 50;
+          animationClass = 'barrage-mobile-vertical';
+        } else {
+          duration = Math.random() * 6 + 8; // 8-14 seconds
+          const minBuffer = 22; // Minimum buffer px between barrages, barrage font size is 18px;
+          let attempts = 0;
+          do {
+            // This need to be adjusted based on the height of the barrage container
+            top = Math.round(getBarrageTop()); // Random number between 20 - 240 pixels. Container is set to fixed 300px height.
+            attempts += 1;
+          } while (attempts < 10 && prev.some(existing => Math.abs(existing.top - top) < minBuffer));
+          animationClass = 'barrage-desktop-horizontal';
+        }
+
+        return [
+          ...prev,
+          { ...review, top, duration, animationClass, key: Date.now() + Math.random() }
+        ]
+      })
+    }
+
+    const interval = setInterval(() => {
+      if (barrageQueue.length < 4) addReview(); // Current barrage limit is 4
+    }, 2000);
+
+    return () => clearInterval(interval);
+
+  }, [reviews, barrageQueue]);
+
+
   // Image upload handlers
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
@@ -2213,8 +2275,100 @@ const PlaceDetails = () => {
       {/* Hero Image Section */}
       <div className="hero-image-section">
         <div className="hero-placeholder">
-          <span className="hero-icon">{locationTypes[place.type]?.icon || "📍"}</span>
-          <h2>PLACE IMAGE</h2>
+          {console.log('DEBUG - Place type:', place.type)}
+          {place.type === 'dog park' || place.type === 'dog_park' ? (
+            <img 
+              src="/dog-park-hero.png" 
+              alt="Dog Park Scene" 
+              className="hero-background-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 1
+              }}
+              onLoad={() => console.log('Dog park image loaded successfully')}
+              onError={(e) => console.error('Dog park image failed to load:', e)}
+            />
+          ) : place.type === 'veterinary' || place.type === 'vet' ? (
+            <img 
+              src="/vet.png" 
+              alt="Veterinary Clinic Scene" 
+              className="hero-background-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 1
+              }}
+              onLoad={() => console.log('Vet image loaded successfully')}
+              onError={(e) => console.error('Vet image failed to load:', e)}
+            />
+          ) : place.type === 'animal shelter' || place.type === 'animal_shelter' || place.type === 'shelter' ? (
+            <img 
+              src="/shelter.png" 
+              alt="Animal Shelter Scene" 
+              className="hero-background-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 1
+              }}
+              onLoad={() => console.log('Shelter image loaded successfully')}
+              onError={(e) => console.error('Shelter image failed to load:', e)}
+            />
+          ) : place.type === 'pet store' || place.type === 'pet_store' || place.type === 'petstore' ? (
+            <img 
+              src="/petstore.png" 
+              alt="Pet Store Scene" 
+              className="hero-background-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 1
+              }}
+              onLoad={() => console.log('Pet store image loaded successfully')}
+              onError={(e) => console.error('Pet store image failed to load:', e)}
+            />
+          ) : (
+            <>
+              <span className="hero-icon">{locationTypes[place.type]?.icon || "📍"}</span>
+              <h2>PLACE IMAGE</h2>
+            </>
+          )}
+
+          {barrageQueue.map((review, _) => (
+            <div
+              key={review.key}
+              className={`barrage-review ${review.animationClass || 'barrage-desktop-horizontal'}`} // default to hotizontal
+              style={{
+                top: `${review.top}px`,
+                animationDuration: `${review.duration}s`
+              }}
+              onAnimationEnd={() => setBarrageQueue(queue => queue.filter(q => q.key !== review.key))}
+            >
+              {review.comment}
+            </div>
+          ))}
+
         </div>
       </div>
 

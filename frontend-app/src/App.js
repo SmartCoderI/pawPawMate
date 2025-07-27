@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
-import { UserProvider, useUser } from "./contexts/UserContext";
+import { useUser } from "./contexts/UserContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -8,6 +8,8 @@ import LostPets from "./pages/LostPets";
 import Profile from "./pages/Profile";
 import PlaceDetails from "./pages/PlaceDetails";
 import "./App.css";
+
+import useSocketNotifications from "./hook/UseSocketNotifications";
 
 // Navigation component that uses UserContext
 const Navigation = () => {
@@ -143,25 +145,28 @@ const LoginPage = () => {
 };
 
 function App() {
-  return (
-    <UserProvider>
-      <Router>
-        <div className="App">
-          <Navigation />
+  const { mongoUser } = useUser();
+  useSocketNotifications(mongoUser?._id);
 
-          <main className="main-content">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/lost-pets" element={<LostPets />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/place/:id" element={<PlaceDetails />} />
-            </Routes>
-          </main>
-        </div>
-      </Router>
-    </UserProvider>
+  return (
+
+    <Router>
+      <div className="App">
+        <Navigation />
+
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/lost-pets" element={<LostPets />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/place/:id" element={<PlaceDetails />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
+
   );
 }
 

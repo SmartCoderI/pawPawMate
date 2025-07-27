@@ -19,13 +19,13 @@ exports.getUserByFirebaseUid = async (req, res) => {
   try {
     const uid = req.params.uid.trim();
     console.log('Backend: Looking for user with Firebase UID:', uid);
-    
+
     const user = await User.findOne({ uid: uid });
     if (!user) {
       console.log('Backend: No user found with UID:', uid);
       return res.status(404).json({ error: "User not found" });
     }
-    
+
     console.log('Backend: Found user:', user);
     res.json(user);
   } catch (err) {
@@ -133,5 +133,34 @@ exports.uploadUserPhoto = async (req, res) => {
       details: error.message,
       code: error.code,
     });
+  }
+};
+
+
+// Helper function to find users near a specific location
+exports.findUserNearLocation = async (lat, lng, radiusMiles = 10) => {
+  try {
+    const latDelta = radiusMiles / 69; // 1 degree lat ≈ 69 miles
+    const lngDelta = radiusMiles / 54.6; // 1 degree lng ≈ 54.6 miles (varies by latitude)
+
+    const nearbyUsers = await User.find({
+      "lastLoginLocation.lat": {
+        $gte: lat - latDelta,
+        $lte: lat + latDelta,
+        $exists: true,
+        $ne: null
+      },
+      "lastLoginLocation.lng": {
+        $gte: lng - lngDelta,
+        $lte: lng + lngDelta,
+        $exists: true,
+        $ne: null
+      }
+    }).select('name email profileImage lastLoginLocation');
+
+    return nearbyUsers;
+  } catch (error) {
+    console.error("Error finding users near location:", error);
+    throw error;
   }
 };
