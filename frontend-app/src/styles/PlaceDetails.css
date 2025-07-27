@@ -200,6 +200,14 @@
   color: #000000;
 }
 
+.hero-background-image {
+  border-radius: 0; /* Remove any default border radius */
+}
+
+.hero-placeholder:has(.hero-background-image) {
+  padding: 0; /* Remove padding when image is present */
+}
+
 /* Info Cards Grid */
 .info-cards-grid {
   display: grid;

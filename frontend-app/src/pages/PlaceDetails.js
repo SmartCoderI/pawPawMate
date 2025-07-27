@@ -2275,8 +2275,85 @@ const PlaceDetails = () => {
       {/* Hero Image Section */}
       <div className="hero-image-section">
         <div className="hero-placeholder">
-          <span className="hero-icon">{locationTypes[place.type]?.icon || "📍"}</span>
-          <h2>PLACE IMAGE</h2>
+          {console.log('DEBUG - Place type:', place.type)}
+          {place.type === 'dog park' || place.type === 'dog_park' ? (
+            <img 
+              src="/dog-park-hero.png" 
+              alt="Dog Park Scene" 
+              className="hero-background-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 1
+              }}
+              onLoad={() => console.log('Dog park image loaded successfully')}
+              onError={(e) => console.error('Dog park image failed to load:', e)}
+            />
+          ) : place.type === 'veterinary' || place.type === 'vet' ? (
+            <img 
+              src="/vet.png" 
+              alt="Veterinary Clinic Scene" 
+              className="hero-background-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 1
+              }}
+              onLoad={() => console.log('Vet image loaded successfully')}
+              onError={(e) => console.error('Vet image failed to load:', e)}
+            />
+          ) : place.type === 'animal shelter' || place.type === 'animal_shelter' || place.type === 'shelter' ? (
+            <img 
+              src="/shelter.png" 
+              alt="Animal Shelter Scene" 
+              className="hero-background-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 1
+              }}
+              onLoad={() => console.log('Shelter image loaded successfully')}
+              onError={(e) => console.error('Shelter image failed to load:', e)}
+            />
+          ) : place.type === 'pet store' || place.type === 'pet_store' || place.type === 'petstore' ? (
+            <img 
+              src="/petstore.png" 
+              alt="Pet Store Scene" 
+              className="hero-background-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 1
+              }}
+              onLoad={() => console.log('Pet store image loaded successfully')}
+              onError={(e) => console.error('Pet store image failed to load:', e)}
+            />
+          ) : (
+            <>
+              <span className="hero-icon">{locationTypes[place.type]?.icon || "📍"}</span>
+              <h2>PLACE IMAGE</h2>
+            </>
+          )}
 
           {barrageQueue.map((review, _) => (
             <div
