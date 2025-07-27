@@ -2275,7 +2275,6 @@ const PlaceDetails = () => {
       {/* Hero Image Section */}
       <div className="hero-image-section">
         <div className="hero-placeholder">
-          {console.log('DEBUG - Place type:', place.type)}
           {place.type === 'dog park' || place.type === 'dog_park' ? (
             <img 
               src="/dog-park-hero.png" 

@@ -78,21 +78,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-stats">
-        <div className="stat-card">
-          <h3>{userStats.cardsCount}</h3>
-          <p>Reward Cards Earned</p>
-        </div>
-        <div className="stat-card">
-          <h3>{userStats.reviewsCount}</h3>
-          <p>Reviews Submitted</p>
-        </div>
-        <div className="stat-card">
-          <h3>{userStats.helpfulVotes}</h3>
-          <p>Helpful Votes Received</p>
-        </div>
-      </div>
-
       <div className="dashboard-tabs">
         <button 
           className={`tab ${activeTab === "cards" ? "active" : ""}`} 
@@ -125,30 +110,30 @@ const Dashboard = () => {
                   </span>
                 </div>
                 
-                <div className={`achievement-badge ${userStats.reviewsCount >= 3 ? 'earned' : 'locked'}`}>
+                <div className={`achievement-badge ${userStats.reviewsCount > 0 ? 'earned' : 'locked'}`}>
                   <div className="badge-icon">📝</div>
                   <h3>Review Master</h3>
-                  <p>Submit 3 detailed reviews</p>
+                  <p>Submit detailed reviews</p>
                   <span className="badge-status">
-                    {userStats.reviewsCount >= 3 ? '✅ Earned' : `🔒 ${userStats.reviewsCount}/3`}
+                    {userStats.reviewsCount > 0 ? `📝 ${userStats.reviewsCount} reviews` : '🔒 0 reviews'}
                   </span>
                 </div>
                 
-                <div className={`achievement-badge ${userStats.cardsCount >= 5 ? 'earned' : 'locked'}`}>
+                <div className={`achievement-badge ${userStats.cardsCount > 0 ? 'earned' : 'locked'}`}>
                   <div className="badge-icon">🏆</div>
                   <h3>Card Collector</h3>
-                  <p>Collect 5 reward cards</p>
+                  <p>Collect reward cards</p>
                   <span className="badge-status">
-                    {userStats.cardsCount >= 5 ? '✅ Earned' : `🔒 ${userStats.cardsCount}/5`}
+                    {userStats.cardsCount > 0 ? `🏆 ${userStats.cardsCount} cards` : '🔒 0 cards'}
                   </span>
                 </div>
                 
-                <div className={`achievement-badge ${userStats.helpfulVotes >= 10 ? 'earned' : 'locked'}`}>
+                <div className={`achievement-badge ${userStats.helpfulVotes > 0 ? 'earned' : 'locked'}`}>
                   <div className="badge-icon">👍</div>
                   <h3>Community Helper</h3>
-                  <p>Receive 10 helpful votes</p>
+                  <p>Receive helpful votes</p>
                   <span className="badge-status">
-                    {userStats.helpfulVotes >= 10 ? '✅ Earned' : `🔒 ${userStats.helpfulVotes}/10`}
+                    {userStats.helpfulVotes > 0 ? `👍 ${userStats.helpfulVotes} votes` : '🔒 0 votes'}
                   </span>
                 </div>
               </div>

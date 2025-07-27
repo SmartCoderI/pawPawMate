@@ -782,7 +782,7 @@ exports.addReview = async (req, res) => {
     // REWARD CARD GENERATION LOGIC
     try {
       // Step 1: Content Validity Check (Anti-spam)
-      const isValidContent = (comment && comment.length >= 20) || (tags && tags.length > 0) || rating;
+      const isValidContent = (comment && comment.length >= 10) || (tags && tags.length > 0) || rating;
 
       if (isValidContent) {
         console.log("Review meets content validity requirements");
@@ -797,19 +797,35 @@ exports.addReview = async (req, res) => {
 
         // Check existing cards to prevent duplicates
         const existingCards = await Card.find({ earnedBy: userId });
-        const hasFirstReviewCard = existingCards.some((card) => card.contributionType === "first_review");
-        const hasMilestoneCard = existingCards.some((card) => card.contributionType === "milestone_achievement");
-
-        if (userReviewCount === 1 && !hasFirstReviewCard) {
-          // This is their first review and they don't have a first review card yet
-          shouldGenerateCard = true;
-          contributionType = "first_review";
-          console.log("User earned card for first review");
-        } else if (userReviewCount === 3 && !hasMilestoneCard) {
-          // They just reached 3 reviews and don't have a milestone card yet
-          shouldGenerateCard = true;
-          contributionType = "milestone_achievement";
-          console.log("User earned card for milestone achievement (3 reviews)");
+        
+        // First review reward (welcome card)
+        if (userReviewCount === 1) {
+          const hasFirstReviewCard = existingCards.some((card) => card.contributionType === "first_review");
+          if (!hasFirstReviewCard) {
+            shouldGenerateCard = true;
+            contributionType = "first_review";
+            console.log("User earned welcome card for first review");
+          } else {
+            console.log("User already has first review card");
+          }
+        }
+        // Every 3 reviews milestone (3rd, 6th, 9th, etc.)
+        else if (userReviewCount % 3 === 0) {
+          // User just reached a multiple of 3 reviews (3, 6, 9, 12, etc.)
+          const cardNumber = userReviewCount / 3; // 1st milestone card, 2nd milestone card, etc.
+          
+          // Check if they already have a card for this milestone
+          const hasCardForThisMilestone = existingCards.some((card) => 
+            card.contributionType === `milestone_${userReviewCount}_reviews`
+          );
+          
+          if (!hasCardForThisMilestone) {
+            shouldGenerateCard = true;
+            contributionType = `milestone_${userReviewCount}_reviews`;
+            console.log(`User earned milestone card #${cardNumber} for reaching ${userReviewCount} reviews`);
+          } else {
+            console.log(`User already has card for ${userReviewCount} reviews milestone`);
+          }
         }
 
         // Generate the card if eligible
@@ -823,7 +839,7 @@ exports.addReview = async (req, res) => {
           console.log(`✅ Reward card generated for user ${userId} - ${contributionType}`);
         } else {
           console.log(
-            `No card generated - Review count: ${userReviewCount}, Has first card: ${hasFirstReviewCard}, Has milestone card: ${hasMilestoneCard}`
+            `No card generated - Review count: ${userReviewCount}, Not first review or multiple of 3, or card already exists`
           );
         }
       }
@@ -2053,6 +2069,46 @@ exports.likeReview = async (req, res) => {
       }
     } catch (cardError) {
       console.error("Error updating card helpful count:", cardError);
+    }
+
+    // POPULAR REVIEW CARD GENERATION LOGIC
+    try {
+      // Only check for card generation when liking (not unliking) and when reaching 5+ likes
+      if (liked && updatedReview.likeCount >= 5) {
+        console.log(`Review reached ${updatedReview.likeCount} likes, checking for popular review card...`);
+        
+        // Check if the review author already has a popular review card for this specific review
+        const existingPopularCard = await Card.findOne({ 
+          reviewId: reviewId,
+          contributionType: "popular_review"
+        });
+        
+        if (!existingPopularCard) {
+          // Get the review author and place info for card generation
+          const reviewAuthorId = updatedReview.userId;
+          const placeId = updatedReview.placeId;
+          
+          // Get place name for the card
+          const place = await Place.findById(placeId);
+          const locationName = place ? place.name : "Unknown Location";
+          
+          // Generate the popular review card
+          await generateRewardCard(
+            reviewAuthorId, 
+            reviewId, 
+            placeId, 
+            locationName, 
+            "popular_review"
+          );
+          
+          console.log(`✅ Popular review card generated for user ${reviewAuthorId} - review with ${updatedReview.likeCount} likes`);
+        } else {
+          console.log(`User already has a popular review card for this review`);
+        }
+      }
+    } catch (popularCardError) {
+      // Don't fail the like operation if card generation fails
+      console.error("Error generating popular review card:", popularCardError);
     }
 
     res.json({
