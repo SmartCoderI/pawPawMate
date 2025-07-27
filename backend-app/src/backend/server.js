@@ -24,6 +24,8 @@ const cardRoutes = require("./routes/cardRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const lostPetRoutes = require("./routes/lostPetRoutes");
 
+const lostPetController = require("./controllers/lostPetController");
+
 // Connect to MongoDB before starting the server
 connectDB();
 
@@ -66,9 +68,16 @@ const io = socketio(server, {
   },
 });
 
+lostPetController.setSocketIO(io);
+
 //listen for new client connections and sets up event listeners
 io.on("connection", (socket) => {
-  console.log("New client connected");
+  console.log("New client connected:", socket.id);
+
+  socket.on("join-user-room", (userId) => {
+    socket.join(`user_${userId}`);
+    console.log(`User ${userId} joined personal room`);
+  });
 
   socket.on("report-lost-pet", (data) => {
     //notify others nearby
