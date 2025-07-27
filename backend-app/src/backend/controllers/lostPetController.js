@@ -2,6 +2,11 @@ const LostPet = require("../models/LostPet");
 const User = require("../models/User");
 const { findUserNearLocation } = require("./userController");
 
+let io;
+const setSocketIO = (socketIO) => {
+  io = socketIO;
+};
+
 // Create a new lost pet report
 exports.createLostPetReport = async (req, res) => {
   try {
@@ -72,12 +77,34 @@ exports.createLostPetReport = async (req, res) => {
 
     try {
       const nearbyUsers = await findUserNearLocation(lostPet.lastSeenLocation.lat, lostPet.lastSeenLocation.lng, 10);
-      console.log('Nearby users found:', nearbyUsers.length);
-      console.log('Nearby users:', nearbyUsers.map(user => ({
-        name: user.name,
-        email: user.email,
-        location: user.lastLoginLocation
-      })));
+      console.log(`Found ${nearbyUsers.length} nearby users within 10 miles`);
+
+      if (nearbyUsers.length > 0 && io) {
+        const alertData = {
+          id: lostPet._id,
+          petName: lostPet.petName,
+          species: lostPet.species,
+          breed: lostPet.breed,
+          color: lostPet.color,
+          size: lostPet.size,
+          lastSeenLocation: lostPet.lastSeenLocation,
+          lastSeenTime: lostPet.lastSeenTime,
+          ownerContact: lostPet.ownerContact,
+          reward: lostPet.reward,
+          photos: lostPet.photos,
+          reportedBy: lostPet.reportedBy,
+          timestamp: new Date()
+        };
+
+        nearbyUsers.forEach(user => {
+          io.to(`user_${user._id}`).emit('lost-pet-alert', {
+            ...alertData,
+            message: `A ${lostPet.species} named ${lostPet.petName} has gone missing near your location.`
+          });
+        });
+        console.log(`Real-time alerts sent to ${nearbyUsers.length} users`);
+      }
+
     } catch (error) {
       console.error('Error finding nearby users:', error);
     }
@@ -89,6 +116,7 @@ exports.createLostPetReport = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+exports.setSocketIO = setSocketIO;
 
 // Get all lost pet reports with optional filtering
 exports.getAllLostPets = async (req, res) => {
