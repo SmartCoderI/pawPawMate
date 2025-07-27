@@ -296,7 +296,7 @@ const Home = () => {
           if (a.type !== 'dog_park' && b.type === 'dog_park') return 1;
           return 0;
         })
-        .slice(0, 30); // Increased limit to show more locations
+        .slice(0, 20); // Increased limit to show more locations
 
       console.log(`Processed ${processedLocations.length} locations:`);
       console.log(`- ${processedLocations.filter(l => l.type === 'dog_park').length} dog parks`);
@@ -842,9 +842,28 @@ const Home = () => {
     }))
   ];
 
-  const filteredLocations = combinedLocations.filter(location => 
-    filter === 'all' || location.type === filter || location.type.replace('_', ' ') === filter
-  );
+  // Get current map bounds
+  const mapBounds = mapRef.current?.getBounds();
+
+  const filteredLocations = combinedLocations.filter(location => {
+    // Check if location type is known
+    if (!locationTypes[location.type]) return false;
+    
+    // Check if location matches current filter
+    const matchesFilter = filter === 'all' || location.type === filter || location.type.replace('_', ' ') === filter;
+    if (!matchesFilter) return false;
+    
+    // Check if location is within current map bounds
+    if (mapBounds) {
+      const isInBounds = location.latitude >= mapBounds.getSouth() && 
+                        location.latitude <= mapBounds.getNorth() && 
+                        location.longitude >= mapBounds.getWest() && 
+                        location.longitude <= mapBounds.getEast();
+      return isInBounds;
+    }
+    
+    return true; // If no bounds available, include all locations
+  }).slice(0,20);
 
   return (
     <div className="home-container">
