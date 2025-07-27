@@ -752,7 +752,8 @@ exports.addReview = async (req, res) => {
           opening_hours: placeData.opening_hours || "",
           description: placeData.description || "",
           tags: placeData.tags || [],
-          addedBy: userId,
+          addedBy: null, // Don't set addedBy for auto-created places
+          creationSource: "review_auto_created",
         });
 
         console.log("New place created successfully:", newPlace);

@@ -9,6 +9,11 @@ const placeSchema = new mongoose.Schema({
   },
   tags: [String], // e.g. ["has pool", "quiet", "fire hydrant"]
   addedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+  creationSource: { 
+    type: String, 
+    enum: ["user_created", "review_auto_created", "osm_imported"], 
+    default: "user_created" 
+  },
   createdAt: { type: Date, default: Date.now },
   // Additional OSM fields
   address: { type: String, default: "" },

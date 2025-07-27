@@ -2245,7 +2245,7 @@ const PlaceDetails = () => {
             ← BACK
           </button>
           {/* Delete button - only show for place creator */}
-          {mongoUser && place.addedBy && place.addedBy === mongoUser._id && !place.isOSMLocation && (
+          {mongoUser && place.addedBy && String(place.addedBy) === String(mongoUser._id) && !place.isOSMLocation && place.creationSource === "user_created" && (
             <button
               className="delete-place-button"
               onClick={() => setShowDeleteConfirm(true)}
