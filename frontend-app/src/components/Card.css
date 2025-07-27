@@ -51,7 +51,7 @@
   background: #ffffff; /* White background for image */
   border: none; /* Remove border for full-width effect */
   border-radius: 0; /* Remove border-radius for full-width effect */
-  height: 280px;
+  height: 320px; /* Increased height for better aspect ratio */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,13 +60,18 @@
   box-shadow: none; /* Remove shadow for clean look */
   width: 100%; /* Full width */
   border-bottom: 2px solid #000000; /* Black border to separate from image */
+  position: relative; /* For absolute positioning of image */
 }
 
 .pet-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Ensures image fills the container while maintaining aspect ratio */
+  object-position: center; /* Centers the image within the container */
   border-radius: 0; /* Remove border-radius for full-width effect */
+  position: absolute; /* Absolute positioning to fill entire container */
+  top: 0;
+  left: 0;
 }
 
 .pet-placeholder {

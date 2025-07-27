@@ -1,32 +1,32 @@
-import axios from 'axios';
-import { auth } from '../firebase';
+import axios from "axios";
+import { auth } from "../firebase";
 
 // Debug the environment variable more thoroughly
 const envUrl = process.env.REACT_APP_API_URL;
-const fallbackUrl = 'http://localhost:5001/api';
+const fallbackUrl = "http://localhost:5001/api";
 
-console.log('API URL Debug:', {
-  'env_value': envUrl,
-  'env_value_length': envUrl ? envUrl.length : 0,
-  'env_value_charCodes': envUrl ? envUrl.split('').map((c, i) => `[${i}]='${c}'(${c.charCodeAt(0)})`) : [],
-  'env_value_trimmed': envUrl ? envUrl.trim() : null,
-  'using_fallback': !envUrl
+console.log("API URL Debug:", {
+  env_value: envUrl,
+  env_value_length: envUrl ? envUrl.length : 0,
+  env_value_charCodes: envUrl ? envUrl.split("").map((c, i) => `[${i}]='${c}'(${c.charCodeAt(0)})`) : [],
+  env_value_trimmed: envUrl ? envUrl.trim() : null,
+  using_fallback: !envUrl,
 });
 
 // Use trimmed value to remove any spaces
 const API_BASE_URL = envUrl ? envUrl.trim() : fallbackUrl;
 
-console.log('API Configuration:', {
-  'process.env.REACT_APP_API_URL': process.env.REACT_APP_API_URL,
-  'API_BASE_URL': API_BASE_URL,
-  'API_BASE_URL_length': API_BASE_URL.length
+console.log("API Configuration:", {
+  "process.env.REACT_APP_API_URL": process.env.REACT_APP_API_URL,
+  API_BASE_URL: API_BASE_URL,
+  API_BASE_URL_length: API_BASE_URL.length,
 });
 
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -34,40 +34,40 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     // Debug the actual request URL being sent
-    console.log('API Request Debug:', {
+    console.log("API Request Debug:", {
       baseURL: config.baseURL,
       url: config.url,
       fullURL: config.baseURL + config.url,
       method: config.method,
-      urlCharCodes: config.url ? config.url.split('').map((c, i) => `[${i}]='${c}'(${c.charCodeAt(0)})`) : []
+      urlCharCodes: config.url ? config.url.split("").map((c, i) => `[${i}]='${c}'(${c.charCodeAt(0)})`) : [],
     });
-    
+
     try {
       // Skip auth token for places and reviews endpoints (frontend handles login checks)
-      const skipAuthEndpoints = ['/places', '/reviews'];
-      const shouldSkipAuth = skipAuthEndpoints.some(endpoint => config.url?.includes(endpoint));
-      
+      const skipAuthEndpoints = ["/places", "/reviews"];
+      const shouldSkipAuth = skipAuthEndpoints.some((endpoint) => config.url?.includes(endpoint));
+
       if (shouldSkipAuth) {
-        console.log('API: Skipping auth token for:', config.method, config.url);
+        console.log("API: Skipping auth token for:", config.method, config.url);
         return config;
       }
-      
+
       // Get Firebase ID token for other endpoints
       const currentUser = auth.currentUser;
       if (currentUser) {
         const token = await currentUser.getIdToken();
         config.headers.Authorization = `Bearer ${token}`;
-        console.log('API: Added auth token to request:', {
+        console.log("API: Added auth token to request:", {
           method: config.method,
           url: config.url,
           hasToken: !!token,
-          tokenLength: token?.length
+          tokenLength: token?.length,
         });
       } else {
-        console.log('API: No current user, request sent without auth token');
+        console.log("API: No current user, request sent without auth token");
       }
     } catch (error) {
-      console.error('Error getting auth token:', error);
+      console.error("Error getting auth token:", error);
     }
     return config;
   },
@@ -80,7 +80,7 @@ api.interceptors.request.use(
 export const userAPI = {
   // Create user in MongoDB when they sign up
   createUser: async (userData) => {
-    const response = await api.post('/users', userData);
+    const response = await api.post("/users", userData);
     return response.data;
   },
 
@@ -93,23 +93,23 @@ export const userAPI = {
   // Get user by Firebase UID
   getUserByFirebaseUid: async (uid) => {
     try {
-      console.log('API: Looking for user with Firebase UID:', uid);
-      
+      console.log("API: Looking for user with Firebase UID:", uid);
+
       // Use the new direct endpoint
       const response = await api.get(`/users/firebase/${uid}`);
-      console.log('API: Found user with matching UID:', response.data);
+      console.log("API: Found user with matching UID:", response.data);
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
-        console.log('API: No user found with UID:', uid);
+        console.log("API: No user found with UID:", uid);
         return null;
       }
-      console.error('Error finding user by Firebase UID:', error);
-      console.error('Error details:', {
+      console.error("Error finding user by Firebase UID:", error);
+      console.error("Error details:", {
         message: error.message,
         status: error.response?.status,
         statusText: error.response?.statusText,
-        data: error.response?.data
+        data: error.response?.data,
       });
       return null;
     }
@@ -130,12 +130,12 @@ export const userAPI = {
   // Helper function to update existing user's UID
   updateUserUid: async (userId, newUid) => {
     try {
-      console.log('API: Updating user UID:', { userId, newUid });
+      console.log("API: Updating user UID:", { userId, newUid });
       const response = await api.put(`/users/${userId}`, { uid: newUid });
-      console.log('API: Successfully updated user UID:', response.data);
+      console.log("API: Successfully updated user UID:", response.data);
       return response.data;
     } catch (error) {
-      console.error('Error updating user UID:', error);
+      console.error("Error updating user UID:", error);
       throw error;
     }
   },
@@ -143,10 +143,10 @@ export const userAPI = {
   // Upload user profile photo
   uploadUserPhoto: async (file) => {
     const formData = new FormData();
-    formData.append('image', file);
-    const response = await api.post('/users/upload-photo', formData, {
+    formData.append("image", file);
+    const response = await api.post("/users/upload-photo", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -157,21 +157,21 @@ export const userAPI = {
 export const petAPI = {
   // Create a new pet
   createPet: async (petData) => {
-    const response = await api.post('/pets', petData);
+    const response = await api.post("/pets", petData);
     return response.data;
   },
 
   // Get all pets (filtered by owner)
   getAllPets: async (ownerId) => {
     try {
-      let url = '/pets';
+      let url = "/pets";
       if (ownerId) {
         url += `?owner=${ownerId}`;
       }
       const response = await api.get(url);
-    return response.data;
+      return response.data;
     } catch (error) {
-      console.error('Error fetching pets:', error);
+      console.error("Error fetching pets:", error);
       return [];
     }
   },
@@ -197,10 +197,10 @@ export const petAPI = {
   // Upload pet photo
   uploadPetPhoto: async (file) => {
     const formData = new FormData();
-    formData.append('image', file);
-    const response = await api.post('/pets/upload-photo', formData, {
+    formData.append("image", file);
+    const response = await api.post("/pets/upload-photo", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -211,13 +211,13 @@ export const petAPI = {
 export const placeAPI = {
   // Get all places
   getAllPlaces: async () => {
-    const response = await api.get('/places');
+    const response = await api.get("/places");
     return response.data;
   },
 
   // Create a new place
   createPlace: async (placeData) => {
-    const response = await api.post('/places', placeData);
+    const response = await api.post("/places", placeData);
     return response.data;
   },
 
@@ -236,7 +236,7 @@ export const placeAPI = {
   // Delete place
   deletePlace: async (placeId, userId) => {
     const response = await api.delete(`/places/${placeId}`, {
-      data: { userId }
+      data: { userId },
     });
     return response.data;
   },
@@ -246,30 +246,30 @@ export const placeAPI = {
 export const reviewAPI = {
   // Create a review (can automatically create place if it doesn't exist)
   createReview: async (reviewData) => {
-    console.log('API: Sending review creation request to backend:', reviewData);
+    console.log("API: Sending review creation request to backend:", reviewData);
     try {
-      const response = await api.post('/reviews', reviewData);
-      console.log('API: Review creation response received:', response.data);
+      const response = await api.post("/reviews", reviewData);
+      console.log("API: Review creation response received:", response.data);
       return response.data;
     } catch (error) {
-      console.error('API: Review creation failed:', error);
-      console.error('API: Error response:', error.response?.data);
+      console.error("API: Review creation failed:", error);
+      console.error("API: Error response:", error.response?.data);
       throw error;
     }
   },
 
   // Delete a review (only by the review author)
   deleteReview: async (reviewId, userId) => {
-    console.log('API: Sending review deletion request:', { reviewId, userId });
+    console.log("API: Sending review deletion request:", { reviewId, userId });
     try {
       const response = await api.delete(`/reviews/${reviewId}`, {
-        data: { userId }
+        data: { userId },
       });
-      console.log('API: Review deletion response received:', response.data);
+      console.log("API: Review deletion response received:", response.data);
       return response.data;
     } catch (error) {
-      console.error('API: Review deletion failed:', error);
-      console.error('API: Error response:', error.response?.data);
+      console.error("API: Review deletion failed:", error);
+      console.error("API: Error response:", error.response?.data);
       throw error;
     }
   },
@@ -303,6 +303,34 @@ export const reviewAPI = {
     const response = await api.get(`/reviews/${placeId}/animal-shelter-stats`);
     return response.data;
   },
+
+  // Like or unlike a review
+  likeReview: async (reviewId, userId) => {
+    console.log("API: Sending review like request:", { reviewId, userId });
+    try {
+      const response = await api.post(`/reviews/${reviewId}/like`, { userId });
+      console.log("API: Review like response received:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("API: Review like failed:", error);
+      console.error("API: Error response:", error.response?.data);
+      throw error;
+    }
+  },
+
+  // Get like status for a review by a specific user
+  getReviewLikeStatus: async (reviewId, userId) => {
+    console.log("API: Getting review like status:", { reviewId, userId });
+    try {
+      const response = await api.get(`/reviews/${reviewId}/like-status?userId=${userId}`);
+      console.log("API: Review like status response received:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("API: Get review like status failed:", error);
+      console.error("API: Error response:", error.response?.data);
+      throw error;
+    }
+  },
 };
 
 // Card API calls
@@ -310,10 +338,10 @@ export const cardAPI = {
   // Get all cards
   getAllCards: async () => {
     try {
-      const response = await api.get('/cards');
+      const response = await api.get("/cards");
       return response.data;
     } catch (error) {
-      console.error('Error fetching cards:', error);
+      console.error("Error fetching cards:", error);
       return [];
     }
   },
@@ -324,14 +352,14 @@ export const cardAPI = {
       const response = await api.get(`/cards/user/${userId}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching user cards:', error);
+      console.error("Error fetching user cards:", error);
       return [];
     }
   },
 
   // Create a card
   createCard: async (cardData) => {
-    const response = await api.post('/cards', cardData);
+    const response = await api.post("/cards", cardData);
     return response.data;
   },
 
@@ -348,20 +376,22 @@ export const lostPetAPI = {
   getAllLostPets: async (filters = {}) => {
     try {
       const params = new URLSearchParams();
-      if (filters.status) params.append('status', filters.status);
-      if (filters.species) params.append('species', filters.species);
-      if (filters.bounds) params.append('bounds', JSON.stringify(filters.bounds));
-      if (filters.dateRange) params.append('dateRange', filters.dateRange);
-      if (filters.limit) params.append('limit', filters.limit);
-      
+
+      if (filters.status) params.append("status", filters.status);
+      if (filters.species) params.append("species", filters.species);
+      if (filters.bounds) params.append("bounds", JSON.stringify(filters.bounds));
+      if (filters.dateRange) params.append("dateRange", filters.dateRange);
+      if (filters.limit) params.append("limit", filters.limit);
+
       const queryString = params.toString();
-      const url = queryString ? `/lostpets?${queryString}` : '/lostpets';
-      
-      console.log('API: Fetching lost pets with filters:', filters);
+      const url = queryString ? `/lostpets?${queryString}` : "/lostpets";
+
+      console.log("API: Fetching lost pets with filters:", filters);
       const response = await api.get(url);
       return response.data;
     } catch (error) {
-      console.error('Error fetching lost pets:', error);
+      console.error("Error fetching lost pets:", error);
+
       return [];
     }
   },
@@ -369,13 +399,15 @@ export const lostPetAPI = {
   // Create a new lost pet report
   createLostPetReport: async (reportData) => {
     try {
-      console.log('API: Creating lost pet report:', reportData);
-      const response = await api.post('/lostpets', reportData);
-      console.log('API: Lost pet report created successfully:', response.data);
+
+      console.log("API: Creating lost pet report:", reportData);
+      const response = await api.post("/lostpets", reportData);
+      console.log("API: Lost pet report created successfully:", response.data);
       return response.data;
     } catch (error) {
-      console.error('API: Error creating lost pet report:', error);
-      console.error('API: Error response:', error.response?.data);
+      console.error("API: Error creating lost pet report:", error);
+      console.error("API: Error response:", error.response?.data);
+
       throw error;
     }
   },
@@ -386,7 +418,9 @@ export const lostPetAPI = {
       const response = await api.get(`/lostpets/${lostPetId}`);
       return response.data;
     } catch (error) {
+
       console.error('Error fetching lost pet:', error);
+
       throw error;
     }
   },
@@ -394,6 +428,7 @@ export const lostPetAPI = {
   // Add a sighting report to an existing lost pet
   addSightingReport: async (lostPetId, sightingData) => {
     try {
+
       console.log('API: Adding sighting report for pet:', lostPetId, sightingData);
       const response = await api.post(`/lostpets/${lostPetId}/sightings`, sightingData);
       console.log('API: Sighting report added successfully:', response.data);
@@ -401,6 +436,7 @@ export const lostPetAPI = {
     } catch (error) {
       console.error('API: Error adding sighting report:', error);
       console.error('API: Error response:', error.response?.data);
+
       throw error;
     }
   },
@@ -408,6 +444,7 @@ export const lostPetAPI = {
   // Update lost pet status (mark as found, etc.)
   updateLostPetStatus: async (lostPetId, statusData) => {
     try {
+
       console.log('API: Updating lost pet status:', lostPetId, statusData);
       const response = await api.put(`/lostpets/${lostPetId}/status`, statusData);
       console.log('API: Lost pet status updated successfully:', response.data);
@@ -415,6 +452,7 @@ export const lostPetAPI = {
     } catch (error) {
       console.error('API: Error updating lost pet status:', error);
       console.error('API: Error response:', error.response?.data);
+
       throw error;
     }
   },
@@ -422,15 +460,17 @@ export const lostPetAPI = {
   // Delete a lost pet report
   deleteLostPetReport: async (lostPetId, userId) => {
     try {
-      console.log('API: Deleting lost pet report:', lostPetId, userId);
+
+      console.log("API: Deleting lost pet report:", lostPetId, userId);
       const response = await api.delete(`/lostpets/${lostPetId}`, {
-        data: { userId }
+        data: { userId },
       });
-      console.log('API: Lost pet report deleted successfully:', response.data);
+      console.log("API: Lost pet report deleted successfully:", response.data);
       return response.data;
     } catch (error) {
-      console.error('API: Error deleting lost pet report:', error);
-      console.error('API: Error response:', error.response?.data);
+      console.error("API: Error deleting lost pet report:", error);
+      console.error("API: Error response:", error.response?.data);
+
       throw error;
     }
   },
@@ -438,16 +478,19 @@ export const lostPetAPI = {
   // Get lost pets statistics
   getLostPetStats: async () => {
     try {
+
       const response = await api.get('/lostpets/stats');
       return response.data;
     } catch (error) {
       console.error('Error fetching lost pet stats:', error);
+
       return {
         total: 0,
         missing: 0,
         seen: 0,
         found: 0,
         speciesBreakdown: [],
+
         recentReports: 0
       };
     }
@@ -455,3 +498,4 @@ export const lostPetAPI = {
 };
 
 export default api; 
+
