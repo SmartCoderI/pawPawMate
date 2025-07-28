@@ -146,7 +146,7 @@ const LoginPage = () => {
 
 function App() {
   const { mongoUser } = useUser();
-  useSocketNotifications(mongoUser?._id);
+  const { AlertModalComponent } = useSocketNotifications(mongoUser?._id);
 
   return (
 
@@ -164,6 +164,7 @@ function App() {
             <Route path="/place/:id" element={<PlaceDetails />} />
           </Routes>
         </main>
+        <AlertModalComponent />
       </div>
     </Router>
 
