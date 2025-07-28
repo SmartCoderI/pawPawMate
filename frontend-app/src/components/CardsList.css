@@ -25,9 +25,25 @@
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   justify-items: center;
+}
+
+/* Responsive: 2 cards per row on medium screens */
+@media (max-width: 768px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
+/* Responsive: 1 card per row on small screens */
+@media (max-width: 480px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
 }
 
 /* Loading state */
@@ -120,10 +136,7 @@
     font-size: 24px;
   }
   
-  .cards-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
+
   
   .no-cards-content {
     padding: 24px;
