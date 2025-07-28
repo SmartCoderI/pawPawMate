@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import LostPetAlertModal from '../components/LostPetAlertModal';
 
 const useSocketNotifications = (userId) => {
+    const navigate = useNavigate();
 
     const [alertData, setAlertData] = useState(null);
     const [showAlertModal, setShowAlertModal] = useState(false);
@@ -31,7 +33,18 @@ const useSocketNotifications = (userId) => {
     };
 
     const handleViewAlertDetails = () => {
-        console.log('Viewing alert details:', alertData); // TODO: replace with logic to navigate to alert details page
+        if (alertData && alertData.id) {
+            navigate('/lost-pets', {
+                state: {
+                    focusedPetId: alertData.id,
+                    centerLocation: {
+                        lat: alertData.lastSeenLocation.lat,
+                        lng: alertData.lastSeenLocation.lng
+                    },
+                    closeExistingPopup: true
+                }
+            });
+        }
         handleCloseAlertModal();
     };
 
