@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Map, { Marker, NavigationControl, GeolocateControl, Popup } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useUser } from '../contexts/UserContext';
@@ -9,14 +9,26 @@ import '../styles/LostPets.css';
 const LostPets = () => {
   const { firebaseUser, mongoUser } = useUser();
   const navigate = useNavigate();
-  
+  const location = useLocation();
+
+  const [focusPetId, setFocusPetId] = useState(null);
+  const [shouldCenterOnPet, setShouldCenterOnPet] = useState(false);
+
   // Check for saved map state first
   const getSavedMapState = () => {
     try {
+      if (location.state?.centerLocation) {
+        return {
+          longitude: location.state.centerLocation.lng,
+          latitude: location.state.centerLocation.lat,
+          zoom: 15
+        };
+      }
+
       const savedState = sessionStorage.getItem('pawpawmate_lostpets_map_state');
       if (savedState) {
         const parsed = JSON.parse(savedState);
-        
+
         // Check if saved state is less than 30 minutes old
         const thirtyMinutes = 30 * 60 * 1000;
         if (Date.now() - parsed.timestamp < thirtyMinutes) {
@@ -39,16 +51,16 @@ const LostPets = () => {
 
   const [viewState, setViewState] = useState(getSavedMapState());
   const [locationPermissionChecked, setLocationPermissionChecked] = useState(false);
-  
+
   // Lost pets data
   const [lostPets, setLostPets] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   // Filters
   const [statusFilter, setStatusFilter] = useState('all');
   const [speciesFilter, setSpeciesFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
-  
+
   // UI state
   const [selectedPet, setSelectedPet] = useState(null);
   const [showReportForm, setShowReportForm] = useState(false);
@@ -85,9 +97,47 @@ const LostPets = () => {
     description: '',
     photos: []
   });
-  
+
   const mapRef = useRef();
   const fetchTimeoutRef = useRef();
+
+
+  useEffect(() => {
+    const petIdFromNav = location.state?.focusedPetId;
+
+    if (petIdFromNav) {
+      if (location.state?.closeExistingPopup) {
+        setSelectedPet(null);
+      }
+      setFocusPetId(petIdFromNav);
+      setShouldCenterOnPet(true);
+
+      // Clear the navigation state to prevent re-triggering
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
+
+  useEffect(() => {
+    if (focusPetId && lostPets.length > 0 && shouldCenterOnPet) {
+      const targetPet = lostPets.find(pet => pet._id === focusPetId);
+      if (targetPet) {
+        console.log('Found target pet, centering and showing:', targetPet);
+        setViewState(prev => ({
+          ...prev,
+          longitude: targetPet.lastSeenLocation.lng,
+          latitude: targetPet.lastSeenLocation.lat,
+          zoom: 16
+        }));
+        setSelectedPet(targetPet);
+        setShouldCenterOnPet(false); // Reset after centering
+        setFocusPetId(null); // Clear focusPetId to prevent re-centering
+      } else {
+        fetchLostPets().then(() => {
+
+        });
+      }
+    }
+  }, [focusPetId, lostPets, shouldCenterOnPet]);
 
   // Status types with colors and icons
   const statusTypes = {
@@ -143,7 +193,7 @@ const LostPets = () => {
       (position) => {
         const { latitude, longitude } = position.coords;
         console.log('Current location obtained:', { latitude, longitude });
-        
+
         // Only use current location if no saved state
         const savedState = sessionStorage.getItem('pawpawmate_lostpets_map_state');
         if (!savedState) {
@@ -221,15 +271,15 @@ const LostPets = () => {
   // Debounced map move handler
   const handleMapMove = (evt) => {
     setViewState(evt.viewState);
-    
+
     // Save map state after user moves the map
     saveMapState(evt.viewState);
-    
+
     // Clear existing timeout
     if (fetchTimeoutRef.current) {
       clearTimeout(fetchTimeoutRef.current);
     }
-    
+
     // Set new timeout to fetch data after user stops moving map
     fetchTimeoutRef.current = setTimeout(() => {
       fetchLostPets();
@@ -248,10 +298,10 @@ const LostPets = () => {
       lat: lngLat.lat,
       lng: lngLat.lng
     });
-    
+
     // Clear address input when clicking on map
     setAddressInput('');
-    
+
     // Only show form if not already open
     if (!showReportForm) {
       setReportType('sighting'); // Default to sighting when clicking map
@@ -312,7 +362,7 @@ const LostPets = () => {
   useEffect(() => {
     // Get user's current location first
     getCurrentLocation();
-    
+
     // Cleanup function
     return () => {
       if (fetchTimeoutRef.current) {
@@ -338,7 +388,7 @@ const LostPets = () => {
     if (statusFilter !== 'all' && pet.status !== statusFilter) {
       return false;
     }
-    
+
     // Species filter
     if (speciesFilter !== 'all' && pet.species !== speciesFilter) {
       return false;
@@ -376,23 +426,23 @@ const LostPets = () => {
   // Geocode address to coordinates
   const geocodeAddress = async (address) => {
     if (!address.trim()) return;
-    
+
     setIsGeocoding(true);
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&addressdetails=1`
       );
       const data = await response.json();
-      
+
       if (data && data.length > 0) {
         const result = data[0];
         const coordinates = {
           lat: parseFloat(result.lat),
           lng: parseFloat(result.lon)
         };
-        
+
         setClickedCoordinates(coordinates);
-        
+
         // Update map view to show the geocoded location
         setViewState(prev => ({
           ...prev,
@@ -400,7 +450,7 @@ const LostPets = () => {
           latitude: coordinates.lat,
           zoom: 15
         }));
-        
+
         console.log('Geocoded address:', address, 'to coordinates:', coordinates);
       } else {
         alert('Address not found. Please try a different address or click on the map.');
@@ -464,7 +514,7 @@ const LostPets = () => {
       alert('Please sign in to submit a lost pet report.');
       return;
     }
-    
+
     if (!clickedCoordinates) {
       alert('Please select a location where your pet got lost by typing an address or clicking on the map.');
       return;
@@ -513,7 +563,7 @@ const LostPets = () => {
       }
 
       // Convert favoritePlaces string to array
-      const favoritePlacesArray = lostPetForm.favoritePlaces 
+      const favoritePlacesArray = lostPetForm.favoritePlaces
         ? lostPetForm.favoritePlaces.split(',').map(place => place.trim()).filter(place => place.length > 0)
         : [];
 
@@ -538,7 +588,7 @@ const LostPets = () => {
       alert('Lost pet report submitted successfully!');
     } catch (error) {
       console.error('Error submitting lost pet report:', error);
-      
+
       // More specific error handling
       if (error.response && error.response.data && error.response.data.error) {
         alert(`Submission failed: ${error.response.data.error}`);
@@ -559,7 +609,7 @@ const LostPets = () => {
       alert('Please select a location on the map and make sure you are logged in.');
       return;
     }
-    
+
     if (!selectedPet) {
       // This is a general sighting report - we'll need to create a new lost pet entry
       // For now, alert the user to select a specific pet
@@ -615,7 +665,7 @@ const LostPets = () => {
         <div className="controls-header">
           <h1>Lost & Found Pets</h1>
           <div className="report-buttons">
-            <button 
+            <button
               className="report-button lost-button"
               onClick={() => {
                 if (!mongoUser) {
@@ -628,7 +678,7 @@ const LostPets = () => {
             >
               Report Lost Pet
             </button>
-            <button 
+            <button
               className="report-button seen-button"
               onClick={() => {
                 if (!mongoUser) {
@@ -694,7 +744,7 @@ const LostPets = () => {
               ))}
             </div>
           </div>
-          
+
           <div className="location-count-display">
             {filteredLostPets.length} lost pets found
             {loading && <span className="location-count-spinner">⟳</span>}
@@ -703,8 +753,8 @@ const LostPets = () => {
 
         <div className="map-instructions">
           <p>
-            📍 <strong>Red pins:</strong> Missing pets | 
-            👀 <strong>Yellow pins:</strong> Recently seen | 
+            📍 <strong>Red pins:</strong> Missing pets |
+            👀 <strong>Yellow pins:</strong> Recently seen |
             ✅ <strong>Green pins:</strong> Found pets
           </p>
           <p>Click on any pin for details, or click on the map to report a sighting</p>
@@ -750,19 +800,22 @@ const LostPets = () => {
               }}
             >
               <div
-                className={`lost-pet-marker status-${pet.status}`}
-                style={{ 
+                className={`lost-pet-marker status-${pet.status} ${focusPetId === pet._id ? 'focused-marker' : ''}`}
+                style={{
                   backgroundColor: statusTypes[pet.status]?.color || '#6b7280',
-                  fontSize: '24px',
-                  width: '48px',
-                  height: '48px',
+                  fontSize: focusPetId === pet._id ? '28px' : '24px', // Make focused marker larger
+                  width: focusPetId === pet._id ? '56px' : '48px',
+                  height: focusPetId === pet._id ? '56px' : '48px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  border: '3px solid white',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                  border: focusPetId === pet._id ? '4px solid #3b82f6' : '3px solid white', // Blue border for focused
+                  boxShadow: focusPetId === pet._id
+                    ? '0 4px 12px rgba(59, 130, 246, 0.5)'
+                    : '0 2px 8px rgba(0,0,0,0.3)',
+                  animation: focusPetId === pet._id ? 'pulse 2s infinite' : 'none'
                 }}
               >
                 <span className="marker-icon">
@@ -781,7 +834,7 @@ const LostPets = () => {
             >
               <div
                 className="location-selection-marker"
-                style={{ 
+                style={{
                   backgroundColor: '#3b82f6',
                   fontSize: '20px',
                   width: '40px',
@@ -818,17 +871,17 @@ const LostPets = () => {
                     {statusTypes[selectedPet.status]?.icon} {statusTypes[selectedPet.status]?.label}
                   </span>
                 </div>
-                
+
                 {selectedPet.photos && selectedPet.photos.length > 0 && (
                   <div className="pet-popup-photo">
-                    <img 
-                      src={selectedPet.photos[0]} 
+                    <img
+                      src={selectedPet.photos[0]}
                       alt={selectedPet.petName}
                       style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px' }}
                     />
                   </div>
                 )}
-                
+
                 <div className="pet-popup-details">
                   <p><strong>Species:</strong> {selectedPet.species} {selectedPet.breed && `(${selectedPet.breed})`}</p>
                   <p><strong>Color:</strong> {selectedPet.color}</p>
@@ -836,26 +889,26 @@ const LostPets = () => {
                   {selectedPet.features && (
                     <p><strong>Features:</strong> {selectedPet.features}</p>
                   )}
-                  
+
                   <div className="location-time-info">
                     <p><strong>Last seen:</strong> {formatTimeAgo(selectedPet.lastSeenTime)}</p>
                     {selectedPet.lastSeenLocation.address && (
                       <p><strong>Location:</strong> {selectedPet.lastSeenLocation.address}</p>
                     )}
                   </div>
-                  
+
                   <div className="contact-info">
                     <p><strong>Contact:</strong> {selectedPet.ownerContact.name}</p>
                     <p><strong>Phone:</strong> {selectedPet.ownerContact.phone}</p>
                     <p><strong>Email:</strong> {selectedPet.ownerContact.email}</p>
                   </div>
-                  
+
                   {selectedPet.reward && (
                     <div className="reward-info">
                       <p><strong>Reward:</strong> {selectedPet.reward}</p>
                     </div>
                   )}
-                  
+
                   {selectedPet.sightings && selectedPet.sightings.length > 0 && (
                     <div className="sightings-info">
                       <p><strong>Recent sightings:</strong> {selectedPet.sightings.length}</p>
@@ -863,10 +916,10 @@ const LostPets = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="pet-popup-actions">
                   {mongoUser && selectedPet.status !== 'found' && (
-                    <button 
+                    <button
                       className="sighting-button"
                       onClick={() => {
                         setClickedCoordinates({
@@ -881,9 +934,9 @@ const LostPets = () => {
                       Report Sighting
                     </button>
                   )}
-                  
+
                   {mongoUser && mongoUser._id === selectedPet.reportedBy._id && selectedPet.status !== 'found' && (
-                    <button 
+                    <button
                       className="found-button"
                       onClick={() => {
                         // TODO: Implement mark as found functionality
@@ -982,53 +1035,53 @@ const LostPets = () => {
                     </div>
                   </div>
 
-                                     <div className="form-section">
-                     <h3>When did your pet get lost?</h3>
-                     <div className="form-group">
-                       <label>Where did your pet get lost? *</label>
-                       <div className="address-input-container">
-                         <input
-                           type="text"
-                           value={addressInput}
-                           onChange={(e) => handleAddressChange(e.target.value)}
-                           placeholder="Enter address where your pet got lost (e.g., 123 Main St, Chicago, IL)"
-                           onKeyPress={(e) => {
-                             if (e.key === 'Enter') {
-                               e.preventDefault();
-                               handleAddressSubmit();
-                             }
-                           }}
-                         />
-                         <button
-                           type="button"
-                           onClick={handleAddressSubmit}
-                           disabled={!addressInput.trim() || isGeocoding}
-                           className="geocode-button"
-                         >
-                           {isGeocoding ? '...' : 'Find'}
-                         </button>
-                       </div>
-                       <small className="address-help">Type an address and click "Find", or click directly on the map</small>
-                     </div>
-                     
-                     <div className="form-group">
-                       <label>When did your pet get lost? *</label>
-                       <input
-                         type="datetime-local"
-                         value={lostPetForm.lastSeenTime}
-                         onChange={(e) => handleLostPetFormChange('lastSeenTime', e.target.value)}
-                         required
-                       />
-                     </div>
-                     
-                     {clickedCoordinates && (
-                       <div className="location-info">
-                         <p><strong>Selected Location:</strong></p>
-                         <p>{clickedCoordinates.lat.toFixed(6)}, {clickedCoordinates.lng.toFixed(6)}</p>
-                         <small>You can click on a different location on the map or enter a new address to change this.</small>
-                       </div>
-                     )}
-                   </div>
+                  <div className="form-section">
+                    <h3>When did your pet get lost?</h3>
+                    <div className="form-group">
+                      <label>Where did your pet get lost? *</label>
+                      <div className="address-input-container">
+                        <input
+                          type="text"
+                          value={addressInput}
+                          onChange={(e) => handleAddressChange(e.target.value)}
+                          placeholder="Enter address where your pet got lost (e.g., 123 Main St, Chicago, IL)"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddressSubmit();
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddressSubmit}
+                          disabled={!addressInput.trim() || isGeocoding}
+                          className="geocode-button"
+                        >
+                          {isGeocoding ? '...' : 'Find'}
+                        </button>
+                      </div>
+                      <small className="address-help">Type an address and click "Find", or click directly on the map</small>
+                    </div>
+
+                    <div className="form-group">
+                      <label>When did your pet get lost? *</label>
+                      <input
+                        type="datetime-local"
+                        value={lostPetForm.lastSeenTime}
+                        onChange={(e) => handleLostPetFormChange('lastSeenTime', e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    {clickedCoordinates && (
+                      <div className="location-info">
+                        <p><strong>Selected Location:</strong></p>
+                        <p>{clickedCoordinates.lat.toFixed(6)}, {clickedCoordinates.lng.toFixed(6)}</p>
+                        <small>You can click on a different location on the map or enter a new address to change this.</small>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="form-section">
                     <h3>Contact Information</h3>
@@ -1088,12 +1141,12 @@ const LostPets = () => {
                     <div className="form-row">
                       <div className="form-group">
                         <label>Favorite Places</label>
-                                                 <input
-                           type="text"
-                           value={lostPetForm.favoritePlaces}
-                           onChange={(e) => handleLostPetFormChange('favoritePlaces', e.target.value)}
-                           placeholder="Parks, streets where your pet likes to go (separate with commas)"
-                         />
+                        <input
+                          type="text"
+                          value={lostPetForm.favoritePlaces}
+                          onChange={(e) => handleLostPetFormChange('favoritePlaces', e.target.value)}
+                          placeholder="Parks, streets where your pet likes to go (separate with commas)"
+                        />
                       </div>
                       <div className="form-group">
                         <label>Reward</label>
@@ -1117,75 +1170,75 @@ const LostPets = () => {
                   </div>
                 </form>
               ) : (
-                                                  <form onSubmit={handleSightingSubmit} className="report-form">
-                   <div className="form-section">
-                     <h3>Sighting Information</h3>
-                     {selectedPet ? (
-                       <div className="selected-pet-info">
-                         <p><strong>Reporting sighting for:</strong> {selectedPet.petName} ({selectedPet.species})</p>
-                       </div>
-                     ) : (
-                       <div className="no-pet-selected-info">
-                         <p><strong>💡 To report a sighting:</strong> First click on a lost pet pin on the map, then click "Report Sighting" from the popup.</p>
-                         <p>If you found a different lost pet not shown on the map, please use "Report Lost Pet" instead.</p>
-                       </div>
-                     )}
-                     
-                     <div className="form-group">
-                       <label>Where did you see this pet?</label>
-                       <div className="address-input-container">
-                         <input
-                           type="text"
-                           value={addressInput}
-                           onChange={(e) => handleAddressChange(e.target.value)}
-                           placeholder="Enter street address where you saw the pet"
-                           onKeyPress={(e) => {
-                             if (e.key === 'Enter') {
-                               e.preventDefault();
-                               handleAddressSubmit();
-                             }
-                           }}
-                         />
-                         <button
-                           type="button"
-                           onClick={handleAddressSubmit}
-                           disabled={!addressInput.trim() || isGeocoding}
-                           className="geocode-button"
-                         >
-                           {isGeocoding ? '...' : 'Find'}
-                         </button>
-                       </div>
-                       <small className="address-help">Type an address and click "Find", or click directly on the map</small>
-                     </div>
-                     
-                     <div className="form-group">
-                       <label>When did you see this pet? *</label>
-                       <input
-                         type="datetime-local"
-                         value={sightingForm.sightingTime}
-                         onChange={(e) => handleSightingFormChange('sightingTime', e.target.value)}
-                         required
-                       />
-                     </div>
-                     
-                     <div className="form-group">
-                       <label>Description</label>
-                       <textarea
-                         value={sightingForm.description}
-                         onChange={(e) => handleSightingFormChange('description', e.target.value)}
-                         placeholder="Describe what you saw, pet's condition, behavior..."
-                         rows={4}
-                       />
-                     </div>
-                     
-                     {clickedCoordinates && (
-                       <div className="location-info">
-                         <p><strong>Sighting Location:</strong></p>
-                         <p>{clickedCoordinates.lat.toFixed(6)}, {clickedCoordinates.lng.toFixed(6)}</p>
-                         <small>You can click on a different location on the map or enter a new address to change this.</small>
-                       </div>
-                     )}
-                   </div>
+                <form onSubmit={handleSightingSubmit} className="report-form">
+                  <div className="form-section">
+                    <h3>Sighting Information</h3>
+                    {selectedPet ? (
+                      <div className="selected-pet-info">
+                        <p><strong>Reporting sighting for:</strong> {selectedPet.petName} ({selectedPet.species})</p>
+                      </div>
+                    ) : (
+                      <div className="no-pet-selected-info">
+                        <p><strong>💡 To report a sighting:</strong> First click on a lost pet pin on the map, then click "Report Sighting" from the popup.</p>
+                        <p>If you found a different lost pet not shown on the map, please use "Report Lost Pet" instead.</p>
+                      </div>
+                    )}
+
+                    <div className="form-group">
+                      <label>Where did you see this pet?</label>
+                      <div className="address-input-container">
+                        <input
+                          type="text"
+                          value={addressInput}
+                          onChange={(e) => handleAddressChange(e.target.value)}
+                          placeholder="Enter street address where you saw the pet"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddressSubmit();
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddressSubmit}
+                          disabled={!addressInput.trim() || isGeocoding}
+                          className="geocode-button"
+                        >
+                          {isGeocoding ? '...' : 'Find'}
+                        </button>
+                      </div>
+                      <small className="address-help">Type an address and click "Find", or click directly on the map</small>
+                    </div>
+
+                    <div className="form-group">
+                      <label>When did you see this pet? *</label>
+                      <input
+                        type="datetime-local"
+                        value={sightingForm.sightingTime}
+                        onChange={(e) => handleSightingFormChange('sightingTime', e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Description</label>
+                      <textarea
+                        value={sightingForm.description}
+                        onChange={(e) => handleSightingFormChange('description', e.target.value)}
+                        placeholder="Describe what you saw, pet's condition, behavior..."
+                        rows={4}
+                      />
+                    </div>
+
+                    {clickedCoordinates && (
+                      <div className="location-info">
+                        <p><strong>Sighting Location:</strong></p>
+                        <p>{clickedCoordinates.lat.toFixed(6)}, {clickedCoordinates.lng.toFixed(6)}</p>
+                        <small>You can click on a different location on the map or enter a new address to change this.</small>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="form-actions">
                     <button type="button" onClick={() => resetForms()} className="cancel-button">

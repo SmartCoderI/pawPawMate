@@ -76,9 +76,8 @@ exports.createLostPetReport = async (req, res) => {
     await lostPet.populate("reportedBy", "name email profileImage");
 
     try {
-      const nearbyUsers = await findUserNearLocation(lostPet.lastSeenLocation.lat, lostPet.lastSeenLocation.lng, 10);
-      console.log(`Found ${nearbyUsers.length} nearby users within 10 miles`);
-
+      let nearbyUsers = await findUserNearLocation(lostPet.lastSeenLocation.lat, lostPet.lastSeenLocation.lng, 10);
+      nearbyUsers = nearbyUsers.filter(u => u._id.toString() !== userId);
       if (nearbyUsers.length > 0 && io) {
         const alertData = {
           id: lostPet._id,
