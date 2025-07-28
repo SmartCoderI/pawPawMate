@@ -5,22 +5,8 @@ import { auth } from "../firebase";
 const envUrl = process.env.REACT_APP_API_URL;
 const fallbackUrl = "http://localhost:5001/api";
 
-console.log("API URL Debug:", {
-  env_value: envUrl,
-  env_value_length: envUrl ? envUrl.length : 0,
-  env_value_charCodes: envUrl ? envUrl.split("").map((c, i) => `[${i}]='${c}'(${c.charCodeAt(0)})`) : [],
-  env_value_trimmed: envUrl ? envUrl.trim() : null,
-  using_fallback: !envUrl,
-});
-
 // Use trimmed value to remove any spaces
 const API_BASE_URL = envUrl ? envUrl.trim() : fallbackUrl;
-
-console.log("API Configuration:", {
-  "process.env.REACT_APP_API_URL": process.env.REACT_APP_API_URL,
-  API_BASE_URL: API_BASE_URL,
-  API_BASE_URL_length: API_BASE_URL.length,
-});
 
 // Create axios instance with default config
 const api = axios.create({
@@ -33,14 +19,7 @@ const api = axios.create({
 // Add auth token to requests if available (excluding places and reviews - they handle auth via frontend)
 api.interceptors.request.use(
   async (config) => {
-    // Debug the actual request URL being sent
-    console.log("API Request Debug:", {
-      baseURL: config.baseURL,
-      url: config.url,
-      fullURL: config.baseURL + config.url,
-      method: config.method,
-      urlCharCodes: config.url ? config.url.split("").map((c, i) => `[${i}]='${c}'(${c.charCodeAt(0)})`) : [],
-    });
+
 
     try {
       // Skip auth token for places and reviews endpoints (frontend handles login checks)
@@ -48,7 +27,6 @@ api.interceptors.request.use(
       const shouldSkipAuth = skipAuthEndpoints.some((endpoint) => config.url?.includes(endpoint));
 
       if (shouldSkipAuth) {
-        console.log("API: Skipping auth token for:", config.method, config.url);
         return config;
       }
 
@@ -57,14 +35,6 @@ api.interceptors.request.use(
       if (currentUser) {
         const token = await currentUser.getIdToken();
         config.headers.Authorization = `Bearer ${token}`;
-        console.log("API: Added auth token to request:", {
-          method: config.method,
-          url: config.url,
-          hasToken: !!token,
-          tokenLength: token?.length,
-        });
-      } else {
-        console.log("API: No current user, request sent without auth token");
       }
     } catch (error) {
       console.error("Error getting auth token:", error);
@@ -93,25 +63,13 @@ export const userAPI = {
   // Get user by Firebase UID
   getUserByFirebaseUid: async (uid) => {
     try {
-      console.log("API: Looking for user with Firebase UID:", uid);
-
-      // Use the new direct endpoint
       const response = await api.get(`/users/firebase/${uid}`);
-      console.log("API: Found user with matching UID:", response.data);
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
-        console.log("API: No user found with UID:", uid);
         return null;
       }
-      console.error("Error finding user by Firebase UID:", error);
-      console.error("Error details:", {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-      });
-      return null;
+      throw error;
     }
   },
 
@@ -130,9 +88,7 @@ export const userAPI = {
   // Helper function to update existing user's UID
   updateUserUid: async (userId, newUid) => {
     try {
-      console.log("API: Updating user UID:", { userId, newUid });
       const response = await api.put(`/users/${userId}`, { uid: newUid });
-      console.log("API: Successfully updated user UID:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error updating user UID:", error);
@@ -246,10 +202,8 @@ export const placeAPI = {
 export const reviewAPI = {
   // Create a review (can automatically create place if it doesn't exist)
   createReview: async (reviewData) => {
-    console.log("API: Sending review creation request to backend:", reviewData);
     try {
       const response = await api.post("/reviews", reviewData);
-      console.log("API: Review creation response received:", response.data);
       return response.data;
     } catch (error) {
       console.error("API: Review creation failed:", error);
@@ -260,12 +214,10 @@ export const reviewAPI = {
 
   // Delete a review (only by the review author)
   deleteReview: async (reviewId, userId) => {
-    console.log("API: Sending review deletion request:", { reviewId, userId });
     try {
       const response = await api.delete(`/reviews/${reviewId}`, {
         data: { userId },
       });
-      console.log("API: Review deletion response received:", response.data);
       return response.data;
     } catch (error) {
       console.error("API: Review deletion failed:", error);
@@ -306,10 +258,8 @@ export const reviewAPI = {
 
   // Like or unlike a review
   likeReview: async (reviewId, userId) => {
-    console.log("API: Sending review like request:", { reviewId, userId });
     try {
       const response = await api.post(`/reviews/${reviewId}/like`, { userId });
-      console.log("API: Review like response received:", response.data);
       return response.data;
     } catch (error) {
       console.error("API: Review like failed:", error);
@@ -320,10 +270,8 @@ export const reviewAPI = {
 
   // Get like status for a review by a specific user
   getReviewLikeStatus: async (reviewId, userId) => {
-    console.log("API: Getting review like status:", { reviewId, userId });
     try {
       const response = await api.get(`/reviews/${reviewId}/like-status?userId=${userId}`);
-      console.log("API: Review like status response received:", response.data);
       return response.data;
     } catch (error) {
       console.error("API: Get review like status failed:", error);
@@ -386,7 +334,6 @@ export const lostPetAPI = {
       const queryString = params.toString();
       const url = queryString ? `/lostpets?${queryString}` : "/lostpets";
 
-      console.log("API: Fetching lost pets with filters:", filters);
       const response = await api.get(url);
       return response.data;
     } catch (error) {
@@ -399,10 +346,7 @@ export const lostPetAPI = {
   // Create a new lost pet report
   createLostPetReport: async (reportData) => {
     try {
-
-      console.log("API: Creating lost pet report:", reportData);
       const response = await api.post("/lostpets", reportData);
-      console.log("API: Lost pet report created successfully:", response.data);
       return response.data;
     } catch (error) {
       console.error("API: Error creating lost pet report:", error);
@@ -428,10 +372,7 @@ export const lostPetAPI = {
   // Add a sighting report to an existing lost pet
   addSightingReport: async (lostPetId, sightingData) => {
     try {
-
-      console.log('API: Adding sighting report for pet:', lostPetId, sightingData);
       const response = await api.post(`/lostpets/${lostPetId}/sightings`, sightingData);
-      console.log('API: Sighting report added successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('API: Error adding sighting report:', error);
@@ -444,10 +385,7 @@ export const lostPetAPI = {
   // Update lost pet status (mark as found, etc.)
   updateLostPetStatus: async (lostPetId, statusData) => {
     try {
-
-      console.log('API: Updating lost pet status:', lostPetId, statusData);
       const response = await api.put(`/lostpets/${lostPetId}/status`, statusData);
-      console.log('API: Lost pet status updated successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('API: Error updating lost pet status:', error);
@@ -460,12 +398,9 @@ export const lostPetAPI = {
   // Delete a lost pet report
   deleteLostPetReport: async (lostPetId, userId) => {
     try {
-
-      console.log("API: Deleting lost pet report:", lostPetId, userId);
       const response = await api.delete(`/lostpets/${lostPetId}`, {
         data: { userId },
       });
-      console.log("API: Lost pet report deleted successfully:", response.data);
       return response.data;
     } catch (error) {
       console.error("API: Error deleting lost pet report:", error);
@@ -478,7 +413,6 @@ export const lostPetAPI = {
   // Get lost pets statistics
   getLostPetStats: async () => {
     try {
-
       const response = await api.get('/lostpets/stats');
       return response.data;
     } catch (error) {

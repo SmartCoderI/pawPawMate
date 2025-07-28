@@ -78,7 +78,51 @@ const Home = () => {
     return '';
   };
 
-  const [locations, setLocations] = useState([]);
+  // Function to get cached locations
+  const getCachedLocations = () => {
+    try {
+      const savedState = sessionStorage.getItem('pawpawmate_map_state');
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        const thirtyMinutes = 30 * 60 * 1000;
+        if (Date.now() - parsed.timestamp < thirtyMinutes && parsed.locations) {
+          console.log('Restored cached locations:', parsed.locations.length);
+          return parsed.locations;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cached locations:', error);
+    }
+    return [];
+  };
+
+  const getCachedDatabasePlaces = () => {
+    try {
+      const savedState = sessionStorage.getItem('pawpawmate_map_state');
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        const thirtyMinutes = 30 * 60 * 1000;
+        if (Date.now() - parsed.timestamp < thirtyMinutes && parsed.databasePlaces) {
+          console.log('Restored cached database places:', parsed.databasePlaces.length);
+          return parsed.databasePlaces;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cached database places:', error);
+    }
+    return [];
+  };
+
+  const [locationsState, setLocationsState] = useState(getCachedLocations());
+  
+  // Wrapper function to save state when locations change
+  const setLocations = (newLocations) => {
+    setLocationsState(newLocations);
+    // Save state after locations change
+    setTimeout(() => saveMapState(), 100);
+  };
+  
+  const locations = locationsState;
   const [filter, setFilterState] = useState(getInitialFilter());
   
   // Wrapper function to save state when filter changes
@@ -98,7 +142,16 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [showPlaceModal, setShowPlaceModal] = useState(false);
   const [clickedCoordinates, setClickedCoordinates] = useState(null);
-  const [databasePlaces, setDatabasePlaces] = useState([]);
+  const [databasePlacesState, setDatabasePlacesState] = useState(getCachedDatabasePlaces());
+  
+  // Wrapper function to save state when database places change
+  const setDatabasePlaces = (newPlaces) => {
+    setDatabasePlacesState(newPlaces);
+    // Save state after database places change
+    setTimeout(() => saveMapState(), 100);
+  };
+  
+  const databasePlaces = databasePlacesState;
   
   // Search state
   const [searchResults, setSearchResults] = useState([]);
@@ -431,6 +484,13 @@ const Home = () => {
 
   // Load database places
   const loadDatabasePlaces = async () => {
+    // Check if we have cached database places first
+    const cachedDatabasePlaces = getCachedDatabasePlaces();
+    if (cachedDatabasePlaces.length > 0) {
+      console.log('Using cached database places, skipping fetch');
+      return;
+    }
+    
     try {
       const dbPlaces = await placeAPI.getAllPlaces();
       setDatabasePlaces(dbPlaces);
@@ -473,9 +533,19 @@ const Home = () => {
   // Fetch locations when location permission is checked and map is ready
   useEffect(() => {
     if (locationPermissionChecked && mapRef.current) {
+      // Check if we have cached locations first
+      const cachedLocations = getCachedLocations();
+      const cachedDatabasePlaces = getCachedDatabasePlaces();
+      
+      if (cachedLocations.length > 0 || cachedDatabasePlaces.length > 0) {
+        console.log('Using cached locations, skipping fetch');
+        return; // Skip fetching if we have cached data
+      }
+      
       const timer = setTimeout(() => {
         const bounds = mapRef.current.getBounds();
         if (bounds) {
+          console.log('No cached locations found, fetching new ones');
           fetchLocations(bounds);
         }
       }, 500); // Shorter delay since location is already determined
@@ -706,10 +776,12 @@ const Home = () => {
         zoom: state.zoom,
         filter: filter,
         searchQuery: searchQuery,
+        locations: locations, // Cache the fetched locations
+        databasePlaces: databasePlaces, // Cache database places too
         timestamp: Date.now()
       };
       sessionStorage.setItem('pawpawmate_map_state', JSON.stringify(stateToSave));
-      console.log('Saved map state:', stateToSave);
+      console.log('Saved map state with locations:', stateToSave);
     } catch (error) {
       console.error('Error saving map state:', error);
     }

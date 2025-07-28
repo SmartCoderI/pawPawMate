@@ -6,7 +6,9 @@ import api from '../services/api';
 const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
   // Determine place type from placeData
   const placeType = placeData?.type || 'dog_park'; // Default to dog_park for backward compatibility
-  const isVetClinic = placeType === 'vet';
+  const isVetClinic = placeType === 'vet' || placeType === 'veterinary';
+  const isPetStore = placeType === 'pet store' || placeType === 'pet_store';
+  const isAnimalShelter = placeType === 'shelter' || placeType === 'animal_shelter';
 
   // Basic review state
   const [rating, setRating] = useState(5);
@@ -17,124 +19,142 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  // Dog park review state - 8 categories
+  // Dog park review state - 8 categories (matching backend exactly)
   const [dogParkReview, setDogParkReview] = useState({
     accessAndLocation: {
       parkingDifficulty: "",
-      handicapFriendly: false,
-      parkingToParkDistance: "",
     },
     hoursOfOperation: {
       is24Hours: false,
-      dawnToDusk: false,
       specificHours: "",
     },
     safetyLevel: {
       fencingCondition: "",
-      doubleGated: false,
       nightIllumination: false,
       firstAidStation: false,
-      emergencyContact: false,
       surveillanceCameras: false,
-      noSharpEdges: false,
     },
     sizeAndLayout: {
-      separateAreas: "",
       runningSpace: "",
       drainagePerformance: "",
     },
     amenitiesAndFacilities: {
       seatingLevel: "",
       shadeAndCover: "",
-      wasteStation: false,
       biodegradableBags: false,
-      restroom: false,
       waterAccess: "",
     },
     maintenanceAndCleanliness: {
       overallCleanliness: "",
-      trashLevel: "",
-      odorLevel: "",
       equipmentCondition: "",
     },
     crowdAndSocialDynamics: {
       peakDays: [],
-      peakHours: "",
-      socialEvents: [],
       ownerCulture: "",
-      wastePickup: "",
       ownerFriendliness: "",
     },
     rulesPoliciesAndCommunity: {
       leashPolicy: "",
-      vaccinationRequired: false,
-      aggressiveDogPolicy: "",
-      otherRules: "",
       communityEnforcement: "",
     },
   });
 
+  
+  // Pet store review state - 6 categories (matching backend exactly)
+  const [petStoreReview, setPetStoreReview] = useState({
+    accessAndLocation: {
+      parkingDifficulty: "",
+    },
+    hoursOfOperation: {
+      is24Hours: false,
+      specificHours: "",
+    },
+    servicesAndConveniences: {
+      grooming: false,
+      veterinaryServices: false,
+      petTraining: false,
+      onlineOrdering: false,
+      curbsidePickup: false,
+      returnPolicy: "",
+    },
+    productSelectionAndQuality: {
+      foodBrandVariety: "",
+      toySelection: "",
+      productFreshness: "",
+    },
+    pricingAndValue: {
+      overallPricing: "",
+      priceMatching: false,
+    },
+    staffKnowledgeAndService: {
+      petKnowledge: "",
+      trainingCertified: false,
+    },
+  });
+
+  // Animal shelter review state - 6 categories (matching backend exactly)
+  const [animalShelterReview, setAnimalShelterReview] = useState({
+    accessAndLocation: {
+      parkingDifficulty: "",
+    },
+    hoursOfOperation: {
+      is24Hours: false,
+      specificHours: "",
+    },
+    animalTypeSelection: {
+      availableAnimalTypes: [],
+      breedVariety: "",
+    },
+    animalCareAndWelfare: {
+      animalHealth: "",
+      livingConditions: "",
+    },
+    adoptionProcessAndSupport: {
+      applicationProcess: "",
+      processingTime: "",
+      homeVisitRequired: false,
+    },
+    staffAndVolunteerQuality: {
+      staffKnowledge: "",
+      customerService: "",
+      volunteerProgram: false,
+    },
+  });
   // Vet clinic review state - 7 categories
+  // Vet clinic review state - 7 categories (matching backend exactly)
   const [vetClinicReview, setVetClinicReview] = useState({
+    accessAndLocation: {
+      parkingDifficulty: "",
+      publicTransportAccess: false,
+    },
+    hoursOfOperation: {
+      is24Hours: false,
+      specificHours: "",
+    },
     clinicEnvironmentAndFacilities: {
       cleanliness: "",
-      comfortLevel: "",
       facilitySize: "",
     },
     costAndTransparency: {
-      routineCheckupCost: "",
-      vaccinationCost: "",
-      spayNeuterCost: "",
-      dentalCleaningCost: "",
-      emergencyVisitCost: "",
+      cost: "",
       feesExplainedUpfront: false,
-      printedEstimatesAvailable: false,
       insuranceAccepted: false,
-      paymentPlansOffered: false,
     },
-    medicalStaffAndServices: {
-      veterinarianAttitude: "",
-      veterinarianCompetence: "",
-      technicianNursePerformance: "",
+    servicesAndSpecializations: {
       onSiteDiagnostics: [],
-      surgeryOrthopedics: false,
-      behavioralCounseling: false,
-      nutritionConsultation: false,
-    },
-    schedulingAndCommunication: {
-      responseTime: "",
-      appointmentWaitTime: "",
-      inClinicWaitingTime: "",
-      followUpCommunication: "",
+      surgeryCapabilities: [],
+      specializations: [],
     },
     emergencyAndAfterHours: {
       openWeekends: false,
       openEvenings: false,
       onCallEmergencyNumber: false,
-      connectedToEmergencyHospitals: false,
-      clearHandoffsToSpecialists: false,
       emergencyTriageSpeed: "",
-      crisisHandlingConfidence: "",
     },
-    ownerInvolvement: {
-      allowedDuringExams: false,
-      allowedDuringProcedures: false,
-      communicationDuringAnesthesia: "",
-      communicationDuringSurgery: "",
-      explainsProceduresWell: false,
-      involvesOwnerInDecisions: false,
+    staffAndServiceQuality: {
+      staffFriendliness: "",
+      veterinarianExperience: "",
     },
-    reputationAndCommunity: {
-      onlineReputationConsistency: "",
-      wordOfMouthReputation: "",
-      communityInvolvement: "",
-      hostsVaccineClinic: false,
-      shelterPartnerships: false,
-      communityEvents: false,
-      educationalPrograms: false,
-      socialMediaPresence: "",
-    },
-    emergencyExperiences: [],
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -224,8 +244,37 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
     }));
   };
 
+  const handlePetStoreChange = (category, field, value) => {
+    setPetStoreReview((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleAnimalShelterChange = (category, field, value) => {
+    setAnimalShelterReview((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [field]: value,
+      },
+    }));
+  };
+
   const handleArrayFieldChange = (category, field, value, checked) => {
-    const handler = isVetClinic ? setVetClinicReview : setDogParkReview;
+    let handler;
+    if (isVetClinic) {
+      handler = setVetClinicReview;
+    } else if (isPetStore) {
+      handler = setPetStoreReview;
+    } else if (isAnimalShelter) {
+      handler = setAnimalShelterReview;
+    } else {
+      handler = setDogParkReview;
+    }
     
     handler((prev) => {
       const currentArray = prev[category][field] || [];
@@ -278,6 +327,10 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
       // Add the appropriate review type
       if (isVetClinic) {
         reviewData.vetClinicReview = vetClinicReview;
+      } else if (isPetStore) {
+        reviewData.petStoreReview = petStoreReview;
+      } else if (isAnimalShelter) {
+        reviewData.animalShelterReview = animalShelterReview;
       } else {
         reviewData.dogParkReview = dogParkReview;
       }
@@ -305,49 +358,42 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
       
       if (isVetClinic) {
         setVetClinicReview({
-          clinicEnvironmentAndFacilities: { cleanliness: "", comfortLevel: "", facilitySize: "" },
-          costAndTransparency: {
-            routineCheckupCost: "", vaccinationCost: "", spayNeuterCost: "", dentalCleaningCost: "", emergencyVisitCost: "",
-            feesExplainedUpfront: false, printedEstimatesAvailable: false, insuranceAccepted: false, paymentPlansOffered: false,
-          },
-          medicalStaffAndServices: {
-            veterinarianAttitude: "", veterinarianCompetence: "", technicianNursePerformance: "", onSiteDiagnostics: [],
-            surgeryOrthopedics: false, behavioralCounseling: false, nutritionConsultation: false,
-          },
-          schedulingAndCommunication: { responseTime: "", appointmentWaitTime: "", inClinicWaitingTime: "", followUpCommunication: "" },
-          emergencyAndAfterHours: {
-            openWeekends: false, openEvenings: false, onCallEmergencyNumber: false, connectedToEmergencyHospitals: false,
-            clearHandoffsToSpecialists: false, emergencyTriageSpeed: "", crisisHandlingConfidence: "",
-          },
-          ownerInvolvement: {
-            allowedDuringExams: false, allowedDuringProcedures: false, communicationDuringAnesthesia: "", communicationDuringSurgery: "",
-            explainsProceduresWell: false, involvesOwnerInDecisions: false,
-          },
-          reputationAndCommunity: {
-            onlineReputationConsistency: "", wordOfMouthReputation: "", communityInvolvement: "", hostsVaccineClinic: false,
-            shelterPartnerships: false, communityEvents: false, educationalPrograms: false, socialMediaPresence: "",
-          },
-          emergencyExperiences: [],
+          accessAndLocation: { parkingDifficulty: "", publicTransportAccess: false },
+          hoursOfOperation: { is24Hours: false, specificHours: "" },
+          clinicEnvironmentAndFacilities: { cleanliness: "", facilitySize: "" },
+          costAndTransparency: { cost: "", feesExplainedUpfront: false, insuranceAccepted: false },
+          servicesAndSpecializations: { onSiteDiagnostics: [], surgeryCapabilities: [], specializations: [] },
+          emergencyAndAfterHours: { openWeekends: false, openEvenings: false, onCallEmergencyNumber: false, emergencyTriageSpeed: "" },
+          staffAndServiceQuality: { staffFriendliness: "", veterinarianExperience: "" },
+        });
+      } else if (isPetStore) {
+        setPetStoreReview({
+          accessAndLocation: { parkingDifficulty: "" },
+          hoursOfOperation: { is24Hours: false, specificHours: "" },
+          servicesAndConveniences: { grooming: false, veterinaryServices: false, petTraining: false, onlineOrdering: false, curbsidePickup: false, returnPolicy: "" },
+          productSelectionAndQuality: { foodBrandVariety: "", toySelection: "", productFreshness: "" },
+          pricingAndValue: { overallPricing: "", priceMatching: false },
+          staffKnowledgeAndService: { petKnowledge: "", trainingCertified: false },
+        });
+      } else if (isAnimalShelter) {
+        setAnimalShelterReview({
+          accessAndLocation: { parkingDifficulty: "" },
+          hoursOfOperation: { is24Hours: false, specificHours: "" },
+          animalTypeSelection: { availableAnimalTypes: [], breedVariety: "" },
+          animalCareAndWelfare: { animalHealth: "", livingConditions: "" },
+          adoptionProcessAndSupport: { applicationProcess: "", processingTime: "", homeVisitRequired: false },
+          staffAndVolunteerQuality: { staffKnowledge: "", customerService: "", volunteerProgram: false },
         });
       } else {
         setDogParkReview({
-          accessAndLocation: { parkingDifficulty: "", handicapFriendly: false, parkingToParkDistance: "" },
-          hoursOfOperation: { is24Hours: false, dawnToDusk: false, specificHours: "" },
-          safetyLevel: {
-            fencingCondition: "", doubleGated: false, nightIllumination: false, firstAidStation: false,
-            emergencyContact: false, surveillanceCameras: false, noSharpEdges: false,
-          },
-          sizeAndLayout: { separateAreas: "", runningSpace: "", drainagePerformance: "" },
-          amenitiesAndFacilities: {
-            seatingLevel: "", shadeAndCover: "", wasteStation: false, biodegradableBags: false, restroom: false, waterAccess: "",
-          },
-          maintenanceAndCleanliness: { overallCleanliness: "", trashLevel: "", odorLevel: "", equipmentCondition: "" },
-          crowdAndSocialDynamics: {
-            peakDays: [], peakHours: "", socialEvents: [], ownerCulture: "", wastePickup: "", ownerFriendliness: "",
-          },
-          rulesPoliciesAndCommunity: {
-            leashPolicy: "", vaccinationRequired: false, aggressiveDogPolicy: "", otherRules: "", communityEnforcement: "",
-          },
+          accessAndLocation: { parkingDifficulty: "" },
+          hoursOfOperation: { is24Hours: false, specificHours: "" },
+          safetyLevel: { fencingCondition: "", nightIllumination: false, firstAidStation: false, surveillanceCameras: false },
+          sizeAndLayout: { runningSpace: "", drainagePerformance: "" },
+          amenitiesAndFacilities: { seatingLevel: "", shadeAndCover: "", biodegradableBags: false, waterAccess: "" },
+          maintenanceAndCleanliness: { overallCleanliness: "", equipmentCondition: "" },
+          crowdAndSocialDynamics: { peakDays: [], ownerCulture: "", ownerFriendliness: "" },
+          rulesPoliciesAndCommunity: { leashPolicy: "", communityEnforcement: "" },
         });
       }
 
@@ -439,185 +485,198 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
           <div className="vet-clinic-review">
             <h4>🏥 Veterinary Clinic Detailed Review</h4>
 
-            {/* 1. Clinic Environment & Facilities */}
+            {/* 1. Access & Location - BACKEND ALIGNED */}
             <div className="form-section">
-              <h5>1. Clinic Environment & Facilities</h5>
+              <h5>1. Access & Location</h5>
 
-              {["cleanliness", "comfortLevel", "facilitySize"].map((field) => (
-                <div key={field} className="form-group">
-                  <label>{field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}:</label>
-                  <select
-                    value={vetClinicReview.clinicEnvironmentAndFacilities[field]}
-                    onChange={(e) => handleVetClinicChange("clinicEnvironmentAndFacilities", field, e.target.value)}
-                  >
-                    <option value="">Select...</option>
-                    {field === "cleanliness" && (
-                      <>
-                        <option value="excellent">Excellent</option>
-                        <option value="good">Good</option>
-                        <option value="fair">Fair</option>
-                        <option value="poor">Poor</option>
-                      </>
-                    )}
-                    {field === "comfortLevel" && (
-                      <>
-                        <option value="excellent">Excellent</option>
-                        <option value="good">Good</option>
-                        <option value="fair">Fair</option>
-                        <option value="poor">Poor</option>
-                      </>
-                    )}
-                    {field === "facilitySize" && (
-                      <>
-                        <option value="spacious">Spacious</option>
-                        <option value="adequate">Adequate</option>
-                        <option value="cramped">Cramped</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              ))}
+              <div className="form-group">
+                <label>Parking Difficulty:</label>
+                <select
+                  value={vetClinicReview.accessAndLocation.parkingDifficulty}
+                  onChange={(e) => handleVetClinicChange("accessAndLocation", "parkingDifficulty", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="easy">Easy</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="difficult">Difficult</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={vetClinicReview.accessAndLocation.publicTransportAccess}
+                    onChange={(e) => handleVetClinicChange("accessAndLocation", "publicTransportAccess", e.target.checked)}
+                  />
+                  Public Transport Access
+                </label>
+              </div>
             </div>
 
-            {/* 2. Cost & Transparency */}
+            {/* 2. Hours of Operation - BACKEND ALIGNED */}
             <div className="form-section">
-              <h5>2. Cost & Transparency</h5>
+              <h5>2. Hours of Operation</h5>
 
-              {["routineCheckupCost", "vaccinationCost", "spayNeuterCost", "dentalCleaningCost", "emergencyVisitCost"].map((field) => (
-                <div key={field} className="form-group">
-                  <label>{field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}:</label>
-                  <select
-                    value={vetClinicReview.costAndTransparency[field]}
-                    onChange={(e) => handleVetClinicChange("costAndTransparency", field, e.target.value)}
-                  >
-                    <option value="">Select...</option>
-                    <option value="low">Low</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="high">High</option>
-                  </select>
-                </div>
-              ))}
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={vetClinicReview.hoursOfOperation.is24Hours}
+                    onChange={(e) => handleVetClinicChange("hoursOfOperation", "is24Hours", e.target.checked)}
+                  />
+                  Open 24 Hours
+                </label>
+              </div>
 
-              {["feesExplainedUpfront", "printedEstimatesAvailable", "insuranceAccepted", "paymentPlansOffered"].map((field) => (
-                <div key={field} className="form-group">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={vetClinicReview.costAndTransparency[field]}
-                      onChange={(e) => handleVetClinicChange("costAndTransparency", field, e.target.checked)}
-                    />
-                    {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}
-                  </label>
-                </div>
-              ))}
+              <div className="form-group">
+                <label>Specific Hours:</label>
+                <input
+                  type="text"
+                  value={vetClinicReview.hoursOfOperation.specificHours}
+                  onChange={(e) => handleVetClinicChange("hoursOfOperation", "specificHours", e.target.value)}
+                  placeholder="e.g., 8 AM - 6 PM"
+                />
+              </div>
             </div>
 
-            {/* 3. Medical Staff & Services */}
+            {/* 3. Clinic Environment & Facilities - BACKEND ALIGNED */}
             <div className="form-section">
-              <h5>3. Medical Staff & Services</h5>
+              <h5>3. Clinic Environment & Facilities</h5>
 
-              {["veterinarianAttitude", "veterinarianCompetence", "technicianNursePerformance"].map((field) => (
-                <div key={field} className="form-group">
-                  <label>{field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}:</label>
-                  <select
-                    value={vetClinicReview.medicalStaffAndServices[field]}
-                    onChange={(e) => handleVetClinicChange("medicalStaffAndServices", field, e.target.value)}
-                  >
-                    <option value="">Select...</option>
-                    <option value="excellent">Excellent</option>
-                    <option value="good">Good</option>
-                    <option value="fair">Fair</option>
-                    <option value="poor">Poor</option>
-                  </select>
-                </div>
-              ))}
+              <div className="form-group">
+                <label>Cleanliness:</label>
+                <select
+                  value={vetClinicReview.clinicEnvironmentAndFacilities.cleanliness}
+                  onChange={(e) => handleVetClinicChange("clinicEnvironmentAndFacilities", "cleanliness", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Good</option>
+                  <option value="fair">Fair</option>
+                  <option value="poor">Poor</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Facility Size:</label>
+                <select
+                  value={vetClinicReview.clinicEnvironmentAndFacilities.facilitySize}
+                  onChange={(e) => handleVetClinicChange("clinicEnvironmentAndFacilities", "facilitySize", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="small">Small</option>
+                  <option value="medium">Medium</option>
+                  <option value="large">Large</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 4. Cost & Transparency - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>4. Cost & Transparency</h5>
+
+              <div className="form-group">
+                <label>Cost:</label>
+                <select
+                  value={vetClinicReview.costAndTransparency.cost}
+                  onChange={(e) => handleVetClinicChange("costAndTransparency", "cost", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="low">Low</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="high">High</option>
+                  <option value="very_high">Very High</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={vetClinicReview.costAndTransparency.feesExplainedUpfront}
+                    onChange={(e) => handleVetClinicChange("costAndTransparency", "feesExplainedUpfront", e.target.checked)}
+                  />
+                  Fees Explained Upfront
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={vetClinicReview.costAndTransparency.insuranceAccepted}
+                    onChange={(e) => handleVetClinicChange("costAndTransparency", "insuranceAccepted", e.target.checked)}
+                  />
+                  Insurance Accepted
+                </label>
+              </div>
+            </div>
+
+            {/* 5. Services & Specializations - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>5. Services & Specializations</h5>
 
               <div className="form-group">
                 <label>On-Site Diagnostics:</label>
                 <div className="checkbox-group">
-                  {["blood_work", "x_rays", "ultrasound", "ecg", "laboratory_tests"].map((diagnostic) => (
+                  {["xray", "ultrasound", "bloodwork", "ecg"].map((diagnostic) => (
                     <label key={diagnostic}>
                       <input
                         type="checkbox"
-                        checked={(vetClinicReview.medicalStaffAndServices.onSiteDiagnostics || []).includes(diagnostic)}
+                        checked={(vetClinicReview.servicesAndSpecializations.onSiteDiagnostics || []).includes(diagnostic)}
                         onChange={(e) =>
-                          handleArrayFieldChange("medicalStaffAndServices", "onSiteDiagnostics", diagnostic, e.target.checked)
+                          handleArrayFieldChange("servicesAndSpecializations", "onSiteDiagnostics", diagnostic, e.target.checked)
                         }
                       />
-                      {diagnostic.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                      {diagnostic === "xray" ? "X-ray" : diagnostic === "ecg" ? "ECG" : diagnostic.charAt(0).toUpperCase() + diagnostic.slice(1)} Available
                     </label>
                   ))}
                 </div>
               </div>
 
-              {["surgeryOrthopedics", "behavioralCounseling", "nutritionConsultation"].map((field) => (
-                <div key={field} className="form-group">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={vetClinicReview.medicalStaffAndServices[field]}
-                      onChange={(e) => handleVetClinicChange("medicalStaffAndServices", field, e.target.checked)}
-                    />
-                    {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}
-                  </label>
+              <div className="form-group">
+                <label>Surgery Capabilities:</label>
+                <div className="checkbox-group">
+                  {["routine_spay_neuter", "orthopedic", "emergency", "dental", "none"].map((surgery) => (
+                    <label key={surgery}>
+                      <input
+                        type="checkbox"
+                        checked={(vetClinicReview.servicesAndSpecializations.surgeryCapabilities || []).includes(surgery)}
+                        onChange={(e) =>
+                          handleArrayFieldChange("servicesAndSpecializations", "surgeryCapabilities", surgery, e.target.checked)
+                        }
+                      />
+                      {surgery.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                    </label>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              <div className="form-group">
+                <label>Specializations:</label>
+                <div className="checkbox-group">
+                  {["cardiology", "dermatology", "oncology", "behavior", "exotic_animals", "none"].map((specialization) => (
+                    <label key={specialization}>
+                      <input
+                        type="checkbox"
+                        checked={(vetClinicReview.servicesAndSpecializations.specializations || []).includes(specialization)}
+                        onChange={(e) =>
+                          handleArrayFieldChange("servicesAndSpecializations", "specializations", specialization, e.target.checked)
+                        }
+                      />
+                      {specialization.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* 4. Scheduling & Communication */}
+            {/* 6. Emergency & After-Hours Care - BACKEND ALIGNED */}
             <div className="form-section">
-              <h5>4. Scheduling & Communication</h5>
+              <h5>6. Emergency & After-Hours Care</h5>
 
-              {["responseTime", "appointmentWaitTime", "inClinicWaitingTime", "followUpCommunication"].map((field) => (
-                <div key={field} className="form-group">
-                  <label>{field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}:</label>
-                  <select
-                    value={vetClinicReview.schedulingAndCommunication[field]}
-                    onChange={(e) => handleVetClinicChange("schedulingAndCommunication", field, e.target.value)}
-                  >
-                    <option value="">Select...</option>
-                    {field === "responseTime" && (
-                      <>
-                        <option value="immediate">Immediate</option>
-                        <option value="same_day">Same Day</option>
-                        <option value="next_day">Next Day</option>
-                        <option value="several_days">Several Days</option>
-                      </>
-                    )}
-                    {field === "appointmentWaitTime" && (
-                      <>
-                        <option value="same_day">Same Day</option>
-                        <option value="within_week">Within Week</option>
-                        <option value="1_2_weeks">1-2 Weeks</option>
-                        <option value="over_2_weeks">Over 2 Weeks</option>
-                      </>
-                    )}
-                    {field === "inClinicWaitingTime" && (
-                      <>
-                        <option value="none">None</option>
-                        <option value="short">Short (under 15 min)</option>
-                        <option value="moderate">Moderate (15-30 min)</option>
-                        <option value="long">Long (over 30 min)</option>
-                      </>
-                    )}
-                    {field === "followUpCommunication" && (
-                      <>
-                        <option value="excellent">Excellent</option>
-                        <option value="good">Good</option>
-                        <option value="fair">Fair</option>
-                        <option value="poor">Poor</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              ))}
-            </div>
-
-            {/* 5. Emergency & After-Hours Care */}
-            <div className="form-section">
-              <h5>5. Emergency & After-Hours Care</h5>
-
-              {["openWeekends", "openEvenings", "onCallEmergencyNumber", "connectedToEmergencyHospitals", "clearHandoffsToSpecialists"].map((field) => (
+              {["openWeekends", "openEvenings", "onCallEmergencyNumber"].map((field) => (
                 <div key={field} className="form-group">
                   <label>
                     <input
@@ -630,12 +689,143 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
                 </div>
               ))}
 
-              {["emergencyTriageSpeed", "crisisHandlingConfidence"].map((field) => (
+              <div className="form-group">
+                <label>Emergency Triage Speed:</label>
+                <select
+                  value={vetClinicReview.emergencyAndAfterHours.emergencyTriageSpeed}
+                  onChange={(e) => handleVetClinicChange("emergencyAndAfterHours", "emergencyTriageSpeed", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="immediate">Immediate</option>
+                  <option value="within_30_min">Within 30 Min</option>
+                  <option value="within_1_hour">Within 1 Hour</option>
+                  <option value="over_1_hour">Over 1 Hour</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 7. Staff & Service Quality - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>7. Staff & Service Quality</h5>
+
+              <div className="form-group">
+                <label>Staff Friendliness:</label>
+                <select
+                  value={vetClinicReview.staffAndServiceQuality.staffFriendliness}
+                  onChange={(e) => handleVetClinicChange("staffAndServiceQuality", "staffFriendliness", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Good</option>
+                  <option value="fair">Fair</option>
+                  <option value="poor">Poor</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Veterinarian Experience:</label>
+                <select
+                  value={vetClinicReview.staffAndServiceQuality.veterinarianExperience}
+                  onChange={(e) => handleVetClinicChange("staffAndServiceQuality", "veterinarianExperience", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="novice">Novice</option>
+                  <option value="experienced">Experienced</option>
+                  <option value="expert">Expert</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        ) : isPetStore ? (
+          <div className="pet-store-review">
+            <h4>🛍️ Pet Store Detailed Review</h4>
+
+            {/* 1. Access & Location - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>1. Access & Location</h5>
+
+              <div className="form-group">
+                <label>Parking Difficulty:</label>
+                <select
+                  value={petStoreReview.accessAndLocation.parkingDifficulty}
+                  onChange={(e) => handlePetStoreChange("accessAndLocation", "parkingDifficulty", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="easy">Easy</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="difficult">Difficult</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 2. Hours of Operation - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>2. Hours of Operation</h5>
+
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={petStoreReview.hoursOfOperation.is24Hours}
+                    onChange={(e) => handlePetStoreChange("hoursOfOperation", "is24Hours", e.target.checked)}
+                  />
+                  Open 24 Hours
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label>Specific Hours:</label>
+                <input
+                  type="text"
+                  value={petStoreReview.hoursOfOperation.specificHours}
+                  onChange={(e) => handlePetStoreChange("hoursOfOperation", "specificHours", e.target.value)}
+                  placeholder="e.g., 8 AM - 8 PM"
+                />
+              </div>
+            </div>
+
+            {/* 3. Services & Conveniences - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>3. Services & Conveniences</h5>
+
+              {["grooming", "veterinaryServices", "petTraining", "onlineOrdering", "curbsidePickup"].map((field) => (
+                <div key={field} className="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={petStoreReview.servicesAndConveniences[field]}
+                      onChange={(e) => handlePetStoreChange("servicesAndConveniences", field, e.target.checked)}
+                    />
+                    {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}
+                  </label>
+                </div>
+              ))}
+
+              <div className="form-group">
+                <label>Return Policy:</label>
+                <select
+                  value={petStoreReview.servicesAndConveniences.returnPolicy}
+                  onChange={(e) => handlePetStoreChange("servicesAndConveniences", "returnPolicy", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Good</option>
+                  <option value="fair">Fair</option>
+                  <option value="poor">Poor</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 4. Product Selection & Quality - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>4. Product Selection & Quality</h5>
+
+              {["foodBrandVariety", "toySelection", "productFreshness"].map((field) => (
                 <div key={field} className="form-group">
                   <label>{field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}:</label>
                   <select
-                    value={vetClinicReview.emergencyAndAfterHours[field]}
-                    onChange={(e) => handleVetClinicChange("emergencyAndAfterHours", field, e.target.value)}
+                    value={petStoreReview.productSelectionAndQuality[field]}
+                    onChange={(e) => handlePetStoreChange("productSelectionAndQuality", field, e.target.value)}
                   >
                     <option value="">Select...</option>
                     <option value="excellent">Excellent</option>
@@ -647,29 +837,161 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
               ))}
             </div>
 
-            {/* 6. Owner Involvement */}
+            {/* 5. Pricing & Value - BACKEND ALIGNED */}
             <div className="form-section">
-              <h5>6. Owner Involvement</h5>
+              <h5>5. Pricing & Value</h5>
 
-              {["allowedDuringExams", "allowedDuringProcedures", "explainsProceduresWell", "involvesOwnerInDecisions"].map((field) => (
-                <div key={field} className="form-group">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={vetClinicReview.ownerInvolvement[field]}
-                      onChange={(e) => handleVetClinicChange("ownerInvolvement", field, e.target.checked)}
-                    />
-                    {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}
-                  </label>
+              <div className="form-group">
+                <label>Overall Pricing:</label>
+                <select
+                  value={petStoreReview.pricingAndValue.overallPricing}
+                  onChange={(e) => handlePetStoreChange("pricingAndValue", "overallPricing", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="low">Low</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="high">High</option>
+                  <option value="very_high">Very High</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={petStoreReview.pricingAndValue.priceMatching}
+                    onChange={(e) => handlePetStoreChange("pricingAndValue", "priceMatching", e.target.checked)}
+                  />
+                  Price Matching
+                </label>
+              </div>
+            </div>
+
+            {/* 6. Staff Knowledge & Service - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>6. Staff Knowledge & Service</h5>
+
+              <div className="form-group">
+                <label>Pet Knowledge:</label>
+                <select
+                  value={petStoreReview.staffKnowledgeAndService.petKnowledge}
+                  onChange={(e) => handlePetStoreChange("staffKnowledgeAndService", "petKnowledge", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Good</option>
+                  <option value="fair">Fair</option>
+                  <option value="poor">Poor</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={petStoreReview.staffKnowledgeAndService.trainingCertified}
+                    onChange={(e) => handlePetStoreChange("staffKnowledgeAndService", "trainingCertified", e.target.checked)}
+                  />
+                  Training Certified
+                </label>
+              </div>
+            </div>
+          </div>
+        ) : isAnimalShelter ? (
+          <div className="animal-shelter-review">
+            <h4>🏠 Animal Shelter Detailed Review</h4>
+
+            {/* 1. Access & Location - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>1. Access & Location</h5>
+
+              <div className="form-group">
+                <label>Parking Difficulty:</label>
+                <select
+                  value={animalShelterReview.accessAndLocation.parkingDifficulty}
+                  onChange={(e) => handleAnimalShelterChange("accessAndLocation", "parkingDifficulty", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="easy">Easy</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="difficult">Difficult</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 2. Hours of Operation - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>2. Hours of Operation</h5>
+
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={animalShelterReview.hoursOfOperation.is24Hours}
+                    onChange={(e) => handleAnimalShelterChange("hoursOfOperation", "is24Hours", e.target.checked)}
+                  />
+                  Open 24 Hours
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label>Specific Hours:</label>
+                <input
+                  type="text"
+                  value={animalShelterReview.hoursOfOperation.specificHours}
+                  onChange={(e) => handleAnimalShelterChange("hoursOfOperation", "specificHours", e.target.value)}
+                  placeholder="e.g., 9 AM - 5 PM"
+                />
+              </div>
+            </div>
+
+            {/* 3. Animal Type Selection - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>3. Animal Type Selection</h5>
+
+              <div className="form-group">
+                <label>Available Animal Types:</label>
+                <div className="checkbox-group">
+                  {["dogs", "cats", "rabbits", "birds", "reptiles", "small_mammals"].map((animalType) => (
+                    <label key={animalType}>
+                      <input
+                        type="checkbox"
+                        checked={(animalShelterReview.animalTypeSelection.availableAnimalTypes || []).includes(animalType)}
+                        onChange={(e) =>
+                          handleArrayFieldChange("animalTypeSelection", "availableAnimalTypes", animalType, e.target.checked)
+                        }
+                      />
+                      {animalType.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                    </label>
+                  ))}
                 </div>
-              ))}
+              </div>
 
-              {["communicationDuringAnesthesia", "communicationDuringSurgery"].map((field) => (
+              <div className="form-group">
+                <label>Breed Variety:</label>
+                <select
+                  value={animalShelterReview.animalTypeSelection.breedVariety}
+                  onChange={(e) => handleAnimalShelterChange("animalTypeSelection", "breedVariety", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Good</option>
+                  <option value="fair">Fair</option>
+                  <option value="poor">Poor</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 4. Animal Care & Welfare - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>4. Animal Care & Welfare</h5>
+
+              {["animalHealth", "livingConditions"].map((field) => (
                 <div key={field} className="form-group">
                   <label>{field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}:</label>
                   <select
-                    value={vetClinicReview.ownerInvolvement[field]}
-                    onChange={(e) => handleVetClinicChange("ownerInvolvement", field, e.target.value)}
+                    value={animalShelterReview.animalCareAndWelfare[field]}
+                    onChange={(e) => handleAnimalShelterChange("animalCareAndWelfare", field, e.target.value)}
                   >
                     <option value="">Select...</option>
                     <option value="excellent">Excellent</option>
@@ -681,16 +1003,59 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
               ))}
             </div>
 
-            {/* 7. Reputation & Community Engagement */}
+            {/* 5. Adoption Process & Support - BACKEND ALIGNED */}
             <div className="form-section">
-              <h5>7. Reputation & Community Engagement</h5>
+              <h5>5. Adoption Process & Support</h5>
 
-              {["onlineReputationConsistency", "wordOfMouthReputation", "communityInvolvement", "socialMediaPresence"].map((field) => (
+              <div className="form-group">
+                <label>Application Process:</label>
+                <select
+                  value={animalShelterReview.adoptionProcessAndSupport.applicationProcess}
+                  onChange={(e) => handleAnimalShelterChange("adoptionProcessAndSupport", "applicationProcess", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="easy">Easy</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="difficult">Difficult</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Processing Time:</label>
+                <select
+                  value={animalShelterReview.adoptionProcessAndSupport.processingTime}
+                  onChange={(e) => handleAnimalShelterChange("adoptionProcessAndSupport", "processingTime", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="same_day">Same Day</option>
+                  <option value="within_week">Within Week</option>
+                  <option value="1_2_weeks">1-2 Weeks</option>
+                  <option value="over_2_weeks">Over 2 Weeks</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={animalShelterReview.adoptionProcessAndSupport.homeVisitRequired}
+                    onChange={(e) => handleAnimalShelterChange("adoptionProcessAndSupport", "homeVisitRequired", e.target.checked)}
+                  />
+                  Home Visit Required
+                </label>
+              </div>
+            </div>
+
+            {/* 6. Staff & Volunteer Quality - BACKEND ALIGNED */}
+            <div className="form-section">
+              <h5>6. Staff & Volunteer Quality</h5>
+
+              {["staffKnowledge", "customerService"].map((field) => (
                 <div key={field} className="form-group">
                   <label>{field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}:</label>
                   <select
-                    value={vetClinicReview.reputationAndCommunity[field]}
-                    onChange={(e) => handleVetClinicChange("reputationAndCommunity", field, e.target.value)}
+                    value={animalShelterReview.staffAndVolunteerQuality[field]}
+                    onChange={(e) => handleAnimalShelterChange("staffAndVolunteerQuality", field, e.target.value)}
                   >
                     <option value="">Select...</option>
                     <option value="excellent">Excellent</option>
@@ -701,18 +1066,16 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
                 </div>
               ))}
 
-              {["hostsVaccineClinic", "shelterPartnerships", "communityEvents", "educationalPrograms"].map((field) => (
-                <div key={field} className="form-group">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={vetClinicReview.reputationAndCommunity[field]}
-                      onChange={(e) => handleVetClinicChange("reputationAndCommunity", field, e.target.checked)}
-                    />
-                    {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}
-                  </label>
-                </div>
-              ))}
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={animalShelterReview.staffAndVolunteerQuality.volunteerProgram}
+                    onChange={(e) => handleAnimalShelterChange("staffAndVolunteerQuality", "volunteerProgram", e.target.checked)}
+                  />
+                  Volunteer Program
+                </label>
+              </div>
             </div>
           </div>
         ) : (
