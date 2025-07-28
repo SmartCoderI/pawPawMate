@@ -97,8 +97,8 @@ const CardsList = () => {
             <p>Start earning reward cards by:</p>
             <ul>
               <li>🌟 Writing your first review</li>
-              <li>📝 Submitting 3+ detailed reviews</li>
-              <li>👍 Getting community approval (2+ upvotes)</li>
+              <li>📝 Reaching review milestones (3rd, 6th, 9th, etc.)</li>
+              <li>👍 Getting community approval (5+ upvotes)</li>
             </ul>
             <p>Each meaningful contribution gets you closer to earning collectible cards!</p>
           </div>
