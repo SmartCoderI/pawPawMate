@@ -282,152 +282,97 @@ const validateDogParkReview = (dogParkReview) => {
   return errors.length === 0 ? true : errors;
 };
 
-// Helper function to validate vet clinic review data
+// Helper function to validate vet clinic review data - ALIGNED WITH NEW BACKEND STRUCTURE
 const validateVetClinicReview = (vetClinicReview) => {
   if (!vetClinicReview) return true; // Optional field
 
   const errors = [];
 
-  // Validate clinicEnvironmentAndFacilities
+  // 1. Validate accessAndLocation
+  if (vetClinicReview.accessAndLocation) {
+    const { parkingDifficulty, publicTransportAccess } = vetClinicReview.accessAndLocation;
+    if (parkingDifficulty && !["easy", "moderate", "difficult"].includes(parkingDifficulty)) {
+      errors.push("Invalid parkingDifficulty value");
+    }
+    // publicTransportAccess is boolean, no enum validation needed
+  }
+
+  // 2. Validate hoursOfOperation
+  if (vetClinicReview.hoursOfOperation) {
+    // is24Hours is boolean, specificHours is string - no enum validation needed
+  }
+
+  // 3. Validate clinicEnvironmentAndFacilities
   if (vetClinicReview.clinicEnvironmentAndFacilities) {
-    const { cleanliness, comfortLevel, facilitySize } = vetClinicReview.clinicEnvironmentAndFacilities;
+    const { cleanliness, facilitySize } = vetClinicReview.clinicEnvironmentAndFacilities;
     if (cleanliness && !["excellent", "good", "fair", "poor"].includes(cleanliness)) {
       errors.push("Invalid cleanliness value");
-    }
-    if (comfortLevel && !["very_comfortable", "comfortable", "neutral", "uncomfortable"].includes(comfortLevel)) {
-      errors.push("Invalid comfortLevel value");
     }
     if (facilitySize && !["small", "medium", "large"].includes(facilitySize)) {
       errors.push("Invalid facilitySize value");
     }
   }
 
-  // Validate costAndTransparency
+  // 4. Validate costAndTransparency
   if (vetClinicReview.costAndTransparency) {
-    const { routineCheckupCost, vaccinationCost, spayNeuterCost, dentalCleaningCost, emergencyVisitCost } =
-      vetClinicReview.costAndTransparency;
-    const costValues = ["low", "moderate", "high", "very_high"];
-
-    if (routineCheckupCost && !costValues.includes(routineCheckupCost)) {
-      errors.push("Invalid routineCheckupCost value");
+    const { cost } = vetClinicReview.costAndTransparency;
+    if (cost && !["low", "moderate", "high", "very_high"].includes(cost)) {
+      errors.push("Invalid cost value");
     }
-    if (vaccinationCost && !costValues.includes(vaccinationCost)) {
-      errors.push("Invalid vaccinationCost value");
-    }
-    if (spayNeuterCost && !costValues.includes(spayNeuterCost)) {
-      errors.push("Invalid spayNeuterCost value");
-    }
-    if (dentalCleaningCost && !costValues.includes(dentalCleaningCost)) {
-      errors.push("Invalid dentalCleaningCost value");
-    }
-    if (emergencyVisitCost && !costValues.includes(emergencyVisitCost)) {
-      errors.push("Invalid emergencyVisitCost value");
-    }
+    // feesExplainedUpfront and insuranceAccepted are boolean - no enum validation needed
   }
 
-  // Validate medicalStaffAndServices
-  if (vetClinicReview.medicalStaffAndServices) {
-    const { veterinarianAttitude, veterinarianCompetence, technicianNursePerformance, onSiteDiagnostics } =
-      vetClinicReview.medicalStaffAndServices;
-    const performanceValues = ["excellent", "good", "fair", "poor"];
-
-    if (veterinarianAttitude && !performanceValues.includes(veterinarianAttitude)) {
-      errors.push("Invalid veterinarianAttitude value");
-    }
-    if (veterinarianCompetence && !performanceValues.includes(veterinarianCompetence)) {
-      errors.push("Invalid veterinarianCompetence value");
-    }
-    if (technicianNursePerformance && !performanceValues.includes(technicianNursePerformance)) {
-      errors.push("Invalid technicianNursePerformance value");
-    }
+  // 5. Validate servicesAndSpecializations
+  if (vetClinicReview.servicesAndSpecializations) {
+    const { onSiteDiagnostics, surgeryCapabilities, specializations } = vetClinicReview.servicesAndSpecializations;
+    
     if (onSiteDiagnostics && Array.isArray(onSiteDiagnostics)) {
-      const validDiagnostics = ["xray", "ultrasound", "bloodwork", "none"];
+      const validDiagnostics = ["xray", "ultrasound", "bloodwork", "ecg", "none"];
       const invalidDiagnostics = onSiteDiagnostics.filter((d) => !validDiagnostics.includes(d));
       if (invalidDiagnostics.length > 0) {
         errors.push("Invalid onSiteDiagnostics values: " + invalidDiagnostics.join(", "));
       }
     }
-  }
-
-  // Validate schedulingAndCommunication
-  if (vetClinicReview.schedulingAndCommunication) {
-    const { responseTime, appointmentWaitTime, inClinicWaitingTime, followUpCommunication } =
-      vetClinicReview.schedulingAndCommunication;
-
-    if (responseTime && !["immediate", "same_day", "next_day", "several_days"].includes(responseTime)) {
-      errors.push("Invalid responseTime value");
+    
+    if (surgeryCapabilities && Array.isArray(surgeryCapabilities)) {
+      const validSurgeries = ["routine_spay_neuter", "orthopedic", "emergency", "dental", "none"];
+      const invalidSurgeries = surgeryCapabilities.filter((s) => !validSurgeries.includes(s));
+      if (invalidSurgeries.length > 0) {
+        errors.push("Invalid surgeryCapabilities values: " + invalidSurgeries.join(", "));
+      }
     }
-    if (
-      appointmentWaitTime &&
-      !["same_day", "within_week", "1_2_weeks", "over_2_weeks"].includes(appointmentWaitTime)
-    ) {
-      errors.push("Invalid appointmentWaitTime value");
-    }
-    if (
-      inClinicWaitingTime &&
-      !["under_15_min", "15_30_min", "30_60_min", "over_1_hour"].includes(inClinicWaitingTime)
-    ) {
-      errors.push("Invalid inClinicWaitingTime value");
-    }
-    if (followUpCommunication && !["excellent", "good", "fair", "poor"].includes(followUpCommunication)) {
-      errors.push("Invalid followUpCommunication value");
+    
+    if (specializations && Array.isArray(specializations)) {
+      const validSpecializations = ["cardiology", "dermatology", "oncology", "behavior", "exotic_animals", "none"];
+      const invalidSpecializations = specializations.filter((s) => !validSpecializations.includes(s));
+      if (invalidSpecializations.length > 0) {
+        errors.push("Invalid specializations values: " + invalidSpecializations.join(", "));
+      }
     }
   }
 
-  // Validate emergencyAndAfterHours
+  // 6. Validate emergencyAndAfterHours
   if (vetClinicReview.emergencyAndAfterHours) {
-    const { emergencyTriageSpeed, crisisHandlingConfidence } = vetClinicReview.emergencyAndAfterHours;
-
+    const { emergencyTriageSpeed } = vetClinicReview.emergencyAndAfterHours;
+    
     if (
       emergencyTriageSpeed &&
       !["immediate", "within_30_min", "within_1_hour", "over_1_hour"].includes(emergencyTriageSpeed)
     ) {
       errors.push("Invalid emergencyTriageSpeed value");
     }
-    if (crisisHandlingConfidence && !["excellent", "good", "fair", "poor"].includes(crisisHandlingConfidence)) {
-      errors.push("Invalid crisisHandlingConfidence value");
-    }
+    // openWeekends, openEvenings, onCallEmergencyNumber are boolean - no enum validation needed
   }
 
-  // Validate emergencyExperiences
-  if (vetClinicReview.emergencyExperiences && Array.isArray(vetClinicReview.emergencyExperiences)) {
-    vetClinicReview.emergencyExperiences.forEach((exp, index) => {
-      if (exp.outcome && !["excellent", "good", "fair", "poor"].includes(exp.outcome)) {
-        errors.push(`Invalid outcome value in emergency experience ${index + 1}`);
-      }
-    });
-  }
-
-  // Validate ownerInvolvement
-  if (vetClinicReview.ownerInvolvement) {
-    const { communicationDuringAnesthesia, communicationDuringSurgery } = vetClinicReview.ownerInvolvement;
-    const communicationValues = ["excellent", "good", "fair", "poor"];
-
-    if (communicationDuringAnesthesia && !communicationValues.includes(communicationDuringAnesthesia)) {
-      errors.push("Invalid communicationDuringAnesthesia value");
+  // 7. Validate staffAndServiceQuality
+  if (vetClinicReview.staffAndServiceQuality) {
+    const { staffFriendliness, veterinarianExperience } = vetClinicReview.staffAndServiceQuality;
+    
+    if (staffFriendliness && !["excellent", "good", "fair", "poor"].includes(staffFriendliness)) {
+      errors.push("Invalid staffFriendliness value");
     }
-    if (communicationDuringSurgery && !communicationValues.includes(communicationDuringSurgery)) {
-      errors.push("Invalid communicationDuringSurgery value");
-    }
-  }
-
-  // Validate reputationAndCommunity
-  if (vetClinicReview.reputationAndCommunity) {
-    const { onlineReputationConsistency, wordOfMouthReputation, communityInvolvement, socialMediaPresence } =
-      vetClinicReview.reputationAndCommunity;
-    const reputationValues = ["excellent", "good", "fair", "poor"];
-
-    if (onlineReputationConsistency && !reputationValues.includes(onlineReputationConsistency)) {
-      errors.push("Invalid onlineReputationConsistency value");
-    }
-    if (wordOfMouthReputation && !reputationValues.includes(wordOfMouthReputation)) {
-      errors.push("Invalid wordOfMouthReputation value");
-    }
-    if (communityInvolvement && !["high", "moderate", "low", "none"].includes(communityInvolvement)) {
-      errors.push("Invalid communityInvolvement value");
-    }
-    if (socialMediaPresence && !["excellent", "good", "fair", "poor", "none"].includes(socialMediaPresence)) {
-      errors.push("Invalid socialMediaPresence value");
+    if (veterinarianExperience && !["novice", "experienced", "expert"].includes(veterinarianExperience)) {
+      errors.push("Invalid veterinarianExperience value");
     }
   }
 
@@ -678,8 +623,6 @@ exports.addReview = async (req, res) => {
     if (animalShelterReview) {
       // Clean the animal shelter review data (remove empty strings to avoid enum validation errors)
       cleanedAnimalShelterReview = cleanAnimalShelterReview(animalShelterReview);
-      console.log("Original animalShelterReview:", animalShelterReview);
-      console.log("Cleaned animalShelterReview:", cleanedAnimalShelterReview);
 
       // Validate the cleaned data
       if (cleanedAnimalShelterReview && Object.keys(cleanedAnimalShelterReview).length > 0) {
@@ -752,7 +695,8 @@ exports.addReview = async (req, res) => {
           opening_hours: placeData.opening_hours || "",
           description: placeData.description || "",
           tags: placeData.tags || [],
-          addedBy: userId,
+          addedBy: null, // Don't set addedBy for auto-created places
+          creationSource: "review_auto_created",
         });
 
         console.log("New place created successfully:", newPlace);
@@ -760,8 +704,8 @@ exports.addReview = async (req, res) => {
       }
     }
 
-    // Create the review with the correct MongoDB user ID
-    const review = await Review.create({
+    // Log the review data being saved
+    const reviewData = {
       userId: userId, // Use MongoDB user ID from request body
       placeId: finalPlaceId,
       rating,
@@ -772,7 +716,10 @@ exports.addReview = async (req, res) => {
       vetClinicReview: cleanedVetClinicReview, // Use cleaned vet clinic data
       petStoreReview: cleanedPetStoreReview, // Use cleaned pet store data
       animalShelterReview: cleanedAnimalShelterReview, // Use cleaned animal shelter data
-    });
+    };
+
+    // Create the review with the correct MongoDB user ID
+    const review = await Review.create(reviewData);
 
     // Populate user information for response
     await review.populate("userId", "name email profileImage");
@@ -864,14 +811,10 @@ exports.addReview = async (req, res) => {
 exports.getReviewsForPlace = async (req, res) => {
   try {
     const { placeId } = req.params;
-    console.log("Fetching reviews for place:", placeId);
-
     // First, get reviews without population to see if they exist
     const reviewsRaw = await Review.find({ placeId });
-    console.log(`Found ${reviewsRaw.length} reviews for place ${placeId}`);
 
     if (reviewsRaw.length === 0) {
-      console.log("No reviews found, returning empty array");
       return res.json([]);
     }
 
@@ -896,11 +839,10 @@ exports.getReviewsForPlace = async (req, res) => {
       return true;
     });
 
-    console.log(`Returning ${validReviews.length} valid reviews`);
     res.json(validReviews);
   } catch (err) {
-    console.error("Error fetching reviews:", err);
-    console.error("Error stack:", err.stack);
+    console.error("🔍 BACKEND: Error fetching reviews:", err);
+    console.error("🔍 BACKEND: Error stack:", err.stack);
     res.status(500).json({ error: err.message });
   }
 };
@@ -1182,88 +1124,84 @@ exports.getVetClinicReviewStats = async (req, res) => {
     const totalReviews = reviews.length;
     const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
 
-    // Calculate category-specific statistics
+    // Calculate category-specific statistics - UPDATED FOR NEW 7-CATEGORY STRUCTURE
     const categoryStats = {
+      // 1. Access & Location
+      accessAndLocation: {
+        parkingDifficulty: {},
+        publicTransportAccess: { true: 0, false: 0 },
+      },
+      // 2. Hours of Operation
+      hoursOfOperation: {
+        is24Hours: { true: 0, false: 0 },
+        specificHours: {},
+      },
+      // 3. Clinic Environment & Facilities
       clinicEnvironmentAndFacilities: {
         cleanliness: {},
-        comfortLevel: {},
         facilitySize: {},
       },
+      // 4. Cost & Transparency
       costAndTransparency: {
-        routineCheckupCost: {},
-        vaccinationCost: {},
-        spayNeuterCost: {},
-        dentalCleaningCost: {},
-        emergencyVisitCost: {},
+        cost: {},
         feesExplainedUpfront: { true: 0, false: 0 },
-        printedEstimatesAvailable: { true: 0, false: 0 },
         insuranceAccepted: { true: 0, false: 0 },
-        paymentPlansOffered: { true: 0, false: 0 },
       },
-      medicalStaffAndServices: {
-        veterinarianAttitude: {},
-        veterinarianCompetence: {},
-        technicianNursePerformance: {},
+      // 5. Services & Specializations
+      servicesAndSpecializations: {
         onSiteDiagnostics: {},
-        surgeryOrthopedics: { true: 0, false: 0 },
-        behavioralCounseling: { true: 0, false: 0 },
-        nutritionConsultation: { true: 0, false: 0 },
+        surgeryCapabilities: {},
+        specializations: {},
       },
-      schedulingAndCommunication: {
-        responseTime: {},
-        appointmentWaitTime: {},
-        inClinicWaitingTime: {},
-        followUpCommunication: {},
-      },
+      // 6. Emergency & After-Hours Care
       emergencyAndAfterHours: {
         openWeekends: { true: 0, false: 0 },
         openEvenings: { true: 0, false: 0 },
         onCallEmergencyNumber: { true: 0, false: 0 },
-        connectedToEmergencyHospitals: { true: 0, false: 0 },
-        clearHandoffsToSpecialists: { true: 0, false: 0 },
         emergencyTriageSpeed: {},
-        crisisHandlingConfidence: {},
       },
-      emergencyExperiences: {
-        totalExperiences: 0,
-        situationTypes: {},
-        outcomes: {},
-      },
-      ownerInvolvement: {
-        allowedDuringExams: {},
-        allowedDuringProcedures: {},
-        communicationDuringAnesthesia: {},
-        communicationDuringSurgery: {},
-        explainsProceduresWell: {},
-        involvesOwnerInDecisions: {},
-      },
-      reputationAndCommunity: {
-        onlineReputationConsistency: {},
-        wordOfMouthReputation: {},
-        communityInvolvement: {},
-        hostsVaccineClinic: {},
-        shelterPartnerships: {},
-        communityEvents: {},
-        educationalPrograms: {},
-        socialMediaPresence: {},
+      // 7. Staff & Service Quality
+      staffAndServiceQuality: {
+        staffFriendliness: {},
+        veterinarianExperience: {},
       },
     };
 
-    // Aggregate statistics from all reviews
+    // Aggregate statistics from all reviews - UPDATED FOR NEW 7-CATEGORY STRUCTURE
     reviews.forEach((review) => {
       if (review.vetClinicReview) {
         const { vetClinicReview } = review;
 
-        // 1. Clinic Environment & Facilities
+        // 1. Access & Location
+        if (vetClinicReview.accessAndLocation) {
+          const { parkingDifficulty, publicTransportAccess } = vetClinicReview.accessAndLocation;
+          if (parkingDifficulty) {
+            categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] =
+              (categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] || 0) + 1;
+          }
+          if (publicTransportAccess !== undefined) {
+            categoryStats.accessAndLocation.publicTransportAccess[publicTransportAccess]++;
+          }
+        }
+
+        // 2. Hours of Operation
+        if (vetClinicReview.hoursOfOperation) {
+          const { is24Hours, specificHours } = vetClinicReview.hoursOfOperation;
+          if (is24Hours !== undefined) {
+            categoryStats.hoursOfOperation.is24Hours[is24Hours]++;
+          }
+          if (specificHours) {
+            categoryStats.hoursOfOperation.specificHours[specificHours] =
+              (categoryStats.hoursOfOperation.specificHours[specificHours] || 0) + 1;
+          }
+        }
+
+        // 3. Clinic Environment & Facilities
         if (vetClinicReview.clinicEnvironmentAndFacilities) {
-          const { cleanliness, comfortLevel, facilitySize } = vetClinicReview.clinicEnvironmentAndFacilities;
+          const { cleanliness, facilitySize } = vetClinicReview.clinicEnvironmentAndFacilities;
           if (cleanliness) {
             categoryStats.clinicEnvironmentAndFacilities.cleanliness[cleanliness] =
               (categoryStats.clinicEnvironmentAndFacilities.cleanliness[cleanliness] || 0) + 1;
-          }
-          if (comfortLevel) {
-            categoryStats.clinicEnvironmentAndFacilities.comfortLevel[comfortLevel] =
-              (categoryStats.clinicEnvironmentAndFacilities.comfortLevel[comfortLevel] || 0) + 1;
           }
           if (facilitySize) {
             categoryStats.clinicEnvironmentAndFacilities.facilitySize[facilitySize] =
@@ -1273,45 +1211,18 @@ exports.getVetClinicReviewStats = async (req, res) => {
 
         // 2. Cost & Transparency
         if (vetClinicReview.costAndTransparency) {
-          const {
-            routineCheckupCost,
-            vaccinationCost,
-            spayNeuterCost,
-            dentalCleaningCost,
-            emergencyVisitCost,
-            feesExplainedUpfront,
-            printedEstimatesAvailable,
-            insuranceAccepted,
-            paymentPlansOffered,
-          } = vetClinicReview.costAndTransparency;
+          const { cost, feesExplainedUpfront, insuranceAccepted } = vetClinicReview.costAndTransparency;
 
-          if (routineCheckupCost) {
-            categoryStats.costAndTransparency.routineCheckupCost[routineCheckupCost] =
-              (categoryStats.costAndTransparency.routineCheckupCost[routineCheckupCost] || 0) + 1;
+          if (cost) {
+            categoryStats.costAndTransparency.cost[cost] =
+              (categoryStats.costAndTransparency.cost[cost] || 0) + 1;
           }
-          if (vaccinationCost) {
-            categoryStats.costAndTransparency.vaccinationCost[vaccinationCost] =
-              (categoryStats.costAndTransparency.vaccinationCost[vaccinationCost] || 0) + 1;
-          }
-          if (spayNeuterCost) {
-            categoryStats.costAndTransparency.spayNeuterCost[spayNeuterCost] =
-              (categoryStats.costAndTransparency.spayNeuterCost[spayNeuterCost] || 0) + 1;
-          }
-          if (dentalCleaningCost) {
-            categoryStats.costAndTransparency.dentalCleaningCost[dentalCleaningCost] =
-              (categoryStats.costAndTransparency.dentalCleaningCost[dentalCleaningCost] || 0) + 1;
-          }
-          if (emergencyVisitCost) {
-            categoryStats.costAndTransparency.emergencyVisitCost[emergencyVisitCost] =
-              (categoryStats.costAndTransparency.emergencyVisitCost[emergencyVisitCost] || 0) + 1;
-          }
-          if (feesExplainedUpfront !== undefined)
+          if (feesExplainedUpfront !== undefined) {
             categoryStats.costAndTransparency.feesExplainedUpfront[feesExplainedUpfront]++;
-          if (printedEstimatesAvailable !== undefined)
-            categoryStats.costAndTransparency.printedEstimatesAvailable[printedEstimatesAvailable]++;
-          if (insuranceAccepted !== undefined) categoryStats.costAndTransparency.insuranceAccepted[insuranceAccepted]++;
-          if (paymentPlansOffered !== undefined)
-            categoryStats.costAndTransparency.paymentPlansOffered[paymentPlansOffered]++;
+          }
+          if (insuranceAccepted !== undefined) {
+            categoryStats.costAndTransparency.insuranceAccepted[insuranceAccepted]++;
+          }
         }
 
         // 3. Medical Staff & Services
@@ -1352,106 +1263,61 @@ exports.getVetClinicReviewStats = async (req, res) => {
             categoryStats.medicalStaffAndServices.nutritionConsultation[nutritionConsultation]++;
         }
 
-        // 4. Scheduling & Communication
-        if (vetClinicReview.schedulingAndCommunication) {
-          const { responseTime, appointmentWaitTime, inClinicWaitingTime, followUpCommunication } =
-            vetClinicReview.schedulingAndCommunication;
-
-          if (responseTime) {
-            categoryStats.schedulingAndCommunication.responseTime[responseTime] =
-              (categoryStats.schedulingAndCommunication.responseTime[responseTime] || 0) + 1;
+        // 5. Services & Specializations
+        if (vetClinicReview.servicesAndSpecializations) {
+          const { onSiteDiagnostics, surgeryCapabilities, specializations } = vetClinicReview.servicesAndSpecializations;
+          
+          if (onSiteDiagnostics && Array.isArray(onSiteDiagnostics)) {
+            onSiteDiagnostics.forEach((diagnostic) => {
+              categoryStats.servicesAndSpecializations.onSiteDiagnostics[diagnostic] =
+                (categoryStats.servicesAndSpecializations.onSiteDiagnostics[diagnostic] || 0) + 1;
+            });
           }
-          if (appointmentWaitTime) {
-            categoryStats.schedulingAndCommunication.appointmentWaitTime[appointmentWaitTime] =
-              (categoryStats.schedulingAndCommunication.appointmentWaitTime[appointmentWaitTime] || 0) + 1;
+          if (surgeryCapabilities && Array.isArray(surgeryCapabilities)) {
+            surgeryCapabilities.forEach((surgery) => {
+              categoryStats.servicesAndSpecializations.surgeryCapabilities[surgery] =
+                (categoryStats.servicesAndSpecializations.surgeryCapabilities[surgery] || 0) + 1;
+            });
           }
-          if (inClinicWaitingTime) {
-            categoryStats.schedulingAndCommunication.inClinicWaitingTime[inClinicWaitingTime] =
-              (categoryStats.schedulingAndCommunication.inClinicWaitingTime[inClinicWaitingTime] || 0) + 1;
-          }
-          if (followUpCommunication) {
-            categoryStats.schedulingAndCommunication.followUpCommunication[followUpCommunication] =
-              (categoryStats.schedulingAndCommunication.followUpCommunication[followUpCommunication] || 0) + 1;
+          if (specializations && Array.isArray(specializations)) {
+            specializations.forEach((specialization) => {
+              categoryStats.servicesAndSpecializations.specializations[specialization] =
+                (categoryStats.servicesAndSpecializations.specializations[specialization] || 0) + 1;
+            });
           }
         }
 
-        // 5. Emergency & After-Hours Care
+        // 6. Emergency & After-Hours Care
         if (vetClinicReview.emergencyAndAfterHours) {
-          const {
-            openWeekends,
-            openEvenings,
-            onCallEmergencyNumber,
-            connectedToEmergencyHospitals,
-            clearHandoffsToSpecialists,
-            emergencyTriageSpeed,
-            crisisHandlingConfidence,
-          } = vetClinicReview.emergencyAndAfterHours;
+          const { openWeekends, openEvenings, onCallEmergencyNumber, emergencyTriageSpeed } = 
+            vetClinicReview.emergencyAndAfterHours;
 
-          if (openWeekends !== undefined) categoryStats.emergencyAndAfterHours.openWeekends[openWeekends]++;
-          if (openEvenings !== undefined) categoryStats.emergencyAndAfterHours.openEvenings[openEvenings]++;
-          if (onCallEmergencyNumber !== undefined)
+          if (openWeekends !== undefined) {
+            categoryStats.emergencyAndAfterHours.openWeekends[openWeekends]++;
+          }
+          if (openEvenings !== undefined) {
+            categoryStats.emergencyAndAfterHours.openEvenings[openEvenings]++;
+          }
+          if (onCallEmergencyNumber !== undefined) {
             categoryStats.emergencyAndAfterHours.onCallEmergencyNumber[onCallEmergencyNumber]++;
-          if (connectedToEmergencyHospitals !== undefined)
-            categoryStats.emergencyAndAfterHours.connectedToEmergencyHospitals[connectedToEmergencyHospitals]++;
-          if (clearHandoffsToSpecialists !== undefined)
-            categoryStats.emergencyAndAfterHours.clearHandoffsToSpecialists[clearHandoffsToSpecialists]++;
-
+          }
           if (emergencyTriageSpeed) {
             categoryStats.emergencyAndAfterHours.emergencyTriageSpeed[emergencyTriageSpeed] =
               (categoryStats.emergencyAndAfterHours.emergencyTriageSpeed[emergencyTriageSpeed] || 0) + 1;
           }
-          if (crisisHandlingConfidence) {
-            categoryStats.emergencyAndAfterHours.crisisHandlingConfidence[crisisHandlingConfidence] =
-              (categoryStats.emergencyAndAfterHours.crisisHandlingConfidence[crisisHandlingConfidence] || 0) + 1;
-          }
         }
 
-        // Emergency Experiences
-        if (vetClinicReview.emergencyExperiences && Array.isArray(vetClinicReview.emergencyExperiences)) {
-          categoryStats.emergencyExperiences.totalExperiences += vetClinicReview.emergencyExperiences.length;
-
-          vetClinicReview.emergencyExperiences.forEach((experience) => {
-            if (experience.situationType) {
-              categoryStats.emergencyExperiences.situationTypes[experience.situationType] =
-                (categoryStats.emergencyExperiences.situationTypes[experience.situationType] || 0) + 1;
-            }
-            if (experience.outcome) {
-              categoryStats.emergencyExperiences.outcomes[experience.outcome] =
-                (categoryStats.emergencyExperiences.outcomes[experience.outcome] || 0) + 1;
-            }
-          });
-        }
-
-        // Owner Involvement
-        if (vetClinicReview.ownerInvolvement) {
-          const { communicationDuringAnesthesia, communicationDuringSurgery } = vetClinicReview.ownerInvolvement;
-          const communicationValues = ["excellent", "good", "fair", "poor"];
-
-          if (communicationDuringAnesthesia && !communicationValues.includes(communicationDuringAnesthesia)) {
-            errors.push("Invalid communicationDuringAnesthesia value");
+        // 7. Staff & Service Quality
+        if (vetClinicReview.staffAndServiceQuality) {
+          const { staffFriendliness, veterinarianExperience } = vetClinicReview.staffAndServiceQuality;
+          
+          if (staffFriendliness) {
+            categoryStats.staffAndServiceQuality.staffFriendliness[staffFriendliness] =
+              (categoryStats.staffAndServiceQuality.staffFriendliness[staffFriendliness] || 0) + 1;
           }
-          if (communicationDuringSurgery && !communicationValues.includes(communicationDuringSurgery)) {
-            errors.push("Invalid communicationDuringSurgery value");
-          }
-        }
-
-        // Reputation & Community
-        if (vetClinicReview.reputationAndCommunity) {
-          const { onlineReputationConsistency, wordOfMouthReputation, communityInvolvement, socialMediaPresence } =
-            vetClinicReview.reputationAndCommunity;
-          const reputationValues = ["excellent", "good", "fair", "poor"];
-
-          if (onlineReputationConsistency && !reputationValues.includes(onlineReputationConsistency)) {
-            errors.push("Invalid onlineReputationConsistency value");
-          }
-          if (wordOfMouthReputation && !reputationValues.includes(wordOfMouthReputation)) {
-            errors.push("Invalid wordOfMouthReputation value");
-          }
-          if (communityInvolvement && !["high", "moderate", "low", "none"].includes(communityInvolvement)) {
-            errors.push("Invalid communityInvolvement value");
-          }
-          if (socialMediaPresence && !["excellent", "good", "fair", "poor", "none"].includes(socialMediaPresence)) {
-            errors.push("Invalid socialMediaPresence value");
+          if (veterinarianExperience) {
+            categoryStats.staffAndServiceQuality.veterinarianExperience[veterinarianExperience] =
+              (categoryStats.staffAndServiceQuality.veterinarianExperience[veterinarianExperience] || 0) + 1;
           }
         }
       }

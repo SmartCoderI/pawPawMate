@@ -82,9 +82,11 @@ exports.createPlace = async (req, res) => {
     // If a userId is provided in the request body, use it (for logged-in users)
     if (req.body.userId) {
       placeData.addedBy = req.body.userId;
+      placeData.creationSource = "user_created";
       console.log('Added user to place data:', req.body.userId);
     } else {
       console.log('No user specified - creating place without user association');
+      placeData.creationSource = "user_created"; // Still user created, just anonymous
     }
     
     console.log('Creating place with validated data:', placeData);
@@ -141,11 +143,22 @@ exports.deletePlace = async (req, res) => {
       return res.status(404).json({ error: "Place not found" });
     }
     
-    // Check if the user is the creator of the place
+    // Check if the place was user-created and user is the creator
+    if (place.creationSource !== "user_created") {
+      console.log('Cannot delete non-user-created place:', {
+        placeId: placeId,
+        creationSource: place.creationSource
+      });
+      return res.status(403).json({ 
+        error: "This place cannot be deleted because it was not created by a user." 
+      });
+    }
+    
     if (!place.addedBy || place.addedBy.toString() !== userId) {
       console.log('Unauthorized delete attempt:', {
         placeCreator: place.addedBy,
-        requestingUser: userId
+        requestingUser: userId,
+        creationSource: place.creationSource
       });
       return res.status(403).json({ 
         error: "You are not authorized to delete this place. Only the creator can delete it." 

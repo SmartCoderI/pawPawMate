@@ -212,63 +212,37 @@ const PlaceDetails = () => {
       },
     },
     vetClinicReview: {
+      accessAndLocation: {
+        parkingDifficulty: "",
+        publicTransportAccess: false,
+      },
+      hoursOfOperation: {
+        is24Hours: false,
+        specificHours: "",
+      },
       clinicEnvironmentAndFacilities: {
         cleanliness: "",
-        comfortLevel: "",
         facilitySize: "",
       },
       costAndTransparency: {
-        routineCheckupCost: "",
-        vaccinationCost: "",
-        spayNeuterCost: "",
-        dentalCleaningCost: "",
-        emergencyVisitCost: "",
+        cost: "",
         feesExplainedUpfront: false,
-        printedEstimatesAvailable: false,
         insuranceAccepted: false,
-        paymentPlansOffered: false,
       },
-      medicalStaffAndServices: {
-        veterinarianAttitude: "",
-        veterinarianCompetence: "",
-        technicianNursePerformance: "",
+      servicesAndSpecializations: {
         onSiteDiagnostics: [],
-        surgeryOrthopedics: false,
-        behavioralCounseling: false,
-        nutritionConsultation: false,
-      },
-      schedulingAndCommunication: {
-        responseTime: "",
-        appointmentWaitTime: "",
-        inClinicWaitingTime: "",
-        followUpCommunication: "",
+        surgeryCapabilities: [],
+        specializations: [],
       },
       emergencyAndAfterHours: {
         openWeekends: false,
         openEvenings: false,
         onCallEmergencyNumber: false,
-        connectedToEmergencyHospitals: false,
-        clearHandoffsToSpecialists: false,
         emergencyTriageSpeed: "",
-        crisisHandlingConfidence: "",
       },
-      ownerInvolvement: {
-        allowedDuringExams: false,
-        allowedDuringProcedures: false,
-        communicationDuringAnesthesia: "",
-        communicationDuringSurgery: "",
-        explainsProceduresWell: false,
-        involvesOwnerInDecisions: false,
-      },
-      reputationAndCommunity: {
-        onlineReputationConsistency: "",
-        wordOfMouthReputation: "",
-        communityInvolvement: "",
-        hostsVaccineClinic: false,
-        shelterPartnerships: false,
-        communityEvents: false,
-        educationalPrograms: false,
-        socialMediaPresence: "",
+      staffAndServiceQuality: {
+        staffFriendliness: "",
+        veterinarianExperience: "",
       },
     },
     petStoreReview: {
@@ -319,42 +293,28 @@ const PlaceDetails = () => {
     animalShelterReview: {
       accessAndLocation: {
         parkingDifficulty: "",
-        handicapFriendly: false,
-        parkingToParkDistance: "",
       },
       hoursOfOperation: {
         is24Hours: false,
-        dawnToDusk: false,
         specificHours: "",
       },
       animalTypeSelection: {
         availableAnimalTypes: [],
         breedVariety: "",
-        ageRange: [],
       },
       animalCareAndWelfare: {
         animalHealth: "",
         livingConditions: "",
-        exercisePrograms: false,
-        medicalCare: "",
-        behavioralAssessment: false,
-        specialNeedsCare: false,
       },
       adoptionProcessAndSupport: {
         applicationProcess: "",
         processingTime: "",
         homeVisitRequired: false,
-        adoptionFees: "",
-        postAdoptionSupport: false,
-        returnPolicy: "",
       },
       staffAndVolunteerQuality: {
         staffKnowledge: "",
-        animalHandling: "",
         customerService: "",
         volunteerProgram: false,
-        staffTraining: false,
-        compassionLevel: "",
       },
     },
   });
@@ -447,8 +407,7 @@ const PlaceDetails = () => {
     const loadPlaceData = async () => {
       try {
         setLoading(true);
-        console.log("Loading place data for ID:", id);
-        console.log("Location state:", location.state);
+        
 
         // Check if this is an OSM-based ID OR a numeric OSM node ID
         if (id.startsWith("osm-") || /^\d+$/.test(id)) {
@@ -482,27 +441,13 @@ const PlaceDetails = () => {
             // First, try to find if this place already exists in database by coordinates
             let existingPlace = null;
             try {
-              console.log("Checking if place exists in database by coordinates:", {
-                lat: osmLocation.latitude,
-                lng: osmLocation.longitude,
-              });
+              
 
               // Try to find place by coordinates (within ~100 meters)
               const places = await placeAPI.getAllPlaces();
               const tolerance = 0.001; // roughly 100 meters
 
-              console.log("Searching for existing places. OSM location coords:", {
-                lat: osmLocation.latitude,
-                lng: osmLocation.longitude,
-              });
-              console.log(
-                "Database places:",
-                places.map((p) => ({
-                  id: p._id,
-                  name: p.name,
-                  coords: p.coordinates,
-                }))
-              );
+
 
               existingPlace = places.find((p) => {
                 if (!p.coordinates) return false;
@@ -510,30 +455,18 @@ const PlaceDetails = () => {
                 const lngDiff = Math.abs(p.coordinates.lng - osmLocation.longitude);
                 const matches = latDiff < tolerance && lngDiff < tolerance;
 
-                console.log("Comparing with place:", {
-                  id: p._id,
-                  name: p.name,
-                  dbCoords: p.coordinates,
-                  osmCoords: { lat: osmLocation.latitude, lng: osmLocation.longitude },
-                  latDiff,
-                  lngDiff,
-                  tolerance,
-                  matches,
-                });
+
 
                 return matches;
               });
 
               if (existingPlace) {
-                console.log("Found existing place in database:", existingPlace);
                 // Redirect to the existing place instead of treating as OSM
                 navigate(`/place/${existingPlace._id}`, { replace: true });
                 return;
-              } else {
-                console.log("No existing place found - will treat as new OSM location");
               }
             } catch (coordError) {
-              console.log("Could not search for existing place by coordinates:", coordError);
+
             }
 
             // Create enhanced place object from OSM data
@@ -848,7 +781,7 @@ const PlaceDetails = () => {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    console.log("🔄 Starting review submission...");
+    
 
     // Check if user is logged in
     if (!mongoUser || !firebaseUser) {
@@ -858,9 +791,7 @@ const PlaceDetails = () => {
     }
 
     // First, upload images if any
-    console.log("📷 Uploading images...");
-    const imageUrls = await uploadImages();
-    console.log("✅ Images uploaded:", imageUrls);
+            const imageUrls = await uploadImages();
 
     // Check if this is an OSM location that needs to be saved first
     if (id.startsWith("osm-") || /^\d+$/.test(id)) {
@@ -926,9 +857,9 @@ const PlaceDetails = () => {
           reviewData.animalShelterReview = reviewForm.animalShelterReview;
         }
 
-        console.log("Submitting review with place auto-creation:", reviewData);
+
         const createdReview = await reviewAPI.createReview(reviewData);
-        console.log("Review created successfully (place auto-created or found):", createdReview);
+        
 
         // Extract the place ID from the review response
         const actualPlaceId = createdReview.placeId;
@@ -1248,7 +1179,12 @@ const PlaceDetails = () => {
       return "option-tag gray"; // Default gray for no data
     }
 
-    const count = tagCounts[category][field][value] || 0;
+    // Try both the value directly and string version for booleans
+    let count = tagCounts[category][field][value] || 0;
+    if (typeof value === 'boolean') {
+      count = count || tagCounts[category][field][String(value)] || 0;
+    }
+    
     const totalReviews = reviews.length;
     const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
 
@@ -1391,118 +1327,228 @@ const PlaceDetails = () => {
     ));
   };
 
-  // Analyze vet clinic review tags
+  // Analyze vet clinic review tags - BACKEND ALIGNED
   const analyzeVetReviewTags = () => {
+    const vetReviews = reviews.filter(r => r.vetClinicReview).map(r => r.vetClinicReview);
     const tagCounts = {
+      accessAndLocation: {
+        parkingDifficulty: { easy: 0, moderate: 0, difficult: 0, Easy: 0, Moderate: 0, Difficult: 0 },
+        publicTransportAccess: { true: 0, false: 0, "true": 0, "false": 0 },
+      },
+      hoursOfOperation: {
+        is24Hours: { true: 0, false: 0, "true": 0, "false": 0 },
+      },
       clinicEnvironmentAndFacilities: {
         cleanliness: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        comfortLevel: { very_comfortable: 0, comfortable: 0, neutral: 0, uncomfortable: 0 },
         facilitySize: { small: 0, medium: 0, large: 0 },
       },
       costAndTransparency: {
-        routineCheckupCost: { low: 0, moderate: 0, high: 0, very_high: 0 },
-        vaccinationCost: { low: 0, moderate: 0, high: 0, very_high: 0 },
-        spayNeuterCost: { low: 0, moderate: 0, high: 0, very_high: 0 },
-        feesExplainedUpfront: { true: 0, false: 0 },
-        printedEstimatesAvailable: { true: 0, false: 0 },
-        insuranceAccepted: { true: 0, false: 0 },
+        cost: { low: 0, moderate: 0, high: 0, very_high: 0 },
+        feesExplainedUpfront: { true: 0, false: 0, "true": 0, "false": 0 },
+        insuranceAccepted: { true: 0, false: 0, "true": 0, "false": 0 },
       },
-      medicalStaffAndServices: {
-        veterinarianAttitude: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        veterinarianCompetence: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        technicianNursePerformance: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        surgeryOrthopedics: { true: 0, false: 0 },
-        behavioralCounseling: { true: 0, false: 0 },
-      },
-      schedulingAndCommunication: {
-        responseTime: { immediate: 0, same_day: 0, next_day: 0, several_days: 0 },
-        appointmentWaitTime: { same_day: 0, within_week: 0, "1_2_weeks": 0, over_2_weeks: 0 },
-        inClinicWaitingTime: { under_15_min: 0, "15_30_min": 0, "30_60_min": 0, over_1_hour: 0 },
-        followUpCommunication: { excellent: 0, good: 0, fair: 0, poor: 0 },
+      servicesAndSpecializations: {
+        onSiteDiagnostics: { xray: 0, ultrasound: 0, bloodwork: 0, ecg: 0, none: 0 },
+        surgeryCapabilities: { routine_spay_neuter: 0, orthopedic: 0, emergency: 0, dental: 0, none: 0 },
+        specializations: { cardiology: 0, dermatology: 0, oncology: 0, behavior: 0, exotic_animals: 0, none: 0 },
       },
       emergencyAndAfterHours: {
-        openWeekends: { true: 0, false: 0 },
-        openEvenings: { true: 0, false: 0 },
-        onCallEmergencyNumber: { true: 0, false: 0 },
-
-        connectedToEmergencyHospitals: { true: 0, false: 0 },
-        clearHandoffsToSpecialists: { true: 0, false: 0 },
-
+        openWeekends: { true: 0, false: 0, "true": 0, "false": 0 },
+        openEvenings: { true: 0, false: 0, "true": 0, "false": 0 },
+        onCallEmergencyNumber: { true: 0, false: 0, "true": 0, "false": 0 },
         emergencyTriageSpeed: { immediate: 0, within_30_min: 0, within_1_hour: 0, over_1_hour: 0 },
-        crisisHandlingConfidence: { excellent: 0, good: 0, fair: 0, poor: 0 },
       },
-      ownerInvolvement: {
-        allowedDuringExams: { true: 0, false: 0 },
-        allowedDuringProcedures: { true: 0, false: 0 },
-        communicationDuringAnesthesia: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        explainsProceduresWell: { true: 0, false: 0 },
-        involvesOwnerInDecisions: { true: 0, false: 0 },
-      },
-      reputationAndCommunity: {
-        onlineReputationConsistency: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        wordOfMouthReputation: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        communityInvolvement: { high: 0, moderate: 0, low: 0, none: 0 },
-        hostsVaccineClinic: { true: 0, false: 0 },
-        shelterPartnerships: { true: 0, false: 0 },
-        communityEvents: { true: 0, false: 0 },
+      staffAndServiceQuality: {
+        staffFriendliness: { excellent: 0, good: 0, fair: 0, poor: 0, Excellent: 0, Good: 0, Fair: 0, Poor: 0 },
+        veterinarianExperience: { novice: 0, experienced: 0, expert: 0 },
       },
     };
 
     // Count occurrences from all reviews
-    reviews.forEach((review) => {
+    reviews.forEach((review, index) => {
       if (review.vetClinicReview) {
         const vcReview = review.vetClinicReview;
 
-        // Clinic Environment & Facilities
-        if (vcReview.clinicEnvironmentAndFacilities) {
-          const cef = vcReview.clinicEnvironmentAndFacilities;
-          if (cef.cleanliness) tagCounts.clinicEnvironmentAndFacilities.cleanliness[cef.cleanliness]++;
-          if (cef.comfortLevel) tagCounts.clinicEnvironmentAndFacilities.comfortLevel[cef.comfortLevel]++;
-          if (cef.facilitySize) tagCounts.clinicEnvironmentAndFacilities.facilitySize[cef.facilitySize]++;
+        // Handle BOTH old and new schema
+        // NEW SCHEMA: Access & Location
+        if (vcReview.accessAndLocation) {
+          const al = vcReview.accessAndLocation;
+          if (al.parkingDifficulty && tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty] !== undefined) {
+            tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty]++;
+          }
+          if (al.publicTransportAccess !== undefined) {
+            tagCounts.accessAndLocation.publicTransportAccess[al.publicTransportAccess]++;
+          }
+        }
+        
+        // OLD SCHEMA: Try to map from old fields
+        if (vcReview.environmentAndFacilities) {
+          // Map wheelchair accessible to public transport access
+          if (vcReview.environmentAndFacilities.wheelchairAccessible !== undefined) {
+            tagCounts.accessAndLocation.publicTransportAccess[vcReview.environmentAndFacilities.wheelchairAccessible]++;
+          }
+          // Map parking availability to parking difficulty
+          if (vcReview.environmentAndFacilities.parkingAvailability) {
+            const parkingMap = {
+              'excellent': 'easy',
+              'good': 'easy',
+              'limited': 'moderate',
+              'poor': 'difficult'
+            };
+            const mapped = parkingMap[vcReview.environmentAndFacilities.parkingAvailability];
+            if (mapped && tagCounts.accessAndLocation.parkingDifficulty[mapped] !== undefined) {
+              tagCounts.accessAndLocation.parkingDifficulty[mapped]++;
+            }
+          }
         }
 
-        // Cost & Transparency
+        // NEW SCHEMA: Hours of Operation
+        if (vcReview.hoursOfOperation) {
+          const ho = vcReview.hoursOfOperation;
+          if (ho.is24Hours !== undefined) {
+            tagCounts.hoursOfOperation.is24Hours[ho.is24Hours]++;
+          }
+        }
+        
+        // OLD SCHEMA: Map from schedulingAndCommunication
+        if (vcReview.schedulingAndCommunication) {
+          // Map 24/7 availability to is24Hours
+          if (vcReview.schedulingAndCommunication.availability24_7 !== undefined) {
+            tagCounts.hoursOfOperation.is24Hours[vcReview.schedulingAndCommunication.availability24_7]++;
+          }
+        }
+
+        // NEW SCHEMA: Services & Specializations
+        if (vcReview.servicesAndSpecializations) {
+          const ss = vcReview.servicesAndSpecializations;
+          
+          // Handle onSiteDiagnostics as an array (matching backend)
+          if (ss.onSiteDiagnostics && Array.isArray(ss.onSiteDiagnostics)) {
+            ss.onSiteDiagnostics.forEach(diag => {
+              if (tagCounts.servicesAndSpecializations.onSiteDiagnostics[diag] !== undefined) {
+                tagCounts.servicesAndSpecializations.onSiteDiagnostics[diag]++;
+              }
+            });
+          }
+          
+          // Handle surgery capabilities and specializations as arrays
+          if (ss.surgeryCapabilities && Array.isArray(ss.surgeryCapabilities)) {
+            ss.surgeryCapabilities.forEach(surgery => {
+              if (tagCounts.servicesAndSpecializations.surgeryCapabilities[surgery] !== undefined) {
+                tagCounts.servicesAndSpecializations.surgeryCapabilities[surgery]++;
+              }
+            });
+          }
+          if (ss.specializations && Array.isArray(ss.specializations)) {
+            ss.specializations.forEach(spec => {
+              if (tagCounts.servicesAndSpecializations.specializations[spec] !== undefined) {
+                tagCounts.servicesAndSpecializations.specializations[spec]++;
+              }
+            });
+          }
+        }
+        
+        // OLD SCHEMA: Map from medicalStaffAndServices
+        if (vcReview.medicalStaffAndServices) {
+          const mss = vcReview.medicalStaffAndServices;
+          // Map diagnostic equipment to onSiteDiagnostics
+          if (mss.diagnosticEquipment) {
+            const diagnosticMap = {
+              'xray_available': ['xray'],
+              'ultrasound_available': ['ultrasound'],
+              'full_lab': ['bloodwork', 'xray', 'ultrasound'],
+              'basic_lab': ['bloodwork'],
+              'limited_equipment': []
+            };
+            const diags = diagnosticMap[mss.diagnosticEquipment] || [];
+            diags.forEach(diag => {
+              if (tagCounts.servicesAndSpecializations.onSiteDiagnostics[diag] !== undefined) {
+                tagCounts.servicesAndSpecializations.onSiteDiagnostics[diag]++;
+              }
+            });
+          }
+        }
+
+        // NEW SCHEMA: Staff & Service Quality
+        if (vcReview.staffAndServiceQuality) {
+          const ssq = vcReview.staffAndServiceQuality;
+          if (ssq.staffFriendliness && tagCounts.staffAndServiceQuality.staffFriendliness[ssq.staffFriendliness] !== undefined) {
+            tagCounts.staffAndServiceQuality.staffFriendliness[ssq.staffFriendliness]++;
+          }
+          if (ssq.veterinarianExperience && tagCounts.staffAndServiceQuality.veterinarianExperience[ssq.veterinarianExperience] !== undefined) {
+            tagCounts.staffAndServiceQuality.veterinarianExperience[ssq.veterinarianExperience]++;
+          }
+        }
+        
+        // OLD SCHEMA: Map from medicalStaffAndServices
+        if (vcReview.medicalStaffAndServices) {
+          const mss = vcReview.medicalStaffAndServices;
+          // Map staff courtesy to staff friendliness
+          if (mss.staffCourtesy) {
+            if (tagCounts.staffAndServiceQuality.staffFriendliness[mss.staffCourtesy] !== undefined) {
+              tagCounts.staffAndServiceQuality.staffFriendliness[mss.staffCourtesy]++;
+            }
+          }
+          // Map veterinarian competence to experience
+          if (mss.veterinarianCompetence) {
+            const expMap = {
+              'excellent': 'expert',
+              'good': 'experienced',
+              'fair': 'experienced',
+              'poor': 'novice'
+            };
+            const mapped = expMap[mss.veterinarianCompetence];
+            if (mapped && tagCounts.staffAndServiceQuality.veterinarianExperience[mapped] !== undefined) {
+              tagCounts.staffAndServiceQuality.veterinarianExperience[mapped]++;
+            }
+          }
+        }
+
+        // NEW SCHEMA: Clinic Environment & Facilities
+        if (vcReview.clinicEnvironmentAndFacilities) {
+          const cef = vcReview.clinicEnvironmentAndFacilities;
+          if (cef.cleanliness && tagCounts.clinicEnvironmentAndFacilities.cleanliness[cef.cleanliness] !== undefined) {
+            tagCounts.clinicEnvironmentAndFacilities.cleanliness[cef.cleanliness]++;
+          }
+          if (cef.facilitySize && tagCounts.clinicEnvironmentAndFacilities.facilitySize[cef.facilitySize] !== undefined) {
+            tagCounts.clinicEnvironmentAndFacilities.facilitySize[cef.facilitySize]++;
+          }
+        }
+        
+        // OLD SCHEMA: Map from environmentAndFacilities
+        if (vcReview.environmentAndFacilities) {
+          const ef = vcReview.environmentAndFacilities;
+          if (ef.cleanliness && tagCounts.clinicEnvironmentAndFacilities.cleanliness[ef.cleanliness] !== undefined) {
+            tagCounts.clinicEnvironmentAndFacilities.cleanliness[ef.cleanliness]++;
+          }
+          // Map comfort level to facility size
+          if (ef.comfortLevel) {
+            const sizeMap = {
+              'excellent': 'large',
+              'good': 'medium',
+              'fair': 'medium',
+              'poor': 'small'
+            };
+            const mapped = sizeMap[ef.comfortLevel];
+            if (mapped && tagCounts.clinicEnvironmentAndFacilities.facilitySize[mapped] !== undefined) {
+              tagCounts.clinicEnvironmentAndFacilities.facilitySize[mapped]++;
+            }
+          }
+        }
+
+        // Cost & Transparency - UPDATED FOR NEW BACKEND STRUCTURE
         if (vcReview.costAndTransparency) {
           const ct = vcReview.costAndTransparency;
-          if (ct.routineCheckupCost) tagCounts.costAndTransparency.routineCheckupCost[ct.routineCheckupCost]++;
-          if (ct.vaccinationCost) tagCounts.costAndTransparency.vaccinationCost[ct.vaccinationCost]++;
-          if (ct.spayNeuterCost) tagCounts.costAndTransparency.spayNeuterCost[ct.spayNeuterCost]++;
+          if (ct.cost) tagCounts.costAndTransparency.cost[ct.cost]++;
           if (ct.feesExplainedUpfront !== undefined)
             tagCounts.costAndTransparency.feesExplainedUpfront[ct.feesExplainedUpfront]++;
-          if (ct.printedEstimatesAvailable !== undefined)
-            tagCounts.costAndTransparency.printedEstimatesAvailable[ct.printedEstimatesAvailable]++;
           if (ct.insuranceAccepted !== undefined)
             tagCounts.costAndTransparency.insuranceAccepted[ct.insuranceAccepted]++;
         }
 
-        // Medical Staff & Services
-        if (vcReview.medicalStaffAndServices) {
-          const mss = vcReview.medicalStaffAndServices;
-          if (mss.veterinarianAttitude)
-            tagCounts.medicalStaffAndServices.veterinarianAttitude[mss.veterinarianAttitude]++;
-          if (mss.veterinarianCompetence)
-            tagCounts.medicalStaffAndServices.veterinarianCompetence[mss.veterinarianCompetence]++;
-          if (mss.technicianNursePerformance)
-            tagCounts.medicalStaffAndServices.technicianNursePerformance[mss.technicianNursePerformance]++;
-          if (mss.surgeryOrthopedics !== undefined)
-            tagCounts.medicalStaffAndServices.surgeryOrthopedics[mss.surgeryOrthopedics]++;
-          if (mss.behavioralCounseling !== undefined)
-            tagCounts.medicalStaffAndServices.behavioralCounseling[mss.behavioralCounseling]++;
-        }
 
-        // Scheduling & Communication
-        if (vcReview.schedulingAndCommunication) {
-          const sc = vcReview.schedulingAndCommunication;
-          if (sc.responseTime) tagCounts.schedulingAndCommunication.responseTime[sc.responseTime]++;
-          if (sc.appointmentWaitTime)
-            tagCounts.schedulingAndCommunication.appointmentWaitTime[sc.appointmentWaitTime]++;
-          if (sc.inClinicWaitingTime)
-            tagCounts.schedulingAndCommunication.inClinicWaitingTime[sc.inClinicWaitingTime]++;
-          if (sc.followUpCommunication)
-            tagCounts.schedulingAndCommunication.followUpCommunication[sc.followUpCommunication]++;
-        }
 
-        // Emergency & After-Hours
+        // Emergency & After-Hours - UPDATED FOR NEW BACKEND STRUCTURE
         if (vcReview.emergencyAndAfterHours) {
           const eah = vcReview.emergencyAndAfterHours;
           if (eah.openWeekends !== undefined) tagCounts.emergencyAndAfterHours.openWeekends[eah.openWeekends]++;
@@ -1511,39 +1557,9 @@ const PlaceDetails = () => {
             tagCounts.emergencyAndAfterHours.onCallEmergencyNumber[eah.onCallEmergencyNumber]++;
           if (eah.emergencyTriageSpeed)
             tagCounts.emergencyAndAfterHours.emergencyTriageSpeed[eah.emergencyTriageSpeed]++;
-          if (eah.crisisHandlingConfidence)
-            tagCounts.emergencyAndAfterHours.crisisHandlingConfidence[eah.crisisHandlingConfidence]++;
         }
 
-        // Owner Involvement
-        if (vcReview.ownerInvolvement) {
-          const oi = vcReview.ownerInvolvement;
-          if (oi.allowedDuringExams !== undefined)
-            tagCounts.ownerInvolvement.allowedDuringExams[oi.allowedDuringExams]++;
-          if (oi.allowedDuringProcedures !== undefined)
-            tagCounts.ownerInvolvement.allowedDuringProcedures[oi.allowedDuringProcedures]++;
-          if (oi.communicationDuringAnesthesia)
-            tagCounts.ownerInvolvement.communicationDuringAnesthesia[oi.communicationDuringAnesthesia]++;
-          if (oi.explainsProceduresWell !== undefined)
-            tagCounts.ownerInvolvement.explainsProceduresWell[oi.explainsProceduresWell]++;
-          if (oi.involvesOwnerInDecisions !== undefined)
-            tagCounts.ownerInvolvement.involvesOwnerInDecisions[oi.involvesOwnerInDecisions]++;
-        }
 
-        // Reputation & Community
-        if (vcReview.reputationAndCommunity) {
-          const rc = vcReview.reputationAndCommunity;
-          if (rc.onlineReputationConsistency)
-            tagCounts.reputationAndCommunity.onlineReputationConsistency[rc.onlineReputationConsistency]++;
-          if (rc.wordOfMouthReputation)
-            tagCounts.reputationAndCommunity.wordOfMouthReputation[rc.wordOfMouthReputation]++;
-          if (rc.communityInvolvement) tagCounts.reputationAndCommunity.communityInvolvement[rc.communityInvolvement]++;
-          if (rc.hostsVaccineClinic !== undefined)
-            tagCounts.reputationAndCommunity.hostsVaccineClinic[rc.hostsVaccineClinic]++;
-          if (rc.shelterPartnerships !== undefined)
-            tagCounts.reputationAndCommunity.shelterPartnerships[rc.shelterPartnerships]++;
-          if (rc.communityEvents !== undefined) tagCounts.reputationAndCommunity.communityEvents[rc.communityEvents]++;
-        }
       }
     });
 
@@ -1553,6 +1569,39 @@ const PlaceDetails = () => {
   // Render smart vet clinic category tags
   const renderSmartVetCategoryTags = (category, tagCounts) => {
     const tagMappings = {
+      accessAndLocation: [
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "easy", label: "🚗 Easy Parking" },
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "moderate", label: "🚗 Moderate Parking" },
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "difficult", label: "🚗 Difficult Parking" },
+        { category: "accessAndLocation", field: "publicTransportAccess", value: true, label: "🚌 Public Transport Access" },
+      ],
+      hoursOfOperation: [
+        { category: "hoursOfOperation", field: "is24Hours", value: true, label: "🕐 24 Hours Open" },
+      ],
+      servicesAndSpecializations: [
+        { category: "servicesAndSpecializations", field: "onSiteDiagnostics", value: "xray", label: "🩻 X-ray Available" },
+        { category: "servicesAndSpecializations", field: "onSiteDiagnostics", value: "ultrasound", label: "📡 Ultrasound Available" },
+        { category: "servicesAndSpecializations", field: "onSiteDiagnostics", value: "bloodwork", label: "🩸 Bloodwork Available" },
+        { category: "servicesAndSpecializations", field: "onSiteDiagnostics", value: "ecg", label: "❤️ ECG Available" },
+        { category: "servicesAndSpecializations", field: "surgeryCapabilities", value: "routine_spay_neuter", label: "✂️ Routine Surgery" },
+        { category: "servicesAndSpecializations", field: "surgeryCapabilities", value: "orthopedic", label: "🦴 Orthopedic Surgery" },
+        { category: "servicesAndSpecializations", field: "surgeryCapabilities", value: "emergency", label: "🚨 Emergency Surgery" },
+        { category: "servicesAndSpecializations", field: "surgeryCapabilities", value: "dental", label: "🦷 Dental Surgery" },
+        { category: "servicesAndSpecializations", field: "specializations", value: "cardiology", label: "❤️ Cardiology" },
+        { category: "servicesAndSpecializations", field: "specializations", value: "dermatology", label: "🧴 Dermatology" },
+        { category: "servicesAndSpecializations", field: "specializations", value: "oncology", label: "🎗️ Oncology" },
+        { category: "servicesAndSpecializations", field: "specializations", value: "behavior", label: "🧠 Behavior" },
+        { category: "servicesAndSpecializations", field: "specializations", value: "exotic_animals", label: "🦎 Exotic Animals" },
+      ],
+      staffAndServiceQuality: [
+        { category: "staffAndServiceQuality", field: "staffFriendliness", value: "excellent", label: "😊 Excellent Staff" },
+        { category: "staffAndServiceQuality", field: "staffFriendliness", value: "good", label: "👍 Good Staff" },
+        { category: "staffAndServiceQuality", field: "staffFriendliness", value: "fair", label: "😐 Fair Staff" },
+        { category: "staffAndServiceQuality", field: "staffFriendliness", value: "poor", label: "😤 Poor Staff" },
+        { category: "staffAndServiceQuality", field: "veterinarianExperience", value: "expert", label: "🏆 Expert Vet" },
+        { category: "staffAndServiceQuality", field: "veterinarianExperience", value: "experienced", label: "👨‍⚕️ Experienced Vet" },
+        { category: "staffAndServiceQuality", field: "veterinarianExperience", value: "novice", label: "🆕 Novice Vet" },
+      ],
       clinicEnvironmentAndFacilities: [
         {
           category: "clinicEnvironmentAndFacilities",
@@ -1568,122 +1617,50 @@ const PlaceDetails = () => {
         },
         {
           category: "clinicEnvironmentAndFacilities",
-          field: "comfortLevel",
-          value: "very_comfortable",
-          label: "😌 Very Comfortable",
+          field: "cleanliness",
+          value: "fair",
+          label: "😐 Fair Cleanliness",
         },
         {
           category: "clinicEnvironmentAndFacilities",
-          field: "comfortLevel",
-          value: "comfortable",
-          label: "😊 Comfortable",
+          field: "cleanliness",
+          value: "poor",
+          label: "😰 Poor Cleanliness",
+        },
+        {
+          category: "clinicEnvironmentAndFacilities",
+          field: "facilitySize",
+          value: "small",
+          label: "🏠 Small Facility",
+        },
+        {
+          category: "clinicEnvironmentAndFacilities",
+          field: "facilitySize",
+          value: "medium",
+          label: "🏢 Medium Facility",
+        },
+        {
+          category: "clinicEnvironmentAndFacilities",
+          field: "facilitySize",
+          value: "large",
+          label: "🏨 Large Facility",
         },
       ],
       costAndTransparency: [
-        { category: "costAndTransparency", field: "routineCheckupCost", value: "low", label: "💰 Low Cost Checkups" },
-        { category: "costAndTransparency", field: "routineCheckupCost", value: "moderate", label: "💰 Moderate Cost" },
+        { category: "costAndTransparency", field: "cost", value: "low", label: "💵 Low Cost" },
+        { category: "costAndTransparency", field: "cost", value: "moderate", label: "💰 Moderate Cost" },
+        { category: "costAndTransparency", field: "cost", value: "high", label: "💸 High Cost" },
         { category: "costAndTransparency", field: "feesExplainedUpfront", value: true, label: "📋 Transparent Fees" },
         { category: "costAndTransparency", field: "insuranceAccepted", value: true, label: "🏥 Insurance Accepted" },
       ],
-      medicalStaffAndServices: [
-        {
-          category: "medicalStaffAndServices",
-          field: "veterinarianAttitude",
-          value: "excellent",
-          label: "👨‍⚕️ Excellent Vet",
-        },
-        {
-          category: "medicalStaffAndServices",
-          field: "veterinarianCompetence",
-          value: "excellent",
-          label: "🎯 Expert Care",
-        },
-        {
-          category: "medicalStaffAndServices",
-          field: "surgeryOrthopedics",
-          value: true,
-          label: "🔬 Surgery Available",
-        },
-        {
-          category: "medicalStaffAndServices",
-          field: "behavioralCounseling",
-          value: true,
-          label: "🧠 Behavioral Help",
-        },
-      ],
-      schedulingAndCommunication: [
-        {
-          category: "schedulingAndCommunication",
-          field: "responseTime",
-          value: "immediate",
-          label: "⚡ Immediate Response",
-        },
-        {
-          category: "schedulingAndCommunication",
-          field: "responseTime",
-          value: "same_day",
-          label: "📞 Same Day Response",
-        },
-        {
-          category: "schedulingAndCommunication",
-          field: "appointmentWaitTime",
-          value: "same_day",
-          label: "📅 Same Day Appointments",
-        },
-        {
-          category: "schedulingAndCommunication",
-          field: "followUpCommunication",
-          value: "excellent",
-          label: "📱 Excellent Follow-up",
-        },
-      ],
+
       emergencyAndAfterHours: [
-        { category: "emergencyAndAfterHours", field: "openWeekends", value: true, label: "🗓️ Weekend Hours" },
+        { category: "emergencyAndAfterHours", field: "openWeekends", value: true, label: "📅 Weekend Hours" },
         { category: "emergencyAndAfterHours", field: "openEvenings", value: true, label: "🌙 Evening Hours" },
-        {
-          category: "emergencyAndAfterHours",
-          field: "onCallEmergencyNumber",
-          value: true,
-          label: "🚨 Emergency On-Call",
-        },
-        {
-          category: "emergencyAndAfterHours",
-          field: "emergencyTriageSpeed",
-          value: "immediate",
-          label: "⚡ Fast Emergency Care",
-        },
-      ],
-      ownerInvolvement: [
-        { category: "ownerInvolvement", field: "allowedDuringExams", value: true, label: "👥 Owner During Exams" },
-        { category: "ownerInvolvement", field: "explainsProceduresWell", value: true, label: "📚 Clear Explanations" },
-        {
-          category: "ownerInvolvement",
-          field: "involvesOwnerInDecisions",
-          value: true,
-          label: "🤝 Collaborative Decisions",
-        },
-        {
-          category: "ownerInvolvement",
-          field: "communicationDuringAnesthesia",
-          value: "excellent",
-          label: "💬 Great Communication",
-        },
-      ],
-      reputationAndCommunity: [
-        {
-          category: "reputationAndCommunity",
-          field: "onlineReputationConsistency",
-          value: "excellent",
-          label: "⭐ Excellent Reputation",
-        },
-        {
-          category: "reputationAndCommunity",
-          field: "wordOfMouthReputation",
-          value: "excellent",
-          label: "🗣️ Great Word of Mouth",
-        },
-        { category: "reputationAndCommunity", field: "hostsVaccineClinic", value: true, label: "💉 Vaccine Clinics" },
-        { category: "reputationAndCommunity", field: "communityEvents", value: true, label: "🎉 Community Events" },
+        { category: "emergencyAndAfterHours", field: "onCallEmergencyNumber", value: true, label: "📱 Emergency On-Call" },
+        { category: "emergencyAndAfterHours", field: "emergencyTriageSpeed", value: "immediate", label: "⚡ Immediate Triage" },
+        { category: "emergencyAndAfterHours", field: "emergencyTriageSpeed", value: "within_30_min", label: "🚨 Fast Emergency Care" },
+        { category: "emergencyAndAfterHours", field: "emergencyTriageSpeed", value: "within_1_hour", label: "⏰ Quick Response" },
       ],
     };
 
@@ -1965,42 +1942,28 @@ const PlaceDetails = () => {
     const tagCounts = {
       accessAndLocation: {
         parkingDifficulty: { easy: 0, moderate: 0, difficult: 0 },
-        handicapFriendly: { true: 0, false: 0 },
-        parkingToParkDistance: { close: 0, moderate: 0, far: 0 },
       },
       hoursOfOperation: {
-        is24Hours: { true: 0, false: 0 },
-        dawnToDusk: { true: 0, false: 0 },
+        is24Hours: { true: 0, false: 0, "true": 0, "false": 0 },
         specificHours: {},
       },
       animalTypeSelection: {
         availableAnimalTypes: { dogs: 0, cats: 0, rabbits: 0, birds: 0, reptiles: 0, small_mammals: 0 },
         breedVariety: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        ageRange: { puppies_kittens: 0, young_adults: 0, adults: 0, seniors: 0 },
       },
       animalCareAndWelfare: {
         animalHealth: { excellent: 0, good: 0, fair: 0, poor: 0 },
         livingConditions: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        exercisePrograms: { true: 0, false: 0 },
-        medicalCare: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        behavioralAssessment: { true: 0, false: 0 },
-        specialNeedsCare: { true: 0, false: 0 },
       },
       adoptionProcessAndSupport: {
         applicationProcess: { easy: 0, moderate: 0, difficult: 0 },
         processingTime: { same_day: 0, within_week: 0, "1_2_weeks": 0, over_2_weeks: 0 },
-        homeVisitRequired: { true: 0, false: 0 },
-        adoptionFees: { low: 0, moderate: 0, high: 0, very_high: 0 },
-        postAdoptionSupport: { true: 0, false: 0 },
-        returnPolicy: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        homeVisitRequired: { true: 0, false: 0, "true": 0, "false": 0 },
       },
       staffAndVolunteerQuality: {
         staffKnowledge: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        animalHandling: { excellent: 0, good: 0, fair: 0, poor: 0 },
         customerService: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        volunteerProgram: { true: 0, false: 0 },
-        staffTraining: { true: 0, false: 0 },
-        compassionLevel: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        volunteerProgram: { true: 0, false: 0, "true": 0, "false": 0 },
       },
     };
 
@@ -2013,15 +1976,19 @@ const PlaceDetails = () => {
         if (asReview.accessAndLocation) {
           const al = asReview.accessAndLocation;
           if (al.parkingDifficulty) tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty]++;
-          if (al.handicapFriendly !== undefined) tagCounts.accessAndLocation.handicapFriendly[al.handicapFriendly]++;
-          if (al.parkingToParkDistance) tagCounts.accessAndLocation.parkingToParkDistance[al.parkingToParkDistance]++;
+          
+          // Handle old schema fields by mapping to new ones
+          if (al.parkingAndAccessibility) {
+            const parkingMap = { excellent: "easy", good: "easy", limited: "moderate", poor: "difficult" };
+            const mappedValue = parkingMap[al.parkingAndAccessibility];
+            if (mappedValue) tagCounts.accessAndLocation.parkingDifficulty[mappedValue]++;
+          }
         }
 
         // Hours of Operation
         if (asReview.hoursOfOperation) {
           const ho = asReview.hoursOfOperation;
           if (ho.is24Hours !== undefined) tagCounts.hoursOfOperation.is24Hours[ho.is24Hours]++;
-          if (ho.dawnToDusk !== undefined) tagCounts.hoursOfOperation.dawnToDusk[ho.dawnToDusk]++;
           if (ho.specificHours) {
             tagCounts.hoursOfOperation.specificHours[ho.specificHours] =
               (tagCounts.hoursOfOperation.specificHours[ho.specificHours] || 0) + 1;
@@ -2039,13 +2006,6 @@ const PlaceDetails = () => {
             });
           }
           if (ats.breedVariety) tagCounts.animalTypeSelection.breedVariety[ats.breedVariety]++;
-          if (ats.ageRange && Array.isArray(ats.ageRange)) {
-            ats.ageRange.forEach((age) => {
-              if (tagCounts.animalTypeSelection.ageRange[age] !== undefined) {
-                tagCounts.animalTypeSelection.ageRange[age]++;
-              }
-            });
-          }
         }
 
         // Animal Care & Welfare
@@ -2053,13 +2013,6 @@ const PlaceDetails = () => {
           const acw = asReview.animalCareAndWelfare;
           if (acw.animalHealth) tagCounts.animalCareAndWelfare.animalHealth[acw.animalHealth]++;
           if (acw.livingConditions) tagCounts.animalCareAndWelfare.livingConditions[acw.livingConditions]++;
-          if (acw.exercisePrograms !== undefined)
-            tagCounts.animalCareAndWelfare.exercisePrograms[acw.exercisePrograms]++;
-          if (acw.medicalCare) tagCounts.animalCareAndWelfare.medicalCare[acw.medicalCare]++;
-          if (acw.behavioralAssessment !== undefined)
-            tagCounts.animalCareAndWelfare.behavioralAssessment[acw.behavioralAssessment]++;
-          if (acw.specialNeedsCare !== undefined)
-            tagCounts.animalCareAndWelfare.specialNeedsCare[acw.specialNeedsCare]++;
         }
 
         // Adoption Process & Support
@@ -2069,22 +2022,15 @@ const PlaceDetails = () => {
           if (aps.processingTime) tagCounts.adoptionProcessAndSupport.processingTime[aps.processingTime]++;
           if (aps.homeVisitRequired !== undefined)
             tagCounts.adoptionProcessAndSupport.homeVisitRequired[aps.homeVisitRequired]++;
-          if (aps.adoptionFees) tagCounts.adoptionProcessAndSupport.adoptionFees[aps.adoptionFees]++;
-          if (aps.postAdoptionSupport !== undefined)
-            tagCounts.adoptionProcessAndSupport.postAdoptionSupport[aps.postAdoptionSupport]++;
-          if (aps.returnPolicy) tagCounts.adoptionProcessAndSupport.returnPolicy[aps.returnPolicy]++;
         }
 
         // Staff & Volunteer Quality
         if (asReview.staffAndVolunteerQuality) {
           const svq = asReview.staffAndVolunteerQuality;
           if (svq.staffKnowledge) tagCounts.staffAndVolunteerQuality.staffKnowledge[svq.staffKnowledge]++;
-          if (svq.animalHandling) tagCounts.staffAndVolunteerQuality.animalHandling[svq.animalHandling]++;
           if (svq.customerService) tagCounts.staffAndVolunteerQuality.customerService[svq.customerService]++;
           if (svq.volunteerProgram !== undefined)
             tagCounts.staffAndVolunteerQuality.volunteerProgram[svq.volunteerProgram]++;
-          if (svq.staffTraining !== undefined) tagCounts.staffAndVolunteerQuality.staffTraining[svq.staffTraining]++;
-          if (svq.compassionLevel) tagCounts.staffAndVolunteerQuality.compassionLevel[svq.compassionLevel]++;
         }
       }
     });
@@ -2104,11 +2050,9 @@ const PlaceDetails = () => {
           value: "difficult",
           label: "🚗 Difficult Parking",
         },
-        { category: "accessAndLocation", field: "handicapFriendly", value: true, label: "♿ Handicap Friendly" },
       ],
       hoursOfOperation: [
         { category: "hoursOfOperation", field: "is24Hours", value: true, label: "🕐 24 Hours Open" },
-        { category: "hoursOfOperation", field: "dawnToDusk", value: true, label: "🌅 Dawn to Dusk" },
       ],
       animalTypeSelection: [
         { category: "animalTypeSelection", field: "availableAnimalTypes", value: "dogs", label: "🐕 Dogs Available" },
@@ -2129,13 +2073,6 @@ const PlaceDetails = () => {
           value: "excellent",
           label: "🏠 Great Conditions",
         },
-        { category: "animalCareAndWelfare", field: "exercisePrograms", value: true, label: "🏃 Exercise Programs" },
-        {
-          category: "animalCareAndWelfare",
-          field: "medicalCare",
-          value: "excellent",
-          label: "🏥 Excellent Medical Care",
-        },
       ],
       adoptionProcessAndSupport: [
         {
@@ -2150,29 +2087,12 @@ const PlaceDetails = () => {
           value: "same_day",
           label: "⚡ Same Day Processing",
         },
-        { category: "adoptionProcessAndSupport", field: "adoptionFees", value: "low", label: "💰 Low Fees" },
-        {
-          category: "adoptionProcessAndSupport",
-          field: "postAdoptionSupport",
-          value: true,
-          label: "🤝 Post-Adoption Support",
-        },
+        { category: "adoptionProcessAndSupport", field: "homeVisitRequired", value: false, label: "🏠 No Home Visit Required" },
       ],
       staffAndVolunteerQuality: [
         { category: "staffAndVolunteerQuality", field: "staffKnowledge", value: "excellent", label: "🧠 Expert Staff" },
-        {
-          category: "staffAndVolunteerQuality",
-          field: "animalHandling",
-          value: "excellent",
-          label: "🐾 Great Animal Handling",
-        },
+        { category: "staffAndVolunteerQuality", field: "customerService", value: "excellent", label: "⭐ Excellent Service" },
         { category: "staffAndVolunteerQuality", field: "volunteerProgram", value: true, label: "👥 Volunteer Program" },
-        {
-          category: "staffAndVolunteerQuality",
-          field: "compassionLevel",
-          value: "excellent",
-          label: "💖 Very Compassionate",
-        },
       ],
     };
 
@@ -2245,7 +2165,7 @@ const PlaceDetails = () => {
             ← BACK
           </button>
           {/* Delete button - only show for place creator */}
-          {mongoUser && place.addedBy && place.addedBy === mongoUser._id && !place.isOSMLocation && (
+          {mongoUser && place.addedBy && String(place.addedBy) === String(mongoUser._id) && !place.isOSMLocation && place.creationSource === "user_created" && (
             <button
               className="delete-place-button"
               onClick={() => setShowDeleteConfirm(true)}
@@ -2275,6 +2195,7 @@ const PlaceDetails = () => {
       {/* Hero Image Section */}
       <div className="hero-image-section">
         <div className="hero-placeholder">
+
           {place.type === 'dog park' || place.type === 'dog_park' ? (
             <img 
               src="/dog-park-hero.png" 
@@ -2467,68 +2388,75 @@ const PlaceDetails = () => {
           )}
 
           <div className="category-tags-grid">
-            {/* 1. Clinic Environment & Facilities */}
+            {(() => {
+              const vetTagCounts = analyzeVetReviewTags();
+              return (
+                <>
+                  {/* 1. Access & Location - BACKEND ALIGNED */}
             <div className="category-section">
-              <h3>🏢 Environment & Facilities</h3>
+                    <h3>🅿️ Access & Location</h3>
 
               <div className="feature-tags">
-                {renderSmartVetCategoryTags("clinicEnvironmentAndFacilities", analyzeVetReviewTags())}
+                      {renderSmartVetCategoryTags("accessAndLocation", vetTagCounts)}
               </div>
             </div>
 
-            {/* 2. Cost & Transparency */}
+                  {/* 2. Hours of Operation - BACKEND ALIGNED */}
             <div className="category-section">
-              <h3>💰 Cost & Transparency</h3>
+                    <h3>🕐 Hours of Operation</h3>
 
               <div className="feature-tags">
-                {renderSmartVetCategoryTags("costAndTransparency", analyzeVetReviewTags())}
+                      {renderSmartVetCategoryTags("hoursOfOperation", vetTagCounts)}
               </div>
             </div>
 
-            {/* 3. Medical Staff & Services */}
+                  {/* 3. Clinic Environment & Facilities - BACKEND ALIGNED */}
             <div className="category-section">
-              <h3>👨‍⚕️ Medical Staff & Services</h3>
+                    <h3>🏢 Clinic Environment & Facilities</h3>
 
               <div className="feature-tags">
-                {renderSmartVetCategoryTags("medicalStaffAndServices", analyzeVetReviewTags())}
+                      {renderSmartVetCategoryTags("clinicEnvironmentAndFacilities", vetTagCounts)}
               </div>
             </div>
 
-            {/* 4. Scheduling & Communication */}
+                  {/* 4. Cost & Transparency - BACKEND ALIGNED */}
             <div className="category-section">
-              <h3>📅 Scheduling & Communication</h3>
+                    <h3>💰 Cost & Transparency</h3>
 
               <div className="feature-tags">
-                {renderSmartVetCategoryTags("schedulingAndCommunication", analyzeVetReviewTags())}
+                      {renderSmartVetCategoryTags("costAndTransparency", vetTagCounts)}
               </div>
             </div>
 
-            {/* 5. Emergency & After-Hours Care */}
+                  {/* 5. Services & Specializations - BACKEND ALIGNED */}
             <div className="category-section">
-              <h3>🚨 Emergency & After-Hours</h3>
+                    <h3>🩺 Services & Specializations</h3>
 
               <div className="feature-tags">
-                {renderSmartVetCategoryTags("emergencyAndAfterHours", analyzeVetReviewTags())}
+                      {renderSmartVetCategoryTags("servicesAndSpecializations", vetTagCounts)}
               </div>
             </div>
 
-            {/* 6. Owner Involvement */}
+                  {/* 6. Emergency & After-Hours Care - BACKEND ALIGNED */}
             <div className="category-section">
-              <h3>👨‍👩‍👧‍👦 Owner Involvement</h3>
+                    <h3>🚨 Emergency & After-Hours Care</h3>
 
               <div className="feature-tags">
-                {renderSmartVetCategoryTags("ownerInvolvement", analyzeVetReviewTags())}
+                      {renderSmartVetCategoryTags("emergencyAndAfterHours", vetTagCounts)}
               </div>
             </div>
 
-            {/* 7. Reputation & Community */}
+                  {/* 7. Staff & Service Quality - BACKEND ALIGNED */}
             <div className="category-section">
-              <h3>🌟 Reputation & Community</h3>
+                    <h3>👨‍⚕️ Staff & Service Quality</h3>
 
               <div className="feature-tags">
-                {renderSmartVetCategoryTags("reputationAndCommunity", analyzeVetReviewTags())}
+                      {renderSmartVetCategoryTags("staffAndServiceQuality", vetTagCounts)}
               </div>
             </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
@@ -3265,9 +3193,104 @@ const PlaceDetails = () => {
                 <div className="vet-clinic-form">
                   <h4>🏥 VET CLINIC DETAILS</h4>
 
-                  {/* 1. Clinic Environment & Facilities */}
+                  {/* 1. Access & Location - BACKEND ALIGNED */}
                   <div className="form-section">
-                    <h5>🏢 Environment & Facilities</h5>
+                    <h5>🅿️ Access & Location</h5>
+                    <div className="form-group">
+                      <label>Parking Difficulty</label>
+                      <select
+                        value={reviewForm.vetClinicReview.accessAndLocation.parkingDifficulty}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            vetClinicReview: {
+                              ...reviewForm.vetClinicReview,
+                              accessAndLocation: {
+                                ...reviewForm.vetClinicReview.accessAndLocation,
+                                parkingDifficulty: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="easy">Easy</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="difficult">Difficult</option>
+                      </select>
+                    </div>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.vetClinicReview.accessAndLocation.publicTransportAccess}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                accessAndLocation: {
+                                  ...reviewForm.vetClinicReview.accessAndLocation,
+                                  publicTransportAccess: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Public Transport Access
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 2. Hours of Operation - BACKEND ALIGNED */}
+                  <div className="form-section">
+                    <h5>🕐 Hours of Operation</h5>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.vetClinicReview.hoursOfOperation.is24Hours}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                hoursOfOperation: {
+                                  ...reviewForm.vetClinicReview.hoursOfOperation,
+                                  is24Hours: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Open 24 Hours
+                      </label>
+                    </div>
+                    <div className="form-group">
+                      <label>Specific Hours</label>
+                      <input
+                        type="text"
+                        value={reviewForm.vetClinicReview.hoursOfOperation.specificHours}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            vetClinicReview: {
+                              ...reviewForm.vetClinicReview,
+                              hoursOfOperation: {
+                                ...reviewForm.vetClinicReview.hoursOfOperation,
+                                specificHours: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                        placeholder="e.g., 8 AM - 6 PM"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 3. Clinic Environment & Facilities - BACKEND ALIGNED */}
+                  <div className="form-section">
+                    <h5>🏢 Clinic Environment & Facilities</h5>
                     <div className="form-group">
                       <label>Cleanliness</label>
                       <select
@@ -3293,9 +3316,9 @@ const PlaceDetails = () => {
                       </select>
                     </div>
                     <div className="form-group">
-                      <label>Comfort Level</label>
+                      <label>Facility Size</label>
                       <select
-                        value={reviewForm.vetClinicReview.clinicEnvironmentAndFacilities.comfortLevel}
+                        value={reviewForm.vetClinicReview.clinicEnvironmentAndFacilities.facilitySize}
                         onChange={(e) =>
                           setReviewForm({
                             ...reviewForm,
@@ -3303,28 +3326,27 @@ const PlaceDetails = () => {
                               ...reviewForm.vetClinicReview,
                               clinicEnvironmentAndFacilities: {
                                 ...reviewForm.vetClinicReview.clinicEnvironmentAndFacilities,
-                                comfortLevel: e.target.value,
+                                facilitySize: e.target.value,
                               },
                             },
                           })
                         }
                       >
                         <option value="">Select...</option>
-                        <option value="very_comfortable">Very Comfortable</option>
-                        <option value="comfortable">Comfortable</option>
-                        <option value="neutral">Neutral</option>
-                        <option value="uncomfortable">Uncomfortable</option>
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
                       </select>
                     </div>
                   </div>
 
-                  {/* 2. Cost & Transparency */}
+                  {/* 4. Cost & Transparency - BACKEND ALIGNED */}
                   <div className="form-section">
                     <h5>💰 Cost & Transparency</h5>
                     <div className="form-group">
-                      <label>Routine Checkup Cost</label>
+                      <label>Cost</label>
                       <select
-                        value={reviewForm.vetClinicReview.costAndTransparency.routineCheckupCost}
+                        value={reviewForm.vetClinicReview.costAndTransparency.cost}
                         onChange={(e) =>
                           setReviewForm({
                             ...reviewForm,
@@ -3332,7 +3354,7 @@ const PlaceDetails = () => {
                               ...reviewForm.vetClinicReview,
                               costAndTransparency: {
                                 ...reviewForm.vetClinicReview.costAndTransparency,
-                                routineCheckupCost: e.target.value,
+                                cost: e.target.value,
                               },
                             },
                           })
@@ -3387,88 +3409,104 @@ const PlaceDetails = () => {
                     </div>
                   </div>
 
-                  {/* 3. Medical Staff & Services */}
+                  {/* 5. Services & Specializations - BACKEND ALIGNED */}
                   <div className="form-section">
-                    <h5>👨‍⚕️ Medical Staff & Services</h5>
+                    <h5>🩺 Services & Specializations</h5>
                     <div className="form-group">
-                      <label>Veterinarian Attitude</label>
-                      <select
-                        value={reviewForm.vetClinicReview.medicalStaffAndServices.veterinarianAttitude}
-                        onChange={(e) =>
+                      <label>On-Site Diagnostics</label>
+                      <div className="checkbox-group">
+                        {["xray", "ultrasound", "bloodwork", "ecg", "none"].map((diagnostic) => (
+                          <label key={diagnostic}>
+                            <input
+                              type="checkbox"
+                              checked={reviewForm.vetClinicReview.servicesAndSpecializations.onSiteDiagnostics.includes(diagnostic)}
+                              onChange={(e) => {
+                                const currentArray = reviewForm.vetClinicReview.servicesAndSpecializations.onSiteDiagnostics || [];
+                                const newArray = e.target.checked
+                                  ? [...currentArray, diagnostic]
+                                  : currentArray.filter(item => item !== diagnostic);
                           setReviewForm({
                             ...reviewForm,
                             vetClinicReview: {
                               ...reviewForm.vetClinicReview,
-                              medicalStaffAndServices: {
-                                ...reviewForm.vetClinicReview.medicalStaffAndServices,
-                                veterinarianAttitude: e.target.value,
-                              },
-                            },
-                          })
-                        }
-                      >
-                        <option value="">Select...</option>
-                        <option value="excellent">Excellent</option>
-                        <option value="good">Good</option>
-                        <option value="fair">Fair</option>
-                        <option value="poor">Poor</option>
-                      </select>
+                                    servicesAndSpecializations: {
+                                      ...reviewForm.vetClinicReview.servicesAndSpecializations,
+                                      onSiteDiagnostics: newArray,
+                                    },
+                                  },
+                                });
+                              }}
+                            />
+                            {diagnostic.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                          </label>
+                        ))}
                     </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Surgery Capabilities</label>
                     <div className="checkbox-group">
-                      <label>
+                        {["routine_spay_neuter", "orthopedic", "emergency", "dental", "none"].map((surgery) => (
+                          <label key={surgery}>
                         <input
                           type="checkbox"
-                          checked={reviewForm.vetClinicReview.medicalStaffAndServices.surgeryOrthopedics}
-                          onChange={(e) =>
+                              checked={reviewForm.vetClinicReview.servicesAndSpecializations.surgeryCapabilities.includes(surgery)}
+                              onChange={(e) => {
+                                const currentArray = reviewForm.vetClinicReview.servicesAndSpecializations.surgeryCapabilities || [];
+                                const newArray = e.target.checked
+                                  ? [...currentArray, surgery]
+                                  : currentArray.filter(item => item !== surgery);
                             setReviewForm({
                               ...reviewForm,
                               vetClinicReview: {
                                 ...reviewForm.vetClinicReview,
-                                medicalStaffAndServices: {
-                                  ...reviewForm.vetClinicReview.medicalStaffAndServices,
-                                  surgeryOrthopedics: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Surgery/Orthopedics Available
+                                    servicesAndSpecializations: {
+                                      ...reviewForm.vetClinicReview.servicesAndSpecializations,
+                                      surgeryCapabilities: newArray,
+                                    },
+                                  },
+                                });
+                              }}
+                            />
+                            {surgery.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       </label>
+                        ))}
                     </div>
                   </div>
-
-                  {/* 4. Scheduling & Communication */}
-                  <div className="form-section">
-                    <h5>📅 Scheduling & Communication</h5>
                     <div className="form-group">
-                      <label>Response Time</label>
-                      <select
-                        value={reviewForm.vetClinicReview.schedulingAndCommunication.responseTime}
-                        onChange={(e) =>
+                      <label>Specializations</label>
+                      <div className="checkbox-group">
+                        {["cardiology", "dermatology", "oncology", "behavior", "exotic_animals", "none"].map((specialization) => (
+                          <label key={specialization}>
+                            <input
+                              type="checkbox"
+                              checked={reviewForm.vetClinicReview.servicesAndSpecializations.specializations.includes(specialization)}
+                              onChange={(e) => {
+                                const currentArray = reviewForm.vetClinicReview.servicesAndSpecializations.specializations || [];
+                                const newArray = e.target.checked
+                                  ? [...currentArray, specialization]
+                                  : currentArray.filter(item => item !== specialization);
                           setReviewForm({
                             ...reviewForm,
                             vetClinicReview: {
                               ...reviewForm.vetClinicReview,
-                              schedulingAndCommunication: {
-                                ...reviewForm.vetClinicReview.schedulingAndCommunication,
-                                responseTime: e.target.value,
-                              },
-                            },
-                          })
-                        }
-                      >
-                        <option value="">Select...</option>
-                        <option value="immediate">Immediate</option>
-                        <option value="same_day">Same Day</option>
-                        <option value="next_day">Next Day</option>
-                        <option value="several_days">Several Days</option>
-                      </select>
+                                    servicesAndSpecializations: {
+                                      ...reviewForm.vetClinicReview.servicesAndSpecializations,
+                                      specializations: newArray,
+                                    },
+                                  },
+                                });
+                              }}
+                            />
+                            {specialization.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </label>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  {/* 5. Emergency & After-Hours */}
+                  {/* 6. Emergency & After-Hours Care - BACKEND ALIGNED */}
                   <div className="form-section">
-                    <h5>🚨 Emergency & After-Hours</h5>
+                    <h5>🚨 Emergency & After-Hours Care</h5>
                     <div className="checkbox-group">
                       <label>
                         <input
@@ -3492,6 +3530,25 @@ const PlaceDetails = () => {
                       <label>
                         <input
                           type="checkbox"
+                          checked={reviewForm.vetClinicReview.emergencyAndAfterHours.openEvenings}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                                emergencyAndAfterHours: {
+                                  ...reviewForm.vetClinicReview.emergencyAndAfterHours,
+                                  openEvenings: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Open Evenings
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
                           checked={reviewForm.vetClinicReview.emergencyAndAfterHours.onCallEmergencyNumber}
                           onChange={(e) =>
                             setReviewForm({
@@ -3509,125 +3566,47 @@ const PlaceDetails = () => {
                         Emergency On-Call Number
                       </label>
                     </div>
-                  </div>
-
-                  {/* 6. Owner Involvement */}
-                  <div className="form-section">
-                    <h5>👨‍👩‍👧‍👦 Owner Involvement</h5>
-                    <div className="checkbox-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.vetClinicReview.ownerInvolvement.allowedDuringExams}
+                    <div className="form-group">
+                      <label>Emergency Triage Speed</label>
+                      <select
+                        value={reviewForm.vetClinicReview.emergencyAndAfterHours.emergencyTriageSpeed}
                           onChange={(e) =>
                             setReviewForm({
                               ...reviewForm,
                               vetClinicReview: {
                                 ...reviewForm.vetClinicReview,
-                                ownerInvolvement: {
-                                  ...reviewForm.vetClinicReview.ownerInvolvement,
-                                  allowedDuringExams: e.target.checked,
+                              emergencyAndAfterHours: {
+                                ...reviewForm.vetClinicReview.emergencyAndAfterHours,
+                                emergencyTriageSpeed: e.target.value,
                                 },
                               },
                             })
                           }
-                        />
-                        Allowed During Exams
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.vetClinicReview.ownerInvolvement.explainsProceduresWell}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              vetClinicReview: {
-                                ...reviewForm.vetClinicReview,
-                                ownerInvolvement: {
-                                  ...reviewForm.vetClinicReview.ownerInvolvement,
-                                  explainsProceduresWell: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Explains Procedures Well
-                      </label>
+                      >
+                        <option value="">Select...</option>
+                        <option value="immediate">Immediate</option>
+                        <option value="within_30_min">Within 30 Min</option>
+                        <option value="within_1_hour">Within 1 Hour</option>
+                        <option value="over_1_hour">Over 1 Hour</option>
+                      </select>
                     </div>
                   </div>
 
-                  {/* 7. Reputation & Community */}
+                  {/* 7. Staff & Service Quality - BACKEND ALIGNED */}
                   <div className="form-section">
-                    <h5>🌟 Reputation & Community</h5>
+                    <h5>👨‍⚕️ Staff & Service Quality</h5>
                     <div className="form-group">
-                      <label>Community Involvement</label>
+                      <label>Staff Friendliness</label>
                       <select
-                        value={reviewForm.vetClinicReview.reputationAndCommunity.communityInvolvement}
+                        value={reviewForm.vetClinicReview.staffAndServiceQuality.staffFriendliness}
                         onChange={(e) =>
                           setReviewForm({
                             ...reviewForm,
                             vetClinicReview: {
                               ...reviewForm.vetClinicReview,
-                              reputationAndCommunity: {
-                                ...reviewForm.vetClinicReview.reputationAndCommunity,
-                                communityInvolvement: e.target.value,
-                              },
-                            },
-                          })
-                        }
-                      >
-                        <option value="">Select...</option>
-                        <option value="high">High</option>
-                        <option value="moderate">Moderate</option>
-                        <option value="low">Low</option>
-                        <option value="none">None</option>
-                      </select>
-                    </div>
-                    <div className="checkbox-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.vetClinicReview.reputationAndCommunity.hostsVaccineClinic}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              vetClinicReview: {
-                                ...reviewForm.vetClinicReview,
-                                reputationAndCommunity: {
-                                  ...reviewForm.vetClinicReview.reputationAndCommunity,
-                                  hostsVaccineClinic: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Hosts Vaccine Clinics
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Pet Store Specific Form - All 6 Categories */}
-              {place.type === "pet_store" && (
-                <div className="pet-store-form">
-                  <h4>🛍️ PET STORE DETAILS</h4>
-
-                  {/* 1. Access & Location */}
-                  <div className="form-section">
-                    <h5>🅿️ Access & Location</h5>
-                    <div className="form-group">
-                      <label>Parking Availability</label>
-                      <select
-                        value={reviewForm.petStoreReview.accessAndLocation.parkingAvailability}
-                        onChange={(e) =>
-                          setReviewForm({
-                            ...reviewForm,
-                            petStoreReview: {
-                              ...reviewForm.petStoreReview,
-                              accessAndLocation: {
-                                ...reviewForm.petStoreReview.accessAndLocation,
-                                parkingAvailability: e.target.value,
+                              staffAndServiceQuality: {
+                                ...reviewForm.vetClinicReview.staffAndServiceQuality,
+                                staffFriendliness: e.target.value,
                               },
                             },
                           })
@@ -3636,49 +3615,67 @@ const PlaceDetails = () => {
                         <option value="">Select...</option>
                         <option value="excellent">Excellent</option>
                         <option value="good">Good</option>
-                        <option value="limited">Limited</option>
+                        <option value="fair">Fair</option>
                         <option value="poor">Poor</option>
                       </select>
                     </div>
-                    <div className="checkbox-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.petStoreReview.accessAndLocation.publicTransportAccess}
+                    <div className="form-group">
+                      <label>Veterinarian Experience</label>
+                      <select
+                        value={reviewForm.vetClinicReview.staffAndServiceQuality.veterinarianExperience}
                           onChange={(e) =>
                             setReviewForm({
                               ...reviewForm,
-                              petStoreReview: {
-                                ...reviewForm.petStoreReview,
-                                accessAndLocation: {
-                                  ...reviewForm.petStoreReview.accessAndLocation,
-                                  publicTransportAccess: e.target.checked,
+                              vetClinicReview: {
+                                ...reviewForm.vetClinicReview,
+                              staffAndServiceQuality: {
+                                ...reviewForm.vetClinicReview.staffAndServiceQuality,
+                                veterinarianExperience: e.target.value,
                                 },
                               },
                             })
                           }
-                        />
-                        Public Transport Access
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.petStoreReview.accessAndLocation.wheelchairAccessible}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              petStoreReview: {
-                                ...reviewForm.petStoreReview,
-                                accessAndLocation: {
-                                  ...reviewForm.petStoreReview.accessAndLocation,
-                                  wheelchairAccessible: e.target.checked,
-                                },
+                      >
+                        <option value="">Select...</option>
+                        <option value="novice">Novice</option>
+                        <option value="experienced">Experienced</option>
+                        <option value="expert">Expert</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Pet Store Specific Form - All 6 Categories */}
+              {(place.type === "pet store" || place.type === "pet_store") && (
+                <div className="pet-store-form">
+                  <h4>🛍️ PET STORE DETAILS</h4>
+
+                  {/* 1. Access & Location - BACKEND ALIGNED */}
+                  <div className="form-section">
+                    <h5>🅿️ Access & Location</h5>
+                    <div className="form-group">
+                      <label>Parking Difficulty</label>
+                      <select
+                        value={reviewForm.petStoreReview.accessAndLocation.parkingDifficulty}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            petStoreReview: {
+                              ...reviewForm.petStoreReview,
+                              accessAndLocation: {
+                                ...reviewForm.petStoreReview.accessAndLocation,
+                                parkingDifficulty: e.target.value,
                               },
-                            })
-                          }
-                        />
-                        Wheelchair Accessible
-                      </label>
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="easy">Easy</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="difficult">Difficult</option>
+                      </select>
                     </div>
                   </div>
 
@@ -4081,9 +4078,9 @@ const PlaceDetails = () => {
                   <div className="form-section">
                     <h5>🅿️ Access & Location</h5>
                     <div className="form-group">
-                      <label>Parking & Accessibility</label>
+                      <label>Parking Difficulty</label>
                       <select
-                        value={reviewForm.animalShelterReview.accessAndLocation.parkingAndAccessibility}
+                        value={reviewForm.animalShelterReview.accessAndLocation.parkingDifficulty}
                         onChange={(e) =>
                           setReviewForm({
                             ...reviewForm,
@@ -4091,68 +4088,50 @@ const PlaceDetails = () => {
                               ...reviewForm.animalShelterReview,
                               accessAndLocation: {
                                 ...reviewForm.animalShelterReview.accessAndLocation,
-                                parkingAndAccessibility: e.target.value,
+                                parkingDifficulty: e.target.value,
                               },
                             },
                           })
                         }
                       >
                         <option value="">Select...</option>
-                        <option value="excellent">Excellent</option>
-                        <option value="good">Good</option>
-                        <option value="limited">Limited</option>
-                        <option value="poor">Poor</option>
+                        <option value="easy">Easy</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="difficult">Difficult</option>
                       </select>
-                    </div>
-                    <div className="checkbox-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.accessAndLocation.publicTransportNearby}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                accessAndLocation: {
-                                  ...reviewForm.animalShelterReview.accessAndLocation,
-                                  publicTransportNearby: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Public Transport Nearby
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.accessAndLocation.easyToFind}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                accessAndLocation: {
-                                  ...reviewForm.animalShelterReview.accessAndLocation,
-                                  easyToFind: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Easy to Find
-                      </label>
                     </div>
                   </div>
 
                   {/* 2. Hours of Operation */}
                   <div className="form-section">
                     <h5>🕐 Hours of Operation</h5>
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.animalShelterReview.hoursOfOperation.is24Hours}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              animalShelterReview: {
+                                ...reviewForm.animalShelterReview,
+                                hoursOfOperation: {
+                                  ...reviewForm.animalShelterReview.hoursOfOperation,
+                                  is24Hours: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        24 Hours Open
+                      </label>
+                    </div>
                     <div className="form-group">
-                      <label>Shelter Hours and Availability</label>
-                      <select
-                        value={reviewForm.animalShelterReview.hoursOfOperation.shelterHoursAndAvailability}
+                      <label>Specific Hours (if not 24 hours)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g., 10 AM - 6 PM"
+                        value={reviewForm.animalShelterReview.hoursOfOperation.specificHours}
                         onChange={(e) =>
                           setReviewForm({
                             ...reviewForm,
@@ -4160,68 +4139,50 @@ const PlaceDetails = () => {
                               ...reviewForm.animalShelterReview,
                               hoursOfOperation: {
                                 ...reviewForm.animalShelterReview.hoursOfOperation,
-                                shelterHoursAndAvailability: e.target.value,
+                                specificHours: e.target.value,
                               },
                             },
                           })
                         }
-                      >
-                        <option value="">Select...</option>
-                        <option value="very_convenient">Very Convenient</option>
-                        <option value="convenient">Convenient</option>
-                        <option value="limited">Limited</option>
-                        <option value="inconvenient">Inconvenient</option>
-                      </select>
-                    </div>
-                    <div className="checkbox-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.hoursOfOperation.weekendHours}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                hoursOfOperation: {
-                                  ...reviewForm.animalShelterReview.hoursOfOperation,
-                                  weekendHours: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Weekend Hours
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.hoursOfOperation.appointmentRequired}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                hoursOfOperation: {
-                                  ...reviewForm.animalShelterReview.hoursOfOperation,
-                                  appointmentRequired: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Appointment Required
-                      </label>
+                      />
                     </div>
                   </div>
 
                   {/* 3. Animal Type Selection */}
                   <div className="form-section">
                     <h5>🐾 Animal Type Selection</h5>
+                    <div className="checkbox-group">
+                      <h6>Available Animal Types</h6>
+                      {["dogs", "cats", "rabbits", "birds", "reptiles", "small_mammals"].map((type) => (
+                        <label key={type}>
+                          <input
+                            type="checkbox"
+                            checked={reviewForm.animalShelterReview.animalTypeSelection.availableAnimalTypes.includes(type)}
+                            onChange={(e) => {
+                              const currentTypes = reviewForm.animalShelterReview.animalTypeSelection.availableAnimalTypes;
+                              const newTypes = e.target.checked
+                                ? [...currentTypes, type]
+                                : currentTypes.filter((t) => t !== type);
+                              setReviewForm({
+                                ...reviewForm,
+                                animalShelterReview: {
+                                  ...reviewForm.animalShelterReview,
+                                  animalTypeSelection: {
+                                    ...reviewForm.animalShelterReview.animalTypeSelection,
+                                    availableAnimalTypes: newTypes,
+                                  },
+                                },
+                              });
+                            }}
+                          />
+                          {type.charAt(0).toUpperCase() + type.slice(1).replace("_", " ")}
+                        </label>
+                      ))}
+                    </div>
                     <div className="form-group">
-                      <label>Available Animals and Breed Variety</label>
+                      <label>Breed Variety</label>
                       <select
-                        value={reviewForm.animalShelterReview.animalTypeSelection.availableAnimalsAndBreedVariety}
+                        value={reviewForm.animalShelterReview.animalTypeSelection.breedVariety}
                         onChange={(e) =>
                           setReviewForm({
                             ...reviewForm,
@@ -4229,95 +4190,7 @@ const PlaceDetails = () => {
                               ...reviewForm.animalShelterReview,
                               animalTypeSelection: {
                                 ...reviewForm.animalShelterReview.animalTypeSelection,
-                                availableAnimalsAndBreedVariety: e.target.value,
-                              },
-                            },
-                          })
-                        }
-                      >
-                        <option value="">Select...</option>
-                        <option value="excellent">Excellent</option>
-                        <option value="good">Good</option>
-                        <option value="limited">Limited</option>
-                        <option value="poor">Poor</option>
-                      </select>
-                    </div>
-                    <div className="checkbox-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.animalTypeSelection.dogsAvailable}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                animalTypeSelection: {
-                                  ...reviewForm.animalShelterReview.animalTypeSelection,
-                                  dogsAvailable: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Dogs Available
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.animalTypeSelection.catsAvailable}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                animalTypeSelection: {
-                                  ...reviewForm.animalShelterReview.animalTypeSelection,
-                                  catsAvailable: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Cats Available
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.animalTypeSelection.otherAnimals}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                animalTypeSelection: {
-                                  ...reviewForm.animalShelterReview.animalTypeSelection,
-                                  otherAnimals: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Other Animals Available
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* 4. Animal Care & Welfare */}
-                  <div className="form-section">
-                    <h5>❤️ Animal Care & Welfare</h5>
-                    <div className="form-group">
-                      <label>Animal Health and Living Conditions</label>
-                      <select
-                        value={reviewForm.animalShelterReview.animalCareAndWelfare.animalHealthAndLivingConditions}
-                        onChange={(e) =>
-                          setReviewForm({
-                            ...reviewForm,
-                            animalShelterReview: {
-                              ...reviewForm.animalShelterReview,
-                              animalCareAndWelfare: {
-                                ...reviewForm.animalShelterReview.animalCareAndWelfare,
-                                animalHealthAndLivingConditions: e.target.value,
+                                breedVariety: e.target.value,
                               },
                             },
                           })
@@ -4327,66 +4200,26 @@ const PlaceDetails = () => {
                         <option value="excellent">Excellent</option>
                         <option value="good">Good</option>
                         <option value="fair">Fair</option>
-                        <option value="concerning">Concerning</option>
+                        <option value="poor">Poor</option>
                       </select>
-                    </div>
-                    <div className="checkbox-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.animalCareAndWelfare.medicalCareProvided}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                animalCareAndWelfare: {
-                                  ...reviewForm.animalShelterReview.animalCareAndWelfare,
-                                  medicalCareProvided: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Medical Care Provided
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.animalCareAndWelfare.spayNeuterProgram}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                animalCareAndWelfare: {
-                                  ...reviewForm.animalShelterReview.animalCareAndWelfare,
-                                  spayNeuterProgram: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Spay/Neuter Program
-                      </label>
                     </div>
                   </div>
 
-                  {/* 5. Adoption Process & Support */}
+                  {/* 4. Animal Care & Welfare */}
                   <div className="form-section">
-                    <h5>📋 Adoption Process & Support</h5>
+                    <h5>🏥 Animal Care & Welfare</h5>
                     <div className="form-group">
-                      <label>Adoption Procedures and Support</label>
+                      <label>Animal Health</label>
                       <select
-                        value={reviewForm.animalShelterReview.adoptionProcessAndSupport.adoptionProceduresAndSupport}
+                        value={reviewForm.animalShelterReview.animalCareAndWelfare.animalHealth}
                         onChange={(e) =>
                           setReviewForm({
                             ...reviewForm,
                             animalShelterReview: {
                               ...reviewForm.animalShelterReview,
-                              adoptionProcessAndSupport: {
-                                ...reviewForm.animalShelterReview.adoptionProcessAndSupport,
-                                adoptionProceduresAndSupport: e.target.value,
+                              animalCareAndWelfare: {
+                                ...reviewForm.animalShelterReview.animalCareAndWelfare,
+                                animalHealth: e.target.value,
                               },
                             },
                           })
@@ -4395,15 +4228,91 @@ const PlaceDetails = () => {
                         <option value="">Select...</option>
                         <option value="excellent">Excellent</option>
                         <option value="good">Good</option>
-                        <option value="adequate">Adequate</option>
+                        <option value="fair">Fair</option>
                         <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Living Conditions</label>
+                      <select
+                        value={reviewForm.animalShelterReview.animalCareAndWelfare.livingConditions}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            animalShelterReview: {
+                              ...reviewForm.animalShelterReview,
+                              animalCareAndWelfare: {
+                                ...reviewForm.animalShelterReview.animalCareAndWelfare,
+                                livingConditions: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 5. Adoption Process & Support */}
+                  <div className="form-section">
+                    <h5>📋 Adoption Process & Support</h5>
+                    <div className="form-group">
+                      <label>Application Process</label>
+                      <select
+                        value={reviewForm.animalShelterReview.adoptionProcessAndSupport.applicationProcess}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            animalShelterReview: {
+                              ...reviewForm.animalShelterReview,
+                              adoptionProcessAndSupport: {
+                                ...reviewForm.animalShelterReview.adoptionProcessAndSupport,
+                                applicationProcess: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="easy">Easy</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="difficult">Difficult</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Processing Time</label>
+                      <select
+                        value={reviewForm.animalShelterReview.adoptionProcessAndSupport.processingTime}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            animalShelterReview: {
+                              ...reviewForm.animalShelterReview,
+                              adoptionProcessAndSupport: {
+                                ...reviewForm.animalShelterReview.adoptionProcessAndSupport,
+                                processingTime: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="same_day">Same Day</option>
+                        <option value="within_week">Within Week</option>
+                        <option value="1_2_weeks">1-2 Weeks</option>
+                        <option value="over_2_weeks">Over 2 Weeks</option>
                       </select>
                     </div>
                     <div className="checkbox-group">
                       <label>
                         <input
                           type="checkbox"
-                          checked={reviewForm.animalShelterReview.adoptionProcessAndSupport.followUpSupport}
+                          checked={reviewForm.animalShelterReview.adoptionProcessAndSupport.homeVisitRequired}
                           onChange={(e) =>
                             setReviewForm({
                               ...reviewForm,
@@ -4411,32 +4320,13 @@ const PlaceDetails = () => {
                                 ...reviewForm.animalShelterReview,
                                 adoptionProcessAndSupport: {
                                   ...reviewForm.animalShelterReview.adoptionProcessAndSupport,
-                                  followUpSupport: e.target.checked,
+                                  homeVisitRequired: e.target.checked,
                                 },
                               },
                             })
                           }
                         />
-                        Follow-up Support
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.adoptionProcessAndSupport.educationalResources}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                adoptionProcessAndSupport: {
-                                  ...reviewForm.animalShelterReview.adoptionProcessAndSupport,
-                                  educationalResources: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Educational Resources
+                        Home Visit Required
                       </label>
                     </div>
                   </div>
@@ -4445,11 +4335,9 @@ const PlaceDetails = () => {
                   <div className="form-section">
                     <h5>👨‍👩‍👧‍👦 Staff & Volunteer Quality</h5>
                     <div className="form-group">
-                      <label>Staff Expertise and Volunteer Programs</label>
+                      <label>Staff Knowledge</label>
                       <select
-                        value={
-                          reviewForm.animalShelterReview.staffAndVolunteerQuality.staffExpertiseAndVolunteerPrograms
-                        }
+                        value={reviewForm.animalShelterReview.staffAndVolunteerQuality.staffKnowledge}
                         onChange={(e) =>
                           setReviewForm({
                             ...reviewForm,
@@ -4457,7 +4345,7 @@ const PlaceDetails = () => {
                               ...reviewForm.animalShelterReview,
                               staffAndVolunteerQuality: {
                                 ...reviewForm.animalShelterReview.staffAndVolunteerQuality,
-                                staffExpertiseAndVolunteerPrograms: e.target.value,
+                                staffKnowledge: e.target.value,
                               },
                             },
                           })
@@ -4466,7 +4354,31 @@ const PlaceDetails = () => {
                         <option value="">Select...</option>
                         <option value="excellent">Excellent</option>
                         <option value="good">Good</option>
-                        <option value="adequate">Adequate</option>
+                        <option value="fair">Fair</option>
+                        <option value="poor">Poor</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Customer Service</label>
+                      <select
+                        value={reviewForm.animalShelterReview.staffAndVolunteerQuality.customerService}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            animalShelterReview: {
+                              ...reviewForm.animalShelterReview,
+                              staffAndVolunteerQuality: {
+                                ...reviewForm.animalShelterReview.staffAndVolunteerQuality,
+                                customerService: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
                         <option value="poor">Poor</option>
                       </select>
                     </div>
@@ -4474,7 +4386,7 @@ const PlaceDetails = () => {
                       <label>
                         <input
                           type="checkbox"
-                          checked={reviewForm.animalShelterReview.staffAndVolunteerQuality.knowledgeableStaff}
+                          checked={reviewForm.animalShelterReview.staffAndVolunteerQuality.volunteerProgram}
                           onChange={(e) =>
                             setReviewForm({
                               ...reviewForm,
@@ -4482,32 +4394,13 @@ const PlaceDetails = () => {
                                 ...reviewForm.animalShelterReview,
                                 staffAndVolunteerQuality: {
                                   ...reviewForm.animalShelterReview.staffAndVolunteerQuality,
-                                  knowledgeableStaff: e.target.checked,
+                                  volunteerProgram: e.target.checked,
                                 },
                               },
                             })
                           }
                         />
-                        Knowledgeable Staff
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={reviewForm.animalShelterReview.staffAndVolunteerQuality.activeVolunteers}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              animalShelterReview: {
-                                ...reviewForm.animalShelterReview,
-                                staffAndVolunteerQuality: {
-                                  ...reviewForm.animalShelterReview.staffAndVolunteerQuality,
-                                  activeVolunteers: e.target.checked,
-                                },
-                              },
-                            })
-                          }
-                        />
-                        Active Volunteers
+                        Volunteer Program Available
                       </label>
                     </div>
                   </div>
