@@ -144,26 +144,34 @@ const LoginPage = () => {
   );
 };
 
-function App() {
+const AppContent = () => {
   const { mongoUser } = useUser();
-  useSocketNotifications(mongoUser?._id);
+  const { AlertModalComponent } = useSocketNotifications(mongoUser?._id);
+  return (
+    <>
+      <Navigation />
 
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/lost-pets" element={<LostPets />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/place/:id" element={<PlaceDetails />} />
+        </Routes>
+      </main>
+      <AlertModalComponent />
+    </>
+  );
+};
+
+function App() {
   return (
 
     <Router>
       <div className="App">
-        <Navigation />
-
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/lost-pets" element={<LostPets />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/place/:id" element={<PlaceDetails />} />
-          </Routes>
-        </main>
+        <AppContent />
       </div>
     </Router>
 
