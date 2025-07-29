@@ -1,6 +1,7 @@
 const LostPet = require("../models/LostPet");
 const User = require("../models/User");
 const { findUserNearLocation } = require("./userController");
+const emailService = require("../utils/emailService");
 
 let io;
 const setSocketIO = (socketIO) => {
@@ -95,13 +96,29 @@ exports.createLostPetReport = async (req, res) => {
           timestamp: new Date()
         };
 
-        nearbyUsers.forEach(user => {
-          io.to(`user_${user._id}`).emit('lost-pet-alert', {
-            ...alertData,
-            message: `A ${lostPet.species} named ${lostPet.petName} has gone missing near your location.`
+        // Socket notifications
+        if (io) {
+          nearbyUsers.forEach(user => {
+            io.to(`user_${user._id}`).emit('lost-pet-alert', {
+              ...alertData,
+              message: `A ${lostPet.species} named ${lostPet.petName} has gone missing near your location.`
+            });
           });
+          console.log(`Real-time alerts sent to ${nearbyUsers.length} users`);
+        }
+
+        const emailPromises = nearbyUsers.map(user => {
+          return emailService.sendLostPetAlert(user.email, user.name, alertData);
         });
-        console.log(`Real-time alerts sent to ${nearbyUsers.length} users`);
+
+        try {
+          const emailResults = await Promise.allSettled(emailPromises);
+          const successful = emailResults.filter(result => emailResults.status === 'fulfilled' && result.value.success).length;
+          const failed = emailResults.length - successful;
+          console.log(`Email alerts sent: ${successful} successful, ${failed} failed`);
+        } catch (emailError) {
+          console.error('Error sending email alerts:', emailError);
+        }
       }
 
     } catch (error) {
