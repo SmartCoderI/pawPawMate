@@ -15,6 +15,7 @@ const generateRewardCard = async (userId, reviewId, placeId, locationName, contr
     // Get user's pets (correct relationship)
     const Pet = require("../models/Pet");
     const userPets = await Pet.find({ owner: userId });
+    console.log("[Card Generation] Fetched user pets:", JSON.stringify(userPets, null, 2));
 
     // Get place data for AI prompt context
     const Place = require("../models/Place");
@@ -30,12 +31,12 @@ const generateRewardCard = async (userId, reviewId, placeId, locationName, contr
     try {
       const promptService = require("../services/promptService");
       const openaiService = require("../services/openaiService");
-      
+
       if (openaiService.isConfigured()) {
         console.log("🎨 Attempting AI image generation for reward card...");
 
-        // Generate AI prompt
-        const aiPrompt = promptService.generateCardPrompt(user, place, contributionType, userPets, review);
+        // Generate AI prompt (now an async operation)
+        const aiPrompt = await promptService.generateCardPrompt(user, place, contributionType, userPets, review);
 
         // Generate unique filename
         const timestamp = Date.now();
@@ -50,7 +51,7 @@ const generateRewardCard = async (userId, reviewId, placeId, locationName, contr
         }
       }
     } catch (aiError) {
-      if (aiError.code === 'MODULE_NOT_FOUND') {
+      if (aiError.code === "MODULE_NOT_FOUND") {
         console.log("ℹ️  AI image generation not available (missing dependencies), using fallback image");
       } else {
         console.error("❌ AI image generation failed, falling back to user pet image:", aiError.message);
@@ -124,9 +125,11 @@ const getUserCards = async (req, res) => {
     const cards = await Card.find({ earnedBy: userObjectId })
       .populate("earnedBy", "name profileImage")
       .populate("reviewId", "rating comment createdAt")
+      .populate("placeId", "type") // Populate the placeId to get the place type
       .sort({ createdAt: -1 });
 
     console.log(`Found ${cards.length} cards for user ${userId}`);
+    console.log("[Debug] Card data being sent to frontend:", JSON.stringify(cards, null, 2));
     res.json(cards);
   } catch (error) {
     console.error("Error fetching user cards:", error);
@@ -140,6 +143,7 @@ const getAllCards = async (req, res) => {
     const cards = await Card.find()
       .populate("earnedBy", "name profileImage")
       .populate("reviewId", "rating comment createdAt")
+      .populate("placeId", "type") // Populate the placeId to get the place type
       .sort({ createdAt: -1 })
       .limit(50);
 
@@ -157,14 +161,17 @@ const updateHelpfulCount = async (req, res) => {
     const { increment } = req.body; // true to increment, false to decrement
 
     const updateValue = increment ? 1 : -1;
-    const card = await Card.findByIdAndUpdate(cardId, { $inc: { helpfulCount: updateValue } }, { new: true });
+    const card = await Card.findByIdAndUpdate(cardId, { $inc: { helpfulCount: updateValue } }, { new: true })
+      .populate("earnedBy", "name profileImage")
+      .populate("reviewId", "rating comment createdAt")
+      .populate("placeId", "type"); // Re-populate after update
 
     if (!card) {
       return res.status(404).json({ error: "Card not found" });
     }
 
     res.json(card);
-  } catch (error) {  contributionType = "milestone_achievement";
+  } catch (error) {
     console.error("Error updating helpful count:", error);
     res.status(500).json({ error: "Failed to update helpful count" });
   }
