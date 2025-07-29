@@ -3,35 +3,37 @@ const Place = require("../models/Place");
 const Card = require("../models/Card");
 const { generateRewardCard } = require("./cardController");
 
-// Helper function to validate pet store review data (basic enum validation)
+// Helper function to validate pet store review data - ALIGNED WITH REVIEW.JS MODEL
 const validatePetStoreReview = (petStoreReview) => {
   if (!petStoreReview) return true; // Optional field
 
   const errors = [];
 
-  // Validate accessAndLocation
+  // 1. Validate accessAndLocation - ALIGNED WITH MODEL
   if (petStoreReview.accessAndLocation) {
-    const { parkingDifficulty, parkingToParkDistance } = petStoreReview.accessAndLocation;
+    const { parkingDifficulty } = petStoreReview.accessAndLocation;
     if (parkingDifficulty && !["easy", "moderate", "difficult"].includes(parkingDifficulty)) {
       errors.push("Invalid parkingDifficulty value");
     }
-    if (parkingToParkDistance && !["close", "moderate", "far"].includes(parkingToParkDistance)) {
-      errors.push("Invalid parkingToParkDistance value");
-    }
   }
 
-  // Validate servicesAndConveniences
+  // 2. Validate hoursOfOperation - ALIGNED WITH MODEL
+  if (petStoreReview.hoursOfOperation) {
+    // is24Hours is boolean, specificHours is string - no enum validation needed
+  }
+
+  // 3. Validate servicesAndConveniences - ALIGNED WITH MODEL
   if (petStoreReview.servicesAndConveniences) {
     const { returnPolicy } = petStoreReview.servicesAndConveniences;
     if (returnPolicy && !["excellent", "good", "fair", "poor"].includes(returnPolicy)) {
       errors.push("Invalid returnPolicy value");
     }
+    // grooming, veterinaryServices, petTraining, onlineOrdering, curbsidePickup are boolean - no enum validation needed
   }
 
-  // Validate productSelectionAndQuality
+  // 4. Validate productSelectionAndQuality - ALIGNED WITH MODEL
   if (petStoreReview.productSelectionAndQuality) {
-    const { foodBrandVariety, toySelection, suppliesAvailability, productFreshness } =
-      petStoreReview.productSelectionAndQuality;
+    const { foodBrandVariety, toySelection, productFreshness } = petStoreReview.productSelectionAndQuality;
     const qualityValues = ["excellent", "good", "fair", "poor"];
 
     if (foodBrandVariety && !qualityValues.includes(foodBrandVariety)) {
@@ -40,67 +42,55 @@ const validatePetStoreReview = (petStoreReview) => {
     if (toySelection && !qualityValues.includes(toySelection)) {
       errors.push("Invalid toySelection value");
     }
-    if (suppliesAvailability && !qualityValues.includes(suppliesAvailability)) {
-      errors.push("Invalid suppliesAvailability value");
-    }
     if (productFreshness && !qualityValues.includes(productFreshness)) {
       errors.push("Invalid productFreshness value");
     }
   }
 
-  // Validate pricingAndValue
+  // 5. Validate pricingAndValue - ALIGNED WITH MODEL
   if (petStoreReview.pricingAndValue) {
     const { overallPricing } = petStoreReview.pricingAndValue;
     if (overallPricing && !["low", "moderate", "high", "very_high"].includes(overallPricing)) {
       errors.push("Invalid overallPricing value");
     }
+    // priceMatching is boolean - no enum validation needed
   }
 
-  // Validate staffKnowledgeAndService
+  // 6. Validate staffKnowledgeAndService - ALIGNED WITH MODEL
   if (petStoreReview.staffKnowledgeAndService) {
-    const { petKnowledge, productRecommendations, customerService, helpfulness } =
-      petStoreReview.staffKnowledgeAndService;
-    const serviceValues = ["excellent", "good", "fair", "poor"];
-
-    if (petKnowledge && !serviceValues.includes(petKnowledge)) {
+    const { petKnowledge } = petStoreReview.staffKnowledgeAndService;
+    if (petKnowledge && !["excellent", "good", "fair", "poor"].includes(petKnowledge)) {
       errors.push("Invalid petKnowledge value");
     }
-    if (productRecommendations && !serviceValues.includes(productRecommendations)) {
-      errors.push("Invalid productRecommendations value");
-    }
-    if (customerService && !serviceValues.includes(customerService)) {
-      errors.push("Invalid customerService value");
-    }
-    if (helpfulness && !serviceValues.includes(helpfulness)) {
-      errors.push("Invalid helpfulness value");
-    }
+    // trainingCertified is boolean - no enum validation needed
   }
 
   return errors.length === 0 ? true : errors;
 };
 
-// Helper function to validate animal shelter review data (basic enum validation)
+// Helper function to validate animal shelter review data - ALIGNED WITH REVIEW.JS MODEL
 const validateAnimalShelterReview = (animalShelterReview) => {
   if (!animalShelterReview) return true; // Optional field
 
   const errors = [];
 
-  // Validate accessAndLocation
+  // 1. Validate accessAndLocation - ALIGNED WITH MODEL
   if (animalShelterReview.accessAndLocation) {
-    const { parkingDifficulty, parkingToParkDistance } = animalShelterReview.accessAndLocation;
+    const { parkingDifficulty } = animalShelterReview.accessAndLocation;
     if (parkingDifficulty && !["easy", "moderate", "difficult"].includes(parkingDifficulty)) {
       errors.push("Invalid parkingDifficulty value");
     }
-    if (parkingToParkDistance && !["close", "moderate", "far"].includes(parkingToParkDistance)) {
-      errors.push("Invalid parkingToParkDistance value");
-    }
   }
 
-  // Validate animalTypeSelection
+  // 2. Validate hoursOfOperation - ALIGNED WITH MODEL
+  if (animalShelterReview.hoursOfOperation) {
+    // is24Hours is boolean, specificHours is string - no enum validation needed
+  }
+
+  // 3. Validate animalTypeSelection - ALIGNED WITH MODEL
   if (animalShelterReview.animalTypeSelection) {
-    const { availableAnimalTypes, breedVariety, ageRange } = animalShelterReview.animalTypeSelection;
+    const { availableAnimalTypes, breedVariety } = animalShelterReview.animalTypeSelection;
     const validAnimalTypes = ["dogs", "cats", "rabbits", "birds", "reptiles", "small_mammals"];
-    const validAgeRanges = ["puppies_kittens", "young_adults", "adults", "seniors"];
 
     if (availableAnimalTypes && Array.isArray(availableAnimalTypes)) {
       availableAnimalTypes.forEach((type, index) => {
@@ -113,19 +103,11 @@ const validateAnimalShelterReview = (animalShelterReview) => {
     if (breedVariety && !["excellent", "good", "fair", "poor"].includes(breedVariety)) {
       errors.push("Invalid breedVariety value");
     }
-
-    if (ageRange && Array.isArray(ageRange)) {
-      ageRange.forEach((age, index) => {
-        if (!validAgeRanges.includes(age)) {
-          errors.push(`Invalid age range at index ${index}: ${age}`);
-        }
-      });
-    }
   }
 
-  // Validate animalCareAndWelfare
+  // 4. Validate animalCareAndWelfare - ALIGNED WITH MODEL
   if (animalShelterReview.animalCareAndWelfare) {
-    const { animalHealth, livingConditions, medicalCare } = animalShelterReview.animalCareAndWelfare;
+    const { animalHealth, livingConditions } = animalShelterReview.animalCareAndWelfare;
     const careValues = ["excellent", "good", "fair", "poor"];
 
     if (animalHealth && !careValues.includes(animalHealth)) {
@@ -134,15 +116,11 @@ const validateAnimalShelterReview = (animalShelterReview) => {
     if (livingConditions && !careValues.includes(livingConditions)) {
       errors.push("Invalid livingConditions value");
     }
-    if (medicalCare && !careValues.includes(medicalCare)) {
-      errors.push("Invalid medicalCare value");
-    }
   }
 
-  // Validate adoptionProcessAndSupport
+  // 5. Validate adoptionProcessAndSupport - ALIGNED WITH MODEL
   if (animalShelterReview.adoptionProcessAndSupport) {
-    const { applicationProcess, processingTime, adoptionFees, returnPolicy } =
-      animalShelterReview.adoptionProcessAndSupport;
+    const { applicationProcess, processingTime } = animalShelterReview.adoptionProcessAndSupport;
 
     if (applicationProcess && !["easy", "moderate", "difficult"].includes(applicationProcess)) {
       errors.push("Invalid applicationProcess value");
@@ -150,68 +128,57 @@ const validateAnimalShelterReview = (animalShelterReview) => {
     if (processingTime && !["same_day", "within_week", "1_2_weeks", "over_2_weeks"].includes(processingTime)) {
       errors.push("Invalid processingTime value");
     }
-    if (adoptionFees && !["low", "moderate", "high", "very_high"].includes(adoptionFees)) {
-      errors.push("Invalid adoptionFees value");
-    }
-    if (returnPolicy && !["excellent", "good", "fair", "poor"].includes(returnPolicy)) {
-      errors.push("Invalid returnPolicy value");
-    }
+    // homeVisitRequired is boolean - no enum validation needed
   }
 
-  // Validate staffAndVolunteerQuality
+  // 6. Validate staffAndVolunteerQuality - ALIGNED WITH MODEL
   if (animalShelterReview.staffAndVolunteerQuality) {
-    const { staffKnowledge, animalHandling, customerService, compassionLevel } =
-      animalShelterReview.staffAndVolunteerQuality;
+    const { staffKnowledge, customerService } = animalShelterReview.staffAndVolunteerQuality;
     const qualityValues = ["excellent", "good", "fair", "poor"];
 
     if (staffKnowledge && !qualityValues.includes(staffKnowledge)) {
       errors.push("Invalid staffKnowledge value");
     }
-    if (animalHandling && !qualityValues.includes(animalHandling)) {
-      errors.push("Invalid animalHandling value");
-    }
     if (customerService && !qualityValues.includes(customerService)) {
       errors.push("Invalid customerService value");
     }
-    if (compassionLevel && !qualityValues.includes(compassionLevel)) {
-      errors.push("Invalid compassionLevel value");
-    }
+    // volunteerProgram is boolean - no enum validation needed
   }
 
   return errors.length === 0 ? true : errors;
 };
 
-// Helper function to validate dog park review data (basic enum validation)
+// Helper function to validate dog park review data - ALIGNED WITH REVIEW.JS MODEL
 const validateDogParkReview = (dogParkReview) => {
   if (!dogParkReview) return true; // Optional field
 
   const errors = [];
 
-  // Validate accessAndLocation
+  // 1. Validate accessAndLocation - ALIGNED WITH MODEL
   if (dogParkReview.accessAndLocation) {
-    const { parkingDifficulty, handicapFriendly, parkingToParkDistance } = dogParkReview.accessAndLocation;
+    const { parkingDifficulty } = dogParkReview.accessAndLocation;
     if (parkingDifficulty && !["easy", "moderate", "difficult"].includes(parkingDifficulty)) {
       errors.push("Invalid parkingDifficulty value");
     }
-    if (parkingToParkDistance && !["close", "moderate", "far"].includes(parkingToParkDistance)) {
-      errors.push("Invalid parkingToParkDistance value");
-    }
   }
 
-  // Validate safetyLevel
+  // 2. Validate hoursOfOperation - ALIGNED WITH MODEL
+  if (dogParkReview.hoursOfOperation) {
+    // is24Hours is boolean, specificHours is string - no enum validation needed
+  }
+
+  // 3. Validate safetyLevel - ALIGNED WITH MODEL
   if (dogParkReview.safetyLevel) {
     const { fencingCondition } = dogParkReview.safetyLevel;
     if (fencingCondition && !["fully_enclosed", "partially_enclosed", "not_enclosed"].includes(fencingCondition)) {
       errors.push("Invalid fencingCondition value");
     }
+    // nightIllumination, firstAidStation, surveillanceCameras are boolean - no enum validation needed
   }
 
-  // Validate sizeAndLayout
+  // 4. Validate sizeAndLayout - ALIGNED WITH MODEL
   if (dogParkReview.sizeAndLayout) {
-    const { separateAreas, runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
-    if (separateAreas && !["yes_small_large", "yes_other", "no"].includes(separateAreas)) {
-      errors.push("Invalid separateAreas value");
-    }
+    const { runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
     if (runningSpace && !["enough", "limited", "tight"].includes(runningSpace)) {
       errors.push("Invalid runningSpace value");
     }
@@ -220,7 +187,7 @@ const validateDogParkReview = (dogParkReview) => {
     }
   }
 
-  // Validate amenitiesAndFacilities
+  // 5. Validate amenitiesAndFacilities - ALIGNED WITH MODEL
   if (dogParkReview.amenitiesAndFacilities) {
     const { seatingLevel, shadeAndCover, waterAccess } = dogParkReview.amenitiesAndFacilities;
     if (seatingLevel && !["bench", "gazebo", "no_seat"].includes(seatingLevel)) {
@@ -232,47 +199,44 @@ const validateDogParkReview = (dogParkReview) => {
     if (waterAccess && !["drinking_fountain", "fire_hydrant", "pool", "none"].includes(waterAccess)) {
       errors.push("Invalid waterAccess value");
     }
+    // biodegradableBags is boolean - no enum validation needed
   }
 
-  // Validate maintenanceAndCleanliness
+  // 6. Validate maintenanceAndCleanliness - ALIGNED WITH MODEL
   if (dogParkReview.maintenanceAndCleanliness) {
-    const { overallCleanliness, trashLevel, odorLevel, equipmentCondition } = dogParkReview.maintenanceAndCleanliness;
+    const { overallCleanliness, equipmentCondition } = dogParkReview.maintenanceAndCleanliness;
     if (overallCleanliness && !["good", "neutral", "bad"].includes(overallCleanliness)) {
       errors.push("Invalid overallCleanliness value");
-    }
-    if (trashLevel && !["clean", "moderate", "dirty"].includes(trashLevel)) {
-      errors.push("Invalid trashLevel value");
-    }
-    if (odorLevel && !["none", "mild", "strong"].includes(odorLevel)) {
-      errors.push("Invalid odorLevel value");
     }
     if (equipmentCondition && !["good", "fair", "poor"].includes(equipmentCondition)) {
       errors.push("Invalid equipmentCondition value");
     }
   }
 
-  // Validate crowdAndSocialDynamics
+  // 7. Validate crowdAndSocialDynamics - ALIGNED WITH MODEL
   if (dogParkReview.crowdAndSocialDynamics) {
-    const { ownerCulture, wastePickup, ownerFriendliness } = dogParkReview.crowdAndSocialDynamics;
+    const { ownerCulture, ownerFriendliness, peakDays } = dogParkReview.crowdAndSocialDynamics;
     if (ownerCulture && !["excellent", "good", "fair", "poor"].includes(ownerCulture)) {
       errors.push("Invalid ownerCulture value");
-    }
-    if (wastePickup && !["always", "usually", "sometimes", "rarely"].includes(wastePickup)) {
-      errors.push("Invalid wastePickup value");
     }
     if (ownerFriendliness && !["very_friendly", "friendly", "neutral", "unfriendly"].includes(ownerFriendliness)) {
       errors.push("Invalid ownerFriendliness value");
     }
+    if (peakDays && Array.isArray(peakDays)) {
+      const validDays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+      peakDays.forEach((day, index) => {
+        if (!validDays.includes(day)) {
+          errors.push(`Invalid peak day at index ${index}: ${day}`);
+        }
+      });
+    }
   }
 
-  // Validate rulesPoliciesAndCommunity
+  // 8. Validate rulesPoliciesAndCommunity - ALIGNED WITH MODEL
   if (dogParkReview.rulesPoliciesAndCommunity) {
-    const { leashPolicy, aggressiveDogPolicy, communityEnforcement } = dogParkReview.rulesPoliciesAndCommunity;
+    const { leashPolicy, communityEnforcement } = dogParkReview.rulesPoliciesAndCommunity;
     if (leashPolicy && !["off_leash_allowed", "leash_required", "mixed_areas"].includes(leashPolicy)) {
       errors.push("Invalid leashPolicy value");
-    }
-    if (aggressiveDogPolicy && !["strict", "moderate", "lenient", "none"].includes(aggressiveDogPolicy)) {
-      errors.push("Invalid aggressiveDogPolicy value");
     }
     if (communityEnforcement && !["strict", "moderate", "lenient", "none"].includes(communityEnforcement)) {
       errors.push("Invalid communityEnforcement value");
@@ -883,120 +847,95 @@ exports.getDogParkReviewStats = async (req, res) => {
     const totalReviews = reviews.length;
     const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
 
-    // Calculate category-specific statistics
+    // Calculate category-specific statistics - ALIGNED WITH REVIEW.JS MODEL
     const categoryStats = {
+      // 1. Access & Location - ALIGNED WITH MODEL
       accessAndLocation: {
         parkingDifficulty: {},
-        handicapFriendly: { true: 0, false: 0 },
-        parkingToParkDistance: {},
       },
+      // 2. Hours of Operation - ALIGNED WITH MODEL
       hoursOfOperation: {
         is24Hours: { true: 0, false: 0 },
-        dawnToDusk: { true: 0, false: 0 },
+        specificHours: {},
       },
+      // 3. Safety Level - ALIGNED WITH MODEL
       safetyLevel: {
         fencingCondition: {},
-        doubleGated: { true: 0, false: 0 },
         nightIllumination: { true: 0, false: 0 },
         firstAidStation: { true: 0, false: 0 },
-        emergencyContact: { true: 0, false: 0 },
         surveillanceCameras: { true: 0, false: 0 },
-        noSharpEdges: { true: 0, false: 0 },
       },
+      // 4. Size & Layout - ALIGNED WITH MODEL
       sizeAndLayout: {
-        separateAreas: {},
         runningSpace: {},
         drainagePerformance: {},
       },
+      // 5. Amenities & Facilities - ALIGNED WITH MODEL
       amenitiesAndFacilities: {
         seatingLevel: {},
         shadeAndCover: {},
-        wasteStation: { true: 0, false: 0 },
         biodegradableBags: { true: 0, false: 0 },
-        restroom: { true: 0, false: 0 },
         waterAccess: {},
       },
+      // 6. Maintenance & Cleanliness - ALIGNED WITH MODEL
       maintenanceAndCleanliness: {
         overallCleanliness: {},
-        trashLevel: {},
-        odorLevel: {},
         equipmentCondition: {},
       },
+      // 7. Crowd & Social Dynamics - ALIGNED WITH MODEL
       crowdAndSocialDynamics: {
+        peakDays: {},
         ownerCulture: {},
-        wastePickup: {},
         ownerFriendliness: {},
       },
+      // 8. Rules, Policies & Community - ALIGNED WITH MODEL
       rulesPoliciesAndCommunity: {
         leashPolicy: {},
-        vaccinationRequired: { true: 0, false: 0 },
-        aggressiveDogPolicy: {},
         communityEnforcement: {},
       },
     };
 
-    // Aggregate statistics from all reviews
+    // Aggregate statistics from all reviews - ALIGNED WITH REVIEW.JS MODEL
     reviews.forEach((review) => {
       if (review.dogParkReview) {
         const { dogParkReview } = review;
 
-        // Access & Location
+        // 1. Access & Location - ALIGNED WITH MODEL
         if (dogParkReview.accessAndLocation) {
-          const { parkingDifficulty, handicapFriendly, parkingToParkDistance } = dogParkReview.accessAndLocation;
+          const { parkingDifficulty } = dogParkReview.accessAndLocation;
           if (parkingDifficulty) {
             categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] =
               (categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] || 0) + 1;
           }
-          if (handicapFriendly !== undefined) {
-            categoryStats.accessAndLocation.handicapFriendly[handicapFriendly]++;
-          }
-          if (parkingToParkDistance) {
-            categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] =
-              (categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] || 0) + 1;
-          }
         }
 
-        // Hours of Operation
+        // 2. Hours of Operation - ALIGNED WITH MODEL
         if (dogParkReview.hoursOfOperation) {
-          const { is24Hours, dawnToDusk } = dogParkReview.hoursOfOperation;
+          const { is24Hours, specificHours } = dogParkReview.hoursOfOperation;
           if (is24Hours !== undefined) {
             categoryStats.hoursOfOperation.is24Hours[is24Hours]++;
           }
-          if (dawnToDusk !== undefined) {
-            categoryStats.hoursOfOperation.dawnToDusk[dawnToDusk]++;
+          if (specificHours) {
+            categoryStats.hoursOfOperation.specificHours[specificHours] =
+              (categoryStats.hoursOfOperation.specificHours[specificHours] || 0) + 1;
           }
         }
 
-        // Safety Level
+        // 3. Safety Level - ALIGNED WITH MODEL
         if (dogParkReview.safetyLevel) {
-          const {
-            fencingCondition,
-            doubleGated,
-            nightIllumination,
-            firstAidStation,
-            emergencyContact,
-            surveillanceCameras,
-            noSharpEdges,
-          } = dogParkReview.safetyLevel;
+          const { fencingCondition, nightIllumination, firstAidStation, surveillanceCameras } = dogParkReview.safetyLevel;
           if (fencingCondition) {
             categoryStats.safetyLevel.fencingCondition[fencingCondition] =
               (categoryStats.safetyLevel.fencingCondition[fencingCondition] || 0) + 1;
           }
-          if (doubleGated !== undefined) categoryStats.safetyLevel.doubleGated[doubleGated]++;
           if (nightIllumination !== undefined) categoryStats.safetyLevel.nightIllumination[nightIllumination]++;
           if (firstAidStation !== undefined) categoryStats.safetyLevel.firstAidStation[firstAidStation]++;
-          if (emergencyContact !== undefined) categoryStats.safetyLevel.emergencyContact[emergencyContact]++;
           if (surveillanceCameras !== undefined) categoryStats.safetyLevel.surveillanceCameras[surveillanceCameras]++;
-          if (noSharpEdges !== undefined) categoryStats.safetyLevel.noSharpEdges[noSharpEdges]++;
         }
 
-        // Size & Layout
+        // 4. Size & Layout - ALIGNED WITH MODEL
         if (dogParkReview.sizeAndLayout) {
-          const { separateAreas, runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
-          if (separateAreas) {
-            categoryStats.sizeAndLayout.separateAreas[separateAreas] =
-              (categoryStats.sizeAndLayout.separateAreas[separateAreas] || 0) + 1;
-          }
+          const { runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
           if (runningSpace) {
             categoryStats.sizeAndLayout.runningSpace[runningSpace] =
               (categoryStats.sizeAndLayout.runningSpace[runningSpace] || 0) + 1;
@@ -1007,10 +946,9 @@ exports.getDogParkReviewStats = async (req, res) => {
           }
         }
 
-        // Amenities & Facilities
+        // 5. Amenities & Facilities - ALIGNED WITH MODEL
         if (dogParkReview.amenitiesAndFacilities) {
-          const { seatingLevel, shadeAndCover, wasteStation, biodegradableBags, restroom, waterAccess } =
-            dogParkReview.amenitiesAndFacilities;
+          const { seatingLevel, shadeAndCover, biodegradableBags, waterAccess } = dogParkReview.amenitiesAndFacilities;
           if (seatingLevel) {
             categoryStats.amenitiesAndFacilities.seatingLevel[seatingLevel] =
               (categoryStats.amenitiesAndFacilities.seatingLevel[seatingLevel] || 0) + 1;
@@ -1019,31 +957,19 @@ exports.getDogParkReviewStats = async (req, res) => {
             categoryStats.amenitiesAndFacilities.shadeAndCover[shadeAndCover] =
               (categoryStats.amenitiesAndFacilities.shadeAndCover[shadeAndCover] || 0) + 1;
           }
-          if (wasteStation !== undefined) categoryStats.amenitiesAndFacilities.wasteStation[wasteStation]++;
-          if (biodegradableBags !== undefined)
-            categoryStats.amenitiesAndFacilities.biodegradableBags[biodegradableBags]++;
-          if (restroom !== undefined) categoryStats.amenitiesAndFacilities.restroom[restroom]++;
+          if (biodegradableBags !== undefined) categoryStats.amenitiesAndFacilities.biodegradableBags[biodegradableBags]++;
           if (waterAccess) {
             categoryStats.amenitiesAndFacilities.waterAccess[waterAccess] =
               (categoryStats.amenitiesAndFacilities.waterAccess[waterAccess] || 0) + 1;
           }
         }
 
-        // Maintenance & Cleanliness
+        // 6. Maintenance & Cleanliness - ALIGNED WITH MODEL
         if (dogParkReview.maintenanceAndCleanliness) {
-          const { overallCleanliness, trashLevel, odorLevel, equipmentCondition } =
-            dogParkReview.maintenanceAndCleanliness;
+          const { overallCleanliness, equipmentCondition } = dogParkReview.maintenanceAndCleanliness;
           if (overallCleanliness) {
             categoryStats.maintenanceAndCleanliness.overallCleanliness[overallCleanliness] =
               (categoryStats.maintenanceAndCleanliness.overallCleanliness[overallCleanliness] || 0) + 1;
-          }
-          if (trashLevel) {
-            categoryStats.maintenanceAndCleanliness.trashLevel[trashLevel] =
-              (categoryStats.maintenanceAndCleanliness.trashLevel[trashLevel] || 0) + 1;
-          }
-          if (odorLevel) {
-            categoryStats.maintenanceAndCleanliness.odorLevel[odorLevel] =
-              (categoryStats.maintenanceAndCleanliness.odorLevel[odorLevel] || 0) + 1;
           }
           if (equipmentCondition) {
             categoryStats.maintenanceAndCleanliness.equipmentCondition[equipmentCondition] =
@@ -1051,16 +977,18 @@ exports.getDogParkReviewStats = async (req, res) => {
           }
         }
 
-        // Crowd & Social Dynamics
+        // 7. Crowd & Social Dynamics - ALIGNED WITH MODEL
         if (dogParkReview.crowdAndSocialDynamics) {
-          const { ownerCulture, wastePickup, ownerFriendliness } = dogParkReview.crowdAndSocialDynamics;
+          const { peakDays, ownerCulture, ownerFriendliness } = dogParkReview.crowdAndSocialDynamics;
+          if (peakDays && Array.isArray(peakDays)) {
+            peakDays.forEach((day) => {
+              categoryStats.crowdAndSocialDynamics.peakDays[day] =
+                (categoryStats.crowdAndSocialDynamics.peakDays[day] || 0) + 1;
+            });
+          }
           if (ownerCulture) {
             categoryStats.crowdAndSocialDynamics.ownerCulture[ownerCulture] =
               (categoryStats.crowdAndSocialDynamics.ownerCulture[ownerCulture] || 0) + 1;
-          }
-          if (wastePickup) {
-            categoryStats.crowdAndSocialDynamics.wastePickup[wastePickup] =
-              (categoryStats.crowdAndSocialDynamics.wastePickup[wastePickup] || 0) + 1;
           }
           if (ownerFriendliness) {
             categoryStats.crowdAndSocialDynamics.ownerFriendliness[ownerFriendliness] =
@@ -1068,19 +996,12 @@ exports.getDogParkReviewStats = async (req, res) => {
           }
         }
 
-        // Rules, Policies & Community
+        // 8. Rules, Policies & Community - ALIGNED WITH MODEL
         if (dogParkReview.rulesPoliciesAndCommunity) {
-          const { leashPolicy, vaccinationRequired, aggressiveDogPolicy, communityEnforcement } =
-            dogParkReview.rulesPoliciesAndCommunity;
+          const { leashPolicy, communityEnforcement } = dogParkReview.rulesPoliciesAndCommunity;
           if (leashPolicy) {
             categoryStats.rulesPoliciesAndCommunity.leashPolicy[leashPolicy] =
               (categoryStats.rulesPoliciesAndCommunity.leashPolicy[leashPolicy] || 0) + 1;
-          }
-          if (vaccinationRequired !== undefined)
-            categoryStats.rulesPoliciesAndCommunity.vaccinationRequired[vaccinationRequired]++;
-          if (aggressiveDogPolicy) {
-            categoryStats.rulesPoliciesAndCommunity.aggressiveDogPolicy[aggressiveDogPolicy] =
-              (categoryStats.rulesPoliciesAndCommunity.aggressiveDogPolicy[aggressiveDogPolicy] || 0) + 1;
           }
           if (communityEnforcement) {
             categoryStats.rulesPoliciesAndCommunity.communityEnforcement[communityEnforcement] =
@@ -1357,101 +1278,75 @@ exports.getPetStoreReviewStats = async (req, res) => {
     const totalReviews = reviews.length;
     const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
 
-    // Calculate category-specific statistics
+    // Calculate category-specific statistics - ALIGNED WITH REVIEW.JS MODEL
     const categoryStats = {
+      // 1. Access & Location - ALIGNED WITH MODEL
       accessAndLocation: {
         parkingDifficulty: {},
-        handicapFriendly: { true: 0, false: 0 },
-        parkingToParkDistance: {},
       },
+      // 2. Hours of Operation - ALIGNED WITH MODEL
       hoursOfOperation: {
         is24Hours: { true: 0, false: 0 },
-        dawnToDusk: { true: 0, false: 0 },
         specificHours: {},
       },
+      // 3. Services & Conveniences - ALIGNED WITH MODEL
       servicesAndConveniences: {
         grooming: { true: 0, false: 0 },
         veterinaryServices: { true: 0, false: 0 },
         petTraining: { true: 0, false: 0 },
-        deliveryService: { true: 0, false: 0 },
         onlineOrdering: { true: 0, false: 0 },
         curbsidePickup: { true: 0, false: 0 },
         returnPolicy: {},
       },
+      // 4. Product Selection & Quality - ALIGNED WITH MODEL
       productSelectionAndQuality: {
         foodBrandVariety: {},
         toySelection: {},
-        suppliesAvailability: {},
         productFreshness: {},
-        organicNaturalOptions: { true: 0, false: 0 },
-        prescriptionDietAvailable: { true: 0, false: 0 },
       },
+      // 5. Pricing & Value - ALIGNED WITH MODEL
       pricingAndValue: {
         overallPricing: {},
-        loyaltyProgram: { true: 0, false: 0 },
-        frequentSales: { true: 0, false: 0 },
         priceMatching: { true: 0, false: 0 },
-        bulkDiscounts: { true: 0, false: 0 },
-        seniorDiscounts: { true: 0, false: 0 },
       },
+      // 6. Staff Knowledge & Service - ALIGNED WITH MODEL
       staffKnowledgeAndService: {
         petKnowledge: {},
-        productRecommendations: {},
-        customerService: {},
-        helpfulness: {},
-        multilingual: { true: 0, false: 0 },
         trainingCertified: { true: 0, false: 0 },
       },
     };
 
-    // Aggregate statistics from all reviews
+    // Aggregate statistics from all reviews - ALIGNED WITH REVIEW.JS MODEL
     reviews.forEach((review) => {
       if (review.petStoreReview) {
         const { petStoreReview } = review;
 
-        // 1. Access & Location
+        // 1. Access & Location - ALIGNED WITH MODEL
         if (petStoreReview.accessAndLocation) {
-          const { parkingDifficulty, handicapFriendly, parkingToParkDistance } = petStoreReview.accessAndLocation;
+          const { parkingDifficulty } = petStoreReview.accessAndLocation;
           if (parkingDifficulty) {
             categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] =
               (categoryStats.accessAndLocation.parkingDifficulty[parkingDifficulty] || 0) + 1;
           }
-          if (handicapFriendly !== undefined) {
-            categoryStats.accessAndLocation.handicapFriendly[handicapFriendly]++;
-          }
-          if (parkingToParkDistance) {
-            categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] =
-              (categoryStats.accessAndLocation.parkingToParkDistance[parkingToParkDistance] || 0) + 1;
-          }
         }
 
-        // 2. Hours of Operation
+        // 2. Hours of Operation - ALIGNED WITH MODEL
         if (petStoreReview.hoursOfOperation) {
-          const { is24Hours, dawnToDusk, specificHours } = petStoreReview.hoursOfOperation;
+          const { is24Hours, specificHours } = petStoreReview.hoursOfOperation;
           if (is24Hours !== undefined) categoryStats.hoursOfOperation.is24Hours[is24Hours]++;
-          if (dawnToDusk !== undefined) categoryStats.hoursOfOperation.dawnToDusk[dawnToDusk]++;
           if (specificHours) {
             categoryStats.hoursOfOperation.specificHours[specificHours] =
               (categoryStats.hoursOfOperation.specificHours[specificHours] || 0) + 1;
           }
         }
 
-        // 3. Services & Conveniences
+        // 3. Services & Conveniences - ALIGNED WITH MODEL
         if (petStoreReview.servicesAndConveniences) {
-          const {
-            grooming,
-            veterinaryServices,
-            petTraining,
-            deliveryService,
-            onlineOrdering,
-            curbsidePickup,
-            returnPolicy,
-          } = petStoreReview.servicesAndConveniences;
+          const { grooming, veterinaryServices, petTraining, onlineOrdering, curbsidePickup, returnPolicy } = 
+            petStoreReview.servicesAndConveniences;
           if (grooming !== undefined) categoryStats.servicesAndConveniences.grooming[grooming]++;
-          if (veterinaryServices !== undefined)
-            categoryStats.servicesAndConveniences.veterinaryServices[veterinaryServices]++;
+          if (veterinaryServices !== undefined) categoryStats.servicesAndConveniences.veterinaryServices[veterinaryServices]++;
           if (petTraining !== undefined) categoryStats.servicesAndConveniences.petTraining[petTraining]++;
-          if (deliveryService !== undefined) categoryStats.servicesAndConveniences.deliveryService[deliveryService]++;
           if (onlineOrdering !== undefined) categoryStats.servicesAndConveniences.onlineOrdering[onlineOrdering]++;
           if (curbsidePickup !== undefined) categoryStats.servicesAndConveniences.curbsidePickup[curbsidePickup]++;
           if (returnPolicy) {
@@ -1460,16 +1355,9 @@ exports.getPetStoreReviewStats = async (req, res) => {
           }
         }
 
-        // 4. Product Selection & Quality
+        // 4. Product Selection & Quality - ALIGNED WITH MODEL
         if (petStoreReview.productSelectionAndQuality) {
-          const {
-            foodBrandVariety,
-            toySelection,
-            suppliesAvailability,
-            productFreshness,
-            organicNaturalOptions,
-            prescriptionDietAvailable,
-          } = petStoreReview.productSelectionAndQuality;
+          const { foodBrandVariety, toySelection, productFreshness } = petStoreReview.productSelectionAndQuality;
           if (foodBrandVariety) {
             categoryStats.productSelectionAndQuality.foodBrandVariety[foodBrandVariety] =
               (categoryStats.productSelectionAndQuality.foodBrandVariety[foodBrandVariety] || 0) + 1;
@@ -1478,64 +1366,30 @@ exports.getPetStoreReviewStats = async (req, res) => {
             categoryStats.productSelectionAndQuality.toySelection[toySelection] =
               (categoryStats.productSelectionAndQuality.toySelection[toySelection] || 0) + 1;
           }
-          if (suppliesAvailability) {
-            categoryStats.productSelectionAndQuality.suppliesAvailability[suppliesAvailability] =
-              (categoryStats.productSelectionAndQuality.suppliesAvailability[suppliesAvailability] || 0) + 1;
-          }
           if (productFreshness) {
             categoryStats.productSelectionAndQuality.productFreshness[productFreshness] =
               (categoryStats.productSelectionAndQuality.productFreshness[productFreshness] || 0) + 1;
           }
-          if (organicNaturalOptions !== undefined)
-            categoryStats.productSelectionAndQuality.organicNaturalOptions[organicNaturalOptions]++;
-          if (prescriptionDietAvailable !== undefined)
-            categoryStats.productSelectionAndQuality.prescriptionDietAvailable[prescriptionDietAvailable]++;
         }
 
-        // 5. Pricing & Value
+        // 5. Pricing & Value - ALIGNED WITH MODEL
         if (petStoreReview.pricingAndValue) {
-          const { overallPricing, loyaltyProgram, frequentSales, priceMatching, bulkDiscounts, seniorDiscounts } =
-            petStoreReview.pricingAndValue;
+          const { overallPricing, priceMatching } = petStoreReview.pricingAndValue;
           if (overallPricing) {
             categoryStats.pricingAndValue.overallPricing[overallPricing] =
               (categoryStats.pricingAndValue.overallPricing[overallPricing] || 0) + 1;
           }
-          if (loyaltyProgram !== undefined) categoryStats.pricingAndValue.loyaltyProgram[loyaltyProgram]++;
-          if (frequentSales !== undefined) categoryStats.pricingAndValue.frequentSales[frequentSales]++;
           if (priceMatching !== undefined) categoryStats.pricingAndValue.priceMatching[priceMatching]++;
-          if (bulkDiscounts !== undefined) categoryStats.pricingAndValue.bulkDiscounts[bulkDiscounts]++;
-          if (seniorDiscounts !== undefined) categoryStats.pricingAndValue.seniorDiscounts[seniorDiscounts]++;
         }
 
-        // 6. Staff Knowledge & Service
+        // 6. Staff Knowledge & Service - ALIGNED WITH MODEL
         if (petStoreReview.staffKnowledgeAndService) {
-          const {
-            petKnowledge,
-            productRecommendations,
-            customerService,
-            helpfulness,
-            multilingual,
-            trainingCertified,
-          } = petStoreReview.staffKnowledgeAndService;
+          const { petKnowledge, trainingCertified } = petStoreReview.staffKnowledgeAndService;
           if (petKnowledge) {
             categoryStats.staffKnowledgeAndService.petKnowledge[petKnowledge] =
               (categoryStats.staffKnowledgeAndService.petKnowledge[petKnowledge] || 0) + 1;
           }
-          if (productRecommendations) {
-            categoryStats.staffKnowledgeAndService.productRecommendations[productRecommendations] =
-              (categoryStats.staffKnowledgeAndService.productRecommendations[productRecommendations] || 0) + 1;
-          }
-          if (customerService) {
-            categoryStats.staffKnowledgeAndService.customerService[customerService] =
-              (categoryStats.staffKnowledgeAndService.customerService[customerService] || 0) + 1;
-          }
-          if (helpfulness) {
-            categoryStats.staffKnowledgeAndService.helpfulness[helpfulness] =
-              (categoryStats.staffKnowledgeAndService.helpfulness[helpfulness] || 0) + 1;
-          }
-          if (multilingual !== undefined) categoryStats.staffKnowledgeAndService.multilingual[multilingual]++;
-          if (trainingCertified !== undefined)
-            categoryStats.staffKnowledgeAndService.trainingCertified[trainingCertified]++;
+          if (trainingCertified !== undefined) categoryStats.staffKnowledgeAndService.trainingCertified[trainingCertified]++;
         }
       }
     });
@@ -1574,46 +1428,38 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
     const totalReviews = reviews.length;
     const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
 
-    // Calculate category-specific statistics
+    // Calculate category-specific statistics - ALIGNED WITH REVIEW.JS MODEL
     const categoryStats = {
+      // 1. Access & Location - ALIGNED WITH MODEL
       accessAndLocation: {
         parkingDifficulty: {},
-        handicapFriendly: { true: 0, false: 0 },
-        parkingToParkDistance: {},
       },
+      // 2. Hours of Operation - ALIGNED WITH MODEL
       hoursOfOperation: {
         is24Hours: { true: 0, false: 0 },
-        dawnToDusk: { true: 0, false: 0 },
         specificHours: {},
       },
+      // 3. Animal Type Selection - ALIGNED WITH MODEL
       animalTypeSelection: {
         availableAnimalTypes: {},
         breedVariety: {},
-        ageRange: {},
       },
+      // 4. Animal Care & Welfare - ALIGNED WITH MODEL
       animalCareAndWelfare: {
         animalHealth: {},
         livingConditions: {},
-        exercisePrograms: { true: 0, false: 0 },
-        medicalCare: {},
-        behavioralAssessment: { true: 0, false: 0 },
-        specialNeedsCare: { true: 0, false: 0 },
       },
+      // 5. Adoption Process & Support - ALIGNED WITH MODEL
       adoptionProcessAndSupport: {
         applicationProcess: {},
         processingTime: {},
         homeVisitRequired: { true: 0, false: 0 },
-        adoptionFees: {},
-        postAdoptionSupport: { true: 0, false: 0 },
-        returnPolicy: {},
       },
+      // 6. Staff & Volunteer Quality - ALIGNED WITH MODEL
       staffAndVolunteerQuality: {
         staffKnowledge: {},
-        animalHandling: {},
         customerService: {},
         volunteerProgram: { true: 0, false: 0 },
-        staffTraining: { true: 0, false: 0 },
-        compassionLevel: {},
       },
     };
 
@@ -1649,9 +1495,9 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
           }
         }
 
-        // 3. Animal Type Selection
+        // 3. Animal Type Selection - ALIGNED WITH MODEL
         if (animalShelterReview.animalTypeSelection) {
-          const { availableAnimalTypes, breedVariety, ageRange } = animalShelterReview.animalTypeSelection;
+          const { availableAnimalTypes, breedVariety } = animalShelterReview.animalTypeSelection;
           if (availableAnimalTypes && Array.isArray(availableAnimalTypes)) {
             availableAnimalTypes.forEach((type) => {
               categoryStats.animalTypeSelection.availableAnimalTypes[type] =
@@ -1662,24 +1508,11 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
             categoryStats.animalTypeSelection.breedVariety[breedVariety] =
               (categoryStats.animalTypeSelection.breedVariety[breedVariety] || 0) + 1;
           }
-          if (ageRange && Array.isArray(ageRange)) {
-            ageRange.forEach((age) => {
-              categoryStats.animalTypeSelection.ageRange[age] =
-                (categoryStats.animalTypeSelection.ageRange[age] || 0) + 1;
-            });
-          }
         }
 
-        // 4. Animal Care & Welfare
+        // 4. Animal Care & Welfare - ALIGNED WITH MODEL
         if (animalShelterReview.animalCareAndWelfare) {
-          const {
-            animalHealth,
-            livingConditions,
-            exercisePrograms,
-            medicalCare,
-            behavioralAssessment,
-            specialNeedsCare,
-          } = animalShelterReview.animalCareAndWelfare;
+          const { animalHealth, livingConditions } = animalShelterReview.animalCareAndWelfare;
           if (animalHealth) {
             categoryStats.animalCareAndWelfare.animalHealth[animalHealth] =
               (categoryStats.animalCareAndWelfare.animalHealth[animalHealth] || 0) + 1;
@@ -1688,26 +1521,11 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
             categoryStats.animalCareAndWelfare.livingConditions[livingConditions] =
               (categoryStats.animalCareAndWelfare.livingConditions[livingConditions] || 0) + 1;
           }
-          if (exercisePrograms !== undefined) categoryStats.animalCareAndWelfare.exercisePrograms[exercisePrograms]++;
-          if (medicalCare) {
-            categoryStats.animalCareAndWelfare.medicalCare[medicalCare] =
-              (categoryStats.animalCareAndWelfare.medicalCare[medicalCare] || 0) + 1;
-          }
-          if (behavioralAssessment !== undefined)
-            categoryStats.animalCareAndWelfare.behavioralAssessment[behavioralAssessment]++;
-          if (specialNeedsCare !== undefined) categoryStats.animalCareAndWelfare.specialNeedsCare[specialNeedsCare]++;
         }
 
-        // 5. Adoption Process & Support
+        // 5. Adoption Process & Support - ALIGNED WITH MODEL
         if (animalShelterReview.adoptionProcessAndSupport) {
-          const {
-            applicationProcess,
-            processingTime,
-            homeVisitRequired,
-            adoptionFees,
-            postAdoptionSupport,
-            returnPolicy,
-          } = animalShelterReview.adoptionProcessAndSupport;
+          const { applicationProcess, processingTime, homeVisitRequired } = animalShelterReview.adoptionProcessAndSupport;
           if (applicationProcess) {
             categoryStats.adoptionProcessAndSupport.applicationProcess[applicationProcess] =
               (categoryStats.adoptionProcessAndSupport.applicationProcess[applicationProcess] || 0) + 1;
@@ -1716,43 +1534,21 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
             categoryStats.adoptionProcessAndSupport.processingTime[processingTime] =
               (categoryStats.adoptionProcessAndSupport.processingTime[processingTime] || 0) + 1;
           }
-          if (homeVisitRequired !== undefined)
-            categoryStats.adoptionProcessAndSupport.homeVisitRequired[homeVisitRequired]++;
-          if (adoptionFees) {
-            categoryStats.adoptionProcessAndSupport.adoptionFees[adoptionFees] =
-              (categoryStats.adoptionProcessAndSupport.adoptionFees[adoptionFees] || 0) + 1;
-          }
-          if (postAdoptionSupport !== undefined)
-            categoryStats.adoptionProcessAndSupport.postAdoptionSupport[postAdoptionSupport]++;
-          if (returnPolicy) {
-            categoryStats.adoptionProcessAndSupport.returnPolicy[returnPolicy] =
-              (categoryStats.adoptionProcessAndSupport.returnPolicy[returnPolicy] || 0) + 1;
-          }
+          if (homeVisitRequired !== undefined) categoryStats.adoptionProcessAndSupport.homeVisitRequired[homeVisitRequired]++;
         }
 
-        // 6. Staff & Volunteer Quality
+        // 6. Staff & Volunteer Quality - ALIGNED WITH MODEL
         if (animalShelterReview.staffAndVolunteerQuality) {
-          const { staffKnowledge, animalHandling, customerService, volunteerProgram, staffTraining, compassionLevel } =
-            animalShelterReview.staffAndVolunteerQuality;
+          const { staffKnowledge, customerService, volunteerProgram } = animalShelterReview.staffAndVolunteerQuality;
           if (staffKnowledge) {
             categoryStats.staffAndVolunteerQuality.staffKnowledge[staffKnowledge] =
               (categoryStats.staffAndVolunteerQuality.staffKnowledge[staffKnowledge] || 0) + 1;
-          }
-          if (animalHandling) {
-            categoryStats.staffAndVolunteerQuality.animalHandling[animalHandling] =
-              (categoryStats.staffAndVolunteerQuality.animalHandling[animalHandling] || 0) + 1;
           }
           if (customerService) {
             categoryStats.staffAndVolunteerQuality.customerService[customerService] =
               (categoryStats.staffAndVolunteerQuality.customerService[customerService] || 0) + 1;
           }
-          if (volunteerProgram !== undefined)
-            categoryStats.staffAndVolunteerQuality.volunteerProgram[volunteerProgram]++;
-          if (staffTraining !== undefined) categoryStats.staffAndVolunteerQuality.staffTraining[staffTraining]++;
-          if (compassionLevel) {
-            categoryStats.staffAndVolunteerQuality.compassionLevel[compassionLevel] =
-              (categoryStats.staffAndVolunteerQuality.compassionLevel[compassionLevel] || 0) + 1;
-          }
+          if (volunteerProgram !== undefined) categoryStats.staffAndVolunteerQuality.volunteerProgram[volunteerProgram]++;
         }
       }
     });

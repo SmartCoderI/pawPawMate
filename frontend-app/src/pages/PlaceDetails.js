@@ -22,6 +22,9 @@ const PlaceDetails = () => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  
+  // Track the actual current place ID (may differ from URL param after OSM->DB conversion)
+  const [currentPlaceId, setCurrentPlaceId] = useState(id);
 
   // Image upload state
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -404,6 +407,9 @@ const PlaceDetails = () => {
 
   // Load place data and reviews
   useEffect(() => {
+    // Update current place ID when URL parameter changes
+    setCurrentPlaceId(id);
+    
     const loadPlaceData = async () => {
       try {
         setLoading(true);
@@ -461,7 +467,8 @@ const PlaceDetails = () => {
               });
 
               if (existingPlace) {
-                // Redirect to the existing place instead of treating as OSM
+                // Update current place ID and redirect to the existing place instead of treating as OSM
+                setCurrentPlaceId(existingPlace._id);
                 navigate(`/place/${existingPlace._id}`, { replace: true });
                 return;
               }
@@ -697,25 +704,25 @@ const PlaceDetails = () => {
       await reviewAPI.deleteReview(reviewId, mongoUser._id);
       console.log("Review deleted successfully");
 
-      // Reload reviews to reflect the deletion
-      const updatedReviews = await reviewAPI.getReviewsByPlace(id);
+      // Reload reviews to reflect the deletion (use currentPlaceId for converted places)
+      const updatedReviews = await reviewAPI.getReviewsByPlace(currentPlaceId);
       setReviews(updatedReviews);
 
       // Also reload stats if needed
       if (place.type === "dog park" || place.type === "dog_park" || place.type === "leisure") {
-        const updatedStats = await reviewAPI.getDogParkStats(id);
+        const updatedStats = await reviewAPI.getDogParkStats(currentPlaceId);
         setDogParkStats(updatedStats);
       }
       if (place.type === "vet" || place.type === "veterinary") {
-        const updatedStats = await reviewAPI.getVetClinicStats(id);
+        const updatedStats = await reviewAPI.getVetClinicStats(currentPlaceId);
         setVetClinicStats(updatedStats);
       }
       if (place.type === "pet store" || place.type === "pet_store") {
-        const updatedStats = await reviewAPI.getPetStoreStats(id);
+        const updatedStats = await reviewAPI.getPetStoreStats(currentPlaceId);
         setPetStoreStats(updatedStats);
       }
       if (place.type === "shelter" || place.type === "animal_shelter") {
-        const updatedStats = await reviewAPI.getAnimalShelterStats(id);
+        const updatedStats = await reviewAPI.getAnimalShelterStats(currentPlaceId);
         setAnimalShelterStats(updatedStats);
       }
 
@@ -865,11 +872,13 @@ const PlaceDetails = () => {
         const actualPlaceId = createdReview.placeId;
         console.log("Actual place ID used:", actualPlaceId);
 
-        // If the place ID is different from current URL, navigate to the correct place
+        // If the place ID is different from current URL, update URL without reload
         if (actualPlaceId !== id) {
-          console.log("Navigating to existing place:", actualPlaceId);
-          navigate(`/place/${actualPlaceId}`);
-          return;
+          console.log("Updating URL to reflect database place ID:", actualPlaceId);
+          // Use replace: true to update URL without adding to history or causing reload
+          window.history.replaceState(null, '', `/place/${actualPlaceId}`);
+          // Update current place ID for future operations
+          setCurrentPlaceId(actualPlaceId);
         }
 
         // Update the place state to reflect it's now in the database
@@ -1030,142 +1039,132 @@ const PlaceDetails = () => {
     }
   };
 
-  // Analyze reviews to get tag popularity for smart coloring
-  const analyzeReviewTags = () => {
+  // Analyze reviews to get tag popularity for smart coloring - ALIGNED WITH BACKEND 8-CATEGORY SYSTEM
+  const analyzeDogParkReviewTags = () => {
     if (!reviews || reviews.length === 0) {
       return {};
     }
 
     const tagCounts = {
+      // 1. Access & Location - ALIGNED WITH BACKEND
       accessAndLocation: {
         parkingDifficulty: { easy: 0, moderate: 0, difficult: 0 },
-        handicapFriendly: { true: 0, false: 0 },
-        parkingToParkDistance: { close: 0, moderate: 0, far: 0 },
       },
+      // 2. Hours of Operation - ALIGNED WITH BACKEND
       hoursOfOperation: {
         is24Hours: { true: 0, false: 0 },
-        dawnToDusk: { true: 0, false: 0 },
+        specificHours: {},
       },
+      // 3. Safety Level - ALIGNED WITH BACKEND
       safetyLevel: {
         fencingCondition: { fully_enclosed: 0, partially_enclosed: 0, not_enclosed: 0 },
-        doubleGated: { true: 0, false: 0 },
         nightIllumination: { true: 0, false: 0 },
         firstAidStation: { true: 0, false: 0 },
-        emergencyContact: { true: 0, false: 0 },
         surveillanceCameras: { true: 0, false: 0 },
-        noSharpEdges: { true: 0, false: 0 },
       },
+      // 4. Size & Layout - ALIGNED WITH BACKEND
       sizeAndLayout: {
-        separateAreas: { yes_small_large: 0, yes_other: 0, no: 0 },
         runningSpace: { enough: 0, limited: 0, tight: 0 },
         drainagePerformance: { excellent: 0, good: 0, poor: 0 },
       },
+      // 5. Amenities & Facilities - ALIGNED WITH BACKEND
       amenitiesAndFacilities: {
         seatingLevel: { bench: 0, gazebo: 0, no_seat: 0 },
         shadeAndCover: { trees: 0, shade_structures: 0, none: 0 },
-        wasteStation: { true: 0, false: 0 },
         biodegradableBags: { true: 0, false: 0 },
-        restroom: { true: 0, false: 0 },
         waterAccess: { drinking_fountain: 0, fire_hydrant: 0, pool: 0, none: 0 },
       },
+      // 6. Maintenance & Cleanliness - ALIGNED WITH BACKEND
       maintenanceAndCleanliness: {
         overallCleanliness: { good: 0, neutral: 0, bad: 0 },
-        trashLevel: { clean: 0, moderate: 0, dirty: 0 },
-        odorLevel: { none: 0, mild: 0, strong: 0 },
         equipmentCondition: { good: 0, fair: 0, poor: 0 },
       },
+      // 7. Crowd & Social Dynamics - ALIGNED WITH BACKEND
       crowdAndSocialDynamics: {
+        peakDays: { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 },
         ownerCulture: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        wastePickup: { always: 0, usually: 0, sometimes: 0, rarely: 0 },
         ownerFriendliness: { very_friendly: 0, friendly: 0, neutral: 0, unfriendly: 0 },
       },
+      // 8. Rules, Policies & Community - ALIGNED WITH BACKEND
       rulesPoliciesAndCommunity: {
         leashPolicy: { off_leash_allowed: 0, leash_required: 0, mixed_areas: 0 },
-        vaccinationRequired: { true: 0, false: 0 },
-        aggressiveDogPolicy: { strict: 0, moderate: 0, lenient: 0, none: 0 },
         communityEnforcement: { strict: 0, moderate: 0, lenient: 0, none: 0 },
       },
     };
 
-    // Count occurrences from all reviews
+    // Count occurrences from all reviews - ALIGNED WITH BACKEND 8-CATEGORY SYSTEM
     reviews.forEach((review) => {
       if (review.dogParkReview) {
         const dpReview = review.dogParkReview;
 
-        // Access & Location
+        // 1. Access & Location - ALIGNED WITH BACKEND
         if (dpReview.accessAndLocation) {
           const al = dpReview.accessAndLocation;
           if (al.parkingDifficulty) tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty]++;
-          if (al.handicapFriendly !== undefined) tagCounts.accessAndLocation.handicapFriendly[al.handicapFriendly]++;
-          if (al.parkingToParkDistance) tagCounts.accessAndLocation.parkingToParkDistance[al.parkingToParkDistance]++;
         }
 
-        // Hours of Operation
+        // 2. Hours of Operation - ALIGNED WITH BACKEND
         if (dpReview.hoursOfOperation) {
           const ho = dpReview.hoursOfOperation;
           if (ho.is24Hours !== undefined) tagCounts.hoursOfOperation.is24Hours[ho.is24Hours]++;
-          if (ho.dawnToDusk !== undefined) tagCounts.hoursOfOperation.dawnToDusk[ho.dawnToDusk]++;
+          if (ho.specificHours) {
+            tagCounts.hoursOfOperation.specificHours[ho.specificHours] = 
+              (tagCounts.hoursOfOperation.specificHours[ho.specificHours] || 0) + 1;
+          }
         }
 
-        // Safety Level
+        // 3. Safety Level - ALIGNED WITH BACKEND
         if (dpReview.safetyLevel) {
           const sl = dpReview.safetyLevel;
           if (sl.fencingCondition) tagCounts.safetyLevel.fencingCondition[sl.fencingCondition]++;
-          if (sl.doubleGated !== undefined) tagCounts.safetyLevel.doubleGated[sl.doubleGated]++;
           if (sl.nightIllumination !== undefined) tagCounts.safetyLevel.nightIllumination[sl.nightIllumination]++;
           if (sl.firstAidStation !== undefined) tagCounts.safetyLevel.firstAidStation[sl.firstAidStation]++;
-          if (sl.emergencyContact !== undefined) tagCounts.safetyLevel.emergencyContact[sl.emergencyContact]++;
           if (sl.surveillanceCameras !== undefined) tagCounts.safetyLevel.surveillanceCameras[sl.surveillanceCameras]++;
-          if (sl.noSharpEdges !== undefined) tagCounts.safetyLevel.noSharpEdges[sl.noSharpEdges]++;
         }
 
-        // Size & Layout
+        // 4. Size & Layout - ALIGNED WITH BACKEND
         if (dpReview.sizeAndLayout) {
           const szl = dpReview.sizeAndLayout;
-          if (szl.separateAreas) tagCounts.sizeAndLayout.separateAreas[szl.separateAreas]++;
           if (szl.runningSpace) tagCounts.sizeAndLayout.runningSpace[szl.runningSpace]++;
           if (szl.drainagePerformance) tagCounts.sizeAndLayout.drainagePerformance[szl.drainagePerformance]++;
         }
 
-        // Amenities & Facilities
+        // 5. Amenities & Facilities - ALIGNED WITH BACKEND
         if (dpReview.amenitiesAndFacilities) {
           const af = dpReview.amenitiesAndFacilities;
           if (af.seatingLevel) tagCounts.amenitiesAndFacilities.seatingLevel[af.seatingLevel]++;
           if (af.shadeAndCover) tagCounts.amenitiesAndFacilities.shadeAndCover[af.shadeAndCover]++;
-          if (af.wasteStation !== undefined) tagCounts.amenitiesAndFacilities.wasteStation[af.wasteStation]++;
-          if (af.biodegradableBags !== undefined)
-            tagCounts.amenitiesAndFacilities.biodegradableBags[af.biodegradableBags]++;
-          if (af.restroom !== undefined) tagCounts.amenitiesAndFacilities.restroom[af.restroom]++;
+          if (af.biodegradableBags !== undefined) tagCounts.amenitiesAndFacilities.biodegradableBags[af.biodegradableBags]++;
           if (af.waterAccess) tagCounts.amenitiesAndFacilities.waterAccess[af.waterAccess]++;
         }
 
-        // Maintenance & Cleanliness
+        // 6. Maintenance & Cleanliness - ALIGNED WITH BACKEND
         if (dpReview.maintenanceAndCleanliness) {
           const mc = dpReview.maintenanceAndCleanliness;
           if (mc.overallCleanliness) tagCounts.maintenanceAndCleanliness.overallCleanliness[mc.overallCleanliness]++;
-          if (mc.trashLevel) tagCounts.maintenanceAndCleanliness.trashLevel[mc.trashLevel]++;
-          if (mc.odorLevel) tagCounts.maintenanceAndCleanliness.odorLevel[mc.odorLevel]++;
           if (mc.equipmentCondition) tagCounts.maintenanceAndCleanliness.equipmentCondition[mc.equipmentCondition]++;
         }
 
-        // Crowd & Social Dynamics
+        // 7. Crowd & Social Dynamics - ALIGNED WITH BACKEND
         if (dpReview.crowdAndSocialDynamics) {
           const csd = dpReview.crowdAndSocialDynamics;
+          // Handle peakDays as array
+          if (csd.peakDays && Array.isArray(csd.peakDays)) {
+            csd.peakDays.forEach(day => {
+              if (tagCounts.crowdAndSocialDynamics.peakDays[day] !== undefined) {
+                tagCounts.crowdAndSocialDynamics.peakDays[day]++;
+              }
+            });
+          }
           if (csd.ownerCulture) tagCounts.crowdAndSocialDynamics.ownerCulture[csd.ownerCulture]++;
-          if (csd.wastePickup) tagCounts.crowdAndSocialDynamics.wastePickup[csd.wastePickup]++;
           if (csd.ownerFriendliness) tagCounts.crowdAndSocialDynamics.ownerFriendliness[csd.ownerFriendliness]++;
         }
 
-        // Rules, Policies & Community
+        // 8. Rules, Policies & Community - ALIGNED WITH BACKEND
         if (dpReview.rulesPoliciesAndCommunity) {
           const rpc = dpReview.rulesPoliciesAndCommunity;
           if (rpc.leashPolicy) tagCounts.rulesPoliciesAndCommunity.leashPolicy[rpc.leashPolicy]++;
-          if (rpc.vaccinationRequired !== undefined)
-            tagCounts.rulesPoliciesAndCommunity.vaccinationRequired[rpc.vaccinationRequired]++;
-          if (rpc.aggressiveDogPolicy)
-            tagCounts.rulesPoliciesAndCommunity.aggressiveDogPolicy[rpc.aggressiveDogPolicy]++;
-          if (rpc.communityEnforcement)
-            tagCounts.rulesPoliciesAndCommunity.communityEnforcement[rpc.communityEnforcement]++;
+          if (rpc.communityEnforcement) tagCounts.rulesPoliciesAndCommunity.communityEnforcement[rpc.communityEnforcement]++;
         }
       }
     });
@@ -1195,101 +1194,84 @@ const PlaceDetails = () => {
     return "option-tag rare"; // Rarely mentioned (faded color)
   };
 
-  // Render smart category tags - show top 3-5 relevant tags per category
-  const renderSmartCategoryTags = (category, tagCounts) => {
+  // Render smart category tags for dog parks - ALIGNED WITH BACKEND 8-CATEGORY SYSTEM
+  const renderSmartDogParkCategoryTags = (category, tagCounts) => {
     const tagMappings = {
+      // 1. Access & Location - ALIGNED WITH BACKEND
       accessAndLocation: [
         { category: "accessAndLocation", field: "parkingDifficulty", value: "easy", label: "🚗 Easy Parking" },
         { category: "accessAndLocation", field: "parkingDifficulty", value: "moderate", label: "🚗 Moderate Parking" },
-        {
-          category: "accessAndLocation",
-          field: "parkingDifficulty",
-          value: "difficult",
-          label: "🚗 Difficult Parking",
-        },
-        { category: "accessAndLocation", field: "handicapFriendly", value: true, label: "♿ Handicap Friendly" },
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "difficult", label: "🚗 Difficult Parking" },
       ],
+      // 2. Hours of Operation - ALIGNED WITH BACKEND
       hoursOfOperation: [
         { category: "hoursOfOperation", field: "is24Hours", value: true, label: "🕐 24 Hours Open" },
-        { category: "hoursOfOperation", field: "dawnToDusk", value: true, label: "🌅 Dawn to Dusk" },
+        { category: "hoursOfOperation", field: "is24Hours", value: false, label: "⏰ Limited Hours" },
       ],
+      // 3. Safety Level - ALIGNED WITH BACKEND
       safetyLevel: [
         { category: "safetyLevel", field: "fencingCondition", value: "fully_enclosed", label: "🚧 Fully Enclosed" },
-        {
-          category: "safetyLevel",
-          field: "fencingCondition",
-          value: "partially_enclosed",
-          label: "🚧 Partially Enclosed",
-        },
-        { category: "safetyLevel", field: "doubleGated", value: true, label: "🚪 Double Gated" },
+        { category: "safetyLevel", field: "fencingCondition", value: "partially_enclosed", label: "🚧 Partially Enclosed" },
+        { category: "safetyLevel", field: "fencingCondition", value: "not_enclosed", label: "🚧 Not Enclosed" },
         { category: "safetyLevel", field: "nightIllumination", value: true, label: "💡 Night Lighting" },
+        { category: "safetyLevel", field: "firstAidStation", value: true, label: "🏥 First Aid Station" },
+        { category: "safetyLevel", field: "surveillanceCameras", value: true, label: "📹 Security Cameras" },
       ],
+      // 4. Size & Layout - ALIGNED WITH BACKEND
       sizeAndLayout: [
-        { category: "sizeAndLayout", field: "separateAreas", value: "yes_small_large", label: "📐 Small/Large Areas" },
         { category: "sizeAndLayout", field: "runningSpace", value: "enough", label: "🏃 Enough Space" },
         { category: "sizeAndLayout", field: "runningSpace", value: "limited", label: "🏃 Limited Space" },
+        { category: "sizeAndLayout", field: "runningSpace", value: "tight", label: "🏃 Tight Space" },
+        { category: "sizeAndLayout", field: "drainagePerformance", value: "excellent", label: "💧 Excellent Drainage" },
+        { category: "sizeAndLayout", field: "drainagePerformance", value: "good", label: "💧 Good Drainage" },
+        { category: "sizeAndLayout", field: "drainagePerformance", value: "poor", label: "💧 Poor Drainage" },
       ],
+      // 5. Amenities & Facilities - ALIGNED WITH BACKEND
       amenitiesAndFacilities: [
         { category: "amenitiesAndFacilities", field: "seatingLevel", value: "bench", label: "🪑 Bench Seating" },
-        { category: "amenitiesAndFacilities", field: "wasteStation", value: true, label: "🗑️ Waste Station" },
-        { category: "amenitiesAndFacilities", field: "restroom", value: true, label: "🚻 Restroom" },
+        { category: "amenitiesAndFacilities", field: "seatingLevel", value: "gazebo", label: "🏗️ Gazebo Seating" },
+        { category: "amenitiesAndFacilities", field: "seatingLevel", value: "no_seat", label: "🚫 No Seating" },
         { category: "amenitiesAndFacilities", field: "shadeAndCover", value: "trees", label: "🌳 Tree Shade" },
+        { category: "amenitiesAndFacilities", field: "shadeAndCover", value: "shade_structures", label: "⛱️ Shade Structures" },
+        { category: "amenitiesAndFacilities", field: "shadeAndCover", value: "none", label: "☀️ No Shade" },
+        { category: "amenitiesAndFacilities", field: "biodegradableBags", value: true, label: "🗑️ Biodegradable Bags" },
+        { category: "amenitiesAndFacilities", field: "waterAccess", value: "drinking_fountain", label: "⛲ Drinking Fountain" },
+        { category: "amenitiesAndFacilities", field: "waterAccess", value: "fire_hydrant", label: "🚒 Fire Hydrant" },
+        { category: "amenitiesAndFacilities", field: "waterAccess", value: "pool", label: "🏊 Dog Pool" },
+        { category: "amenitiesAndFacilities", field: "waterAccess", value: "none", label: "🚫 No Water Access" },
       ],
+      // 6. Maintenance & Cleanliness - ALIGNED WITH BACKEND
       maintenanceAndCleanliness: [
-        {
-          category: "maintenanceAndCleanliness",
-          field: "overallCleanliness",
-          value: "good",
-          label: "🧽 Good Cleanliness",
-        },
-        {
-          category: "maintenanceAndCleanliness",
-          field: "overallCleanliness",
-          value: "neutral",
-          label: "🧽 Fair Cleanliness",
-        },
-        {
-          category: "maintenanceAndCleanliness",
-          field: "overallCleanliness",
-          value: "bad",
-          label: "🧽 Poor Cleanliness",
-        },
+        { category: "maintenanceAndCleanliness", field: "overallCleanliness", value: "good", label: "🧽 Good Cleanliness" },
+        { category: "maintenanceAndCleanliness", field: "overallCleanliness", value: "neutral", label: "🧽 Fair Cleanliness" },
+        { category: "maintenanceAndCleanliness", field: "overallCleanliness", value: "bad", label: "🧽 Poor Cleanliness" },
+        { category: "maintenanceAndCleanliness", field: "equipmentCondition", value: "good", label: "🔧 Good Equipment" },
+        { category: "maintenanceAndCleanliness", field: "equipmentCondition", value: "fair", label: "🔧 Fair Equipment" },
+        { category: "maintenanceAndCleanliness", field: "equipmentCondition", value: "poor", label: "🔧 Poor Equipment" },
       ],
+      // 7. Crowd & Social Dynamics - ALIGNED WITH BACKEND
       crowdAndSocialDynamics: [
-        {
-          category: "crowdAndSocialDynamics",
-          field: "ownerCulture",
-          value: "excellent",
-          label: "⭐ Excellent Culture",
-        },
+        { category: "crowdAndSocialDynamics", field: "peakDays", value: "saturday", label: "📅 Busy Saturdays" },
+        { category: "crowdAndSocialDynamics", field: "peakDays", value: "sunday", label: "📅 Busy Sundays" },
+        { category: "crowdAndSocialDynamics", field: "peakDays", value: "friday", label: "📅 Busy Fridays" },
+        { category: "crowdAndSocialDynamics", field: "ownerCulture", value: "excellent", label: "⭐ Excellent Culture" },
         { category: "crowdAndSocialDynamics", field: "ownerCulture", value: "good", label: "⭐ Good Culture" },
-        {
-          category: "crowdAndSocialDynamics",
-          field: "ownerFriendliness",
-          value: "very_friendly",
-          label: "😊 Very Friendly",
-        },
+        { category: "crowdAndSocialDynamics", field: "ownerCulture", value: "fair", label: "⭐ Fair Culture" },
+        { category: "crowdAndSocialDynamics", field: "ownerCulture", value: "poor", label: "⭐ Poor Culture" },
+        { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "very_friendly", label: "😊 Very Friendly" },
         { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "friendly", label: "🙂 Friendly" },
+        { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "neutral", label: "😐 Neutral" },
+        { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "unfriendly", label: "😤 Unfriendly" },
       ],
+      // 8. Rules, Policies & Community - ALIGNED WITH BACKEND
       rulesPoliciesAndCommunity: [
-        {
-          category: "rulesPoliciesAndCommunity",
-          field: "leashPolicy",
-          value: "off_leash_allowed",
-          label: "🦮 Off-Leash Allowed",
-        },
-        {
-          category: "rulesPoliciesAndCommunity",
-          field: "leashPolicy",
-          value: "leash_required",
-          label: "🦮 Leash Required",
-        },
-        {
-          category: "rulesPoliciesAndCommunity",
-          field: "vaccinationRequired",
-          value: true,
-          label: "💉 Vaccination Required",
-        },
+        { category: "rulesPoliciesAndCommunity", field: "leashPolicy", value: "off_leash_allowed", label: "🦮 Off-Leash Allowed" },
+        { category: "rulesPoliciesAndCommunity", field: "leashPolicy", value: "leash_required", label: "🦮 Leash Required" },
+        { category: "rulesPoliciesAndCommunity", field: "leashPolicy", value: "mixed_areas", label: "🦮 Mixed Areas" },
+        { category: "rulesPoliciesAndCommunity", field: "communityEnforcement", value: "strict", label: "⚖️ Strict Enforcement" },
+        { category: "rulesPoliciesAndCommunity", field: "communityEnforcement", value: "moderate", label: "⚖️ Moderate Enforcement" },
+        { category: "rulesPoliciesAndCommunity", field: "communityEnforcement", value: "lenient", label: "⚖️ Lenient Enforcement" },
+        { category: "rulesPoliciesAndCommunity", field: "communityEnforcement", value: "none", label: "⚖️ No Enforcement" },
       ],
     };
 
@@ -1698,131 +1680,101 @@ const PlaceDetails = () => {
     ));
   };
 
-  // Analyze pet store reviews to get tag popularity for smart coloring
+  // Analyze pet store reviews to get tag popularity for smart coloring - ALIGNED WITH BACKEND 6-CATEGORY SYSTEM
   const analyzePetStoreReviewTags = () => {
     if (!reviews || reviews.length === 0) {
       return {};
     }
 
     const tagCounts = {
+      // 1. Access & Location - ALIGNED WITH BACKEND
       accessAndLocation: {
         parkingDifficulty: { easy: 0, moderate: 0, difficult: 0 },
-        handicapFriendly: { true: 0, false: 0 },
-        parkingToParkDistance: { close: 0, moderate: 0, far: 0 },
       },
+      // 2. Hours of Operation - ALIGNED WITH BACKEND
       hoursOfOperation: {
         is24Hours: { true: 0, false: 0 },
-        dawnToDusk: { true: 0, false: 0 },
         specificHours: {},
       },
+      // 3. Services & Conveniences - ALIGNED WITH BACKEND
       servicesAndConveniences: {
         grooming: { true: 0, false: 0 },
         veterinaryServices: { true: 0, false: 0 },
         petTraining: { true: 0, false: 0 },
-        deliveryService: { true: 0, false: 0 },
         onlineOrdering: { true: 0, false: 0 },
         curbsidePickup: { true: 0, false: 0 },
         returnPolicy: { excellent: 0, good: 0, fair: 0, poor: 0 },
       },
+      // 4. Product Selection & Quality - ALIGNED WITH BACKEND
       productSelectionAndQuality: {
         foodBrandVariety: { excellent: 0, good: 0, fair: 0, poor: 0 },
         toySelection: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        suppliesAvailability: { excellent: 0, good: 0, fair: 0, poor: 0 },
         productFreshness: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        organicNaturalOptions: { true: 0, false: 0 },
-        prescriptionDietAvailable: { true: 0, false: 0 },
       },
+      // 5. Pricing & Value - ALIGNED WITH BACKEND
       pricingAndValue: {
         overallPricing: { low: 0, moderate: 0, high: 0, very_high: 0 },
-        loyaltyProgram: { true: 0, false: 0 },
-        frequentSales: { true: 0, false: 0 },
         priceMatching: { true: 0, false: 0 },
-        bulkDiscounts: { true: 0, false: 0 },
-        seniorDiscounts: { true: 0, false: 0 },
       },
+      // 6. Staff Knowledge & Service - ALIGNED WITH BACKEND
       staffKnowledgeAndService: {
         petKnowledge: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        productRecommendations: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        customerService: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        helpfulness: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        multilingual: { true: 0, false: 0 },
         trainingCertified: { true: 0, false: 0 },
       },
     };
 
-    // Count occurrences from all reviews
+    // Count occurrences from all reviews - ALIGNED WITH BACKEND 6-CATEGORY SYSTEM
     reviews.forEach((review) => {
       if (review.petStoreReview) {
         const psReview = review.petStoreReview;
 
-        // Access & Location
+        // 1. Access & Location - ALIGNED WITH BACKEND
         if (psReview.accessAndLocation) {
           const al = psReview.accessAndLocation;
           if (al.parkingDifficulty) tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty]++;
-          if (al.handicapFriendly !== undefined) tagCounts.accessAndLocation.handicapFriendly[al.handicapFriendly]++;
-          if (al.parkingToParkDistance) tagCounts.accessAndLocation.parkingToParkDistance[al.parkingToParkDistance]++;
         }
 
-        // Hours of Operation
+        // 2. Hours of Operation - ALIGNED WITH BACKEND
         if (psReview.hoursOfOperation) {
           const ho = psReview.hoursOfOperation;
           if (ho.is24Hours !== undefined) tagCounts.hoursOfOperation.is24Hours[ho.is24Hours]++;
-          if (ho.dawnToDusk !== undefined) tagCounts.hoursOfOperation.dawnToDusk[ho.dawnToDusk]++;
           if (ho.specificHours) {
             tagCounts.hoursOfOperation.specificHours[ho.specificHours] =
               (tagCounts.hoursOfOperation.specificHours[ho.specificHours] || 0) + 1;
           }
         }
 
-        // Services & Conveniences
+        // 3. Services & Conveniences - ALIGNED WITH BACKEND
         if (psReview.servicesAndConveniences) {
           const sc = psReview.servicesAndConveniences;
           if (sc.grooming !== undefined) tagCounts.servicesAndConveniences.grooming[sc.grooming]++;
-          if (sc.veterinaryServices !== undefined)
-            tagCounts.servicesAndConveniences.veterinaryServices[sc.veterinaryServices]++;
+          if (sc.veterinaryServices !== undefined) tagCounts.servicesAndConveniences.veterinaryServices[sc.veterinaryServices]++;
           if (sc.petTraining !== undefined) tagCounts.servicesAndConveniences.petTraining[sc.petTraining]++;
-          if (sc.deliveryService !== undefined) tagCounts.servicesAndConveniences.deliveryService[sc.deliveryService]++;
           if (sc.onlineOrdering !== undefined) tagCounts.servicesAndConveniences.onlineOrdering[sc.onlineOrdering]++;
           if (sc.curbsidePickup !== undefined) tagCounts.servicesAndConveniences.curbsidePickup[sc.curbsidePickup]++;
           if (sc.returnPolicy) tagCounts.servicesAndConveniences.returnPolicy[sc.returnPolicy]++;
         }
 
-        // Product Selection & Quality
+        // 4. Product Selection & Quality - ALIGNED WITH BACKEND
         if (psReview.productSelectionAndQuality) {
           const psq = psReview.productSelectionAndQuality;
           if (psq.foodBrandVariety) tagCounts.productSelectionAndQuality.foodBrandVariety[psq.foodBrandVariety]++;
           if (psq.toySelection) tagCounts.productSelectionAndQuality.toySelection[psq.toySelection]++;
-          if (psq.suppliesAvailability)
-            tagCounts.productSelectionAndQuality.suppliesAvailability[psq.suppliesAvailability]++;
           if (psq.productFreshness) tagCounts.productSelectionAndQuality.productFreshness[psq.productFreshness]++;
-          if (psq.organicNaturalOptions !== undefined)
-            tagCounts.productSelectionAndQuality.organicNaturalOptions[psq.organicNaturalOptions]++;
-          if (psq.prescriptionDietAvailable !== undefined)
-            tagCounts.productSelectionAndQuality.prescriptionDietAvailable[psq.prescriptionDietAvailable]++;
         }
 
-        // Pricing & Value
+        // 5. Pricing & Value - ALIGNED WITH BACKEND
         if (psReview.pricingAndValue) {
           const pv = psReview.pricingAndValue;
           if (pv.overallPricing) tagCounts.pricingAndValue.overallPricing[pv.overallPricing]++;
-          if (pv.loyaltyProgram !== undefined) tagCounts.pricingAndValue.loyaltyProgram[pv.loyaltyProgram]++;
-          if (pv.frequentSales !== undefined) tagCounts.pricingAndValue.frequentSales[pv.frequentSales]++;
           if (pv.priceMatching !== undefined) tagCounts.pricingAndValue.priceMatching[pv.priceMatching]++;
-          if (pv.bulkDiscounts !== undefined) tagCounts.pricingAndValue.bulkDiscounts[pv.bulkDiscounts]++;
-          if (pv.seniorDiscounts !== undefined) tagCounts.pricingAndValue.seniorDiscounts[pv.seniorDiscounts]++;
         }
 
-        // Staff Knowledge & Service
+        // 6. Staff Knowledge & Service - ALIGNED WITH BACKEND
         if (psReview.staffKnowledgeAndService) {
           const sks = psReview.staffKnowledgeAndService;
           if (sks.petKnowledge) tagCounts.staffKnowledgeAndService.petKnowledge[sks.petKnowledge]++;
-          if (sks.productRecommendations)
-            tagCounts.staffKnowledgeAndService.productRecommendations[sks.productRecommendations]++;
-          if (sks.customerService) tagCounts.staffKnowledgeAndService.customerService[sks.customerService]++;
-          if (sks.helpfulness) tagCounts.staffKnowledgeAndService.helpfulness[sks.helpfulness]++;
-          if (sks.multilingual !== undefined) tagCounts.staffKnowledgeAndService.multilingual[sks.multilingual]++;
-          if (sks.trainingCertified !== undefined)
-            tagCounts.staffKnowledgeAndService.trainingCertified[sks.trainingCertified]++;
+          if (sks.trainingCertified !== undefined) tagCounts.staffKnowledgeAndService.trainingCertified[sks.trainingCertified]++;
         }
       }
     });
@@ -1830,72 +1782,52 @@ const PlaceDetails = () => {
     return tagCounts;
   };
 
-  // Render smart category tags for pet stores
+  // Render smart category tags for pet stores - ALIGNED WITH BACKEND 6-CATEGORY SYSTEM (TOP 4 TAGS)
   const renderSmartPetStoreCategoryTags = (category, tagCounts) => {
     const tagMappings = {
+      // 1. Access & Location - ALIGNED WITH BACKEND
       accessAndLocation: [
         { category: "accessAndLocation", field: "parkingDifficulty", value: "easy", label: "🚗 Easy Parking" },
         { category: "accessAndLocation", field: "parkingDifficulty", value: "moderate", label: "🚗 Moderate Parking" },
-        {
-          category: "accessAndLocation",
-          field: "parkingDifficulty",
-          value: "difficult",
-          label: "🚗 Difficult Parking",
-        },
-        { category: "accessAndLocation", field: "handicapFriendly", value: true, label: "♿ Handicap Friendly" },
+        { category: "accessAndLocation", field: "parkingDifficulty", value: "difficult", label: "🚗 Difficult Parking" },
       ],
+      // 2. Hours of Operation - ALIGNED WITH BACKEND
       hoursOfOperation: [
         { category: "hoursOfOperation", field: "is24Hours", value: true, label: "🕐 24 Hours Open" },
-        { category: "hoursOfOperation", field: "dawnToDusk", value: true, label: "🌅 Dawn to Dusk" },
+        { category: "hoursOfOperation", field: "is24Hours", value: false, label: "⏰ Limited Hours" },
       ],
+      // 3. Services & Conveniences - ALIGNED WITH BACKEND
       servicesAndConveniences: [
+        { category: "servicesAndConveniences", field: "grooming", value: true, label: "✂️ Grooming Available" },
         { category: "servicesAndConveniences", field: "veterinaryServices", value: true, label: "🏥 Vet Services" },
-        { category: "servicesAndConveniences", field: "grooming", value: true, label: "✂️ Grooming" },
         { category: "servicesAndConveniences", field: "petTraining", value: true, label: "🎓 Pet Training" },
-        { category: "servicesAndConveniences", field: "deliveryService", value: true, label: "🚚 Delivery" },
+        { category: "servicesAndConveniences", field: "onlineOrdering", value: true, label: "💻 Online Ordering" },
+        { category: "servicesAndConveniences", field: "curbsidePickup", value: true, label: "🚗 Curbside Pickup" },
+        { category: "servicesAndConveniences", field: "returnPolicy", value: "excellent", label: "↩️ Excellent Returns" },
+        { category: "servicesAndConveniences", field: "returnPolicy", value: "good", label: "↩️ Good Returns" },
       ],
+      // 4. Product Selection & Quality - ALIGNED WITH BACKEND
       productSelectionAndQuality: [
-        {
-          category: "productSelectionAndQuality",
-          field: "foodBrandVariety",
-          value: "excellent",
-          label: "🥘 Excellent Food Variety",
-        },
-        {
-          category: "productSelectionAndQuality",
-          field: "toySelection",
-          value: "excellent",
-          label: "🧸 Great Toy Selection",
-        },
-        {
-          category: "productSelectionAndQuality",
-          field: "organicNaturalOptions",
-          value: true,
-          label: "🌱 Organic Options",
-        },
-        {
-          category: "productSelectionAndQuality",
-          field: "prescriptionDietAvailable",
-          value: true,
-          label: "💊 Prescription Diets",
-        },
+        { category: "productSelectionAndQuality", field: "foodBrandVariety", value: "excellent", label: "🥘 Excellent Food Variety" },
+        { category: "productSelectionAndQuality", field: "foodBrandVariety", value: "good", label: "🥘 Good Food Variety" },
+        { category: "productSelectionAndQuality", field: "toySelection", value: "excellent", label: "🧸 Excellent Toy Selection" },
+        { category: "productSelectionAndQuality", field: "toySelection", value: "good", label: "🧸 Good Toy Selection" },
+        { category: "productSelectionAndQuality", field: "productFreshness", value: "excellent", label: "🌟 Excellent Freshness" },
+        { category: "productSelectionAndQuality", field: "productFreshness", value: "good", label: "✨ Good Freshness" },
       ],
+      // 5. Pricing & Value - ALIGNED WITH BACKEND
       pricingAndValue: [
-        { category: "pricingAndValue", field: "loyaltyProgram", value: true, label: "🎁 Loyalty Program" },
-        { category: "pricingAndValue", field: "frequentSales", value: true, label: "💰 Frequent Sales" },
+        { category: "pricingAndValue", field: "overallPricing", value: "low", label: "💵 Low Prices" },
+        { category: "pricingAndValue", field: "overallPricing", value: "moderate", label: "💰 Moderate Prices" },
+        { category: "pricingAndValue", field: "overallPricing", value: "high", label: "💸 High Prices" },
         { category: "pricingAndValue", field: "priceMatching", value: true, label: "🏷️ Price Matching" },
-        { category: "pricingAndValue", field: "bulkDiscounts", value: true, label: "📦 Bulk Discounts" },
       ],
+      // 6. Staff Knowledge & Service - ALIGNED WITH BACKEND
       staffKnowledgeAndService: [
-        { category: "staffKnowledgeAndService", field: "petKnowledge", value: "excellent", label: "🧠 Expert Staff" },
-        {
-          category: "staffKnowledgeAndService",
-          field: "customerService",
-          value: "excellent",
-          label: "😊 Excellent Service",
-        },
-        { category: "staffKnowledgeAndService", field: "helpfulness", value: "excellent", label: "🤝 Very Helpful" },
-        { category: "staffKnowledgeAndService", field: "multilingual", value: true, label: "🗣️ Multilingual Staff" },
+        { category: "staffKnowledgeAndService", field: "petKnowledge", value: "excellent", label: "🧠 Expert Pet Knowledge" },
+        { category: "staffKnowledgeAndService", field: "petKnowledge", value: "good", label: "👍 Good Pet Knowledge" },
+        { category: "staffKnowledgeAndService", field: "petKnowledge", value: "fair", label: "😐 Fair Pet Knowledge" },
+        { category: "staffKnowledgeAndService", field: "trainingCertified", value: true, label: "🎓 Certified Staff" },
       ],
     };
 
@@ -2309,65 +2241,65 @@ const PlaceDetails = () => {
           <div className="category-tags-grid">
             {/* 1. Access & Location */}
             <div className="category-section">
-              <h3>📍 Access & Location</h3>
+              <h3>Access & Location</h3>
 
-              <div className="feature-tags">{renderSmartCategoryTags("accessAndLocation", analyzeReviewTags())}</div>
+              <div className="feature-tags">{renderSmartDogParkCategoryTags("accessAndLocation", analyzeDogParkReviewTags())}</div>
             </div>
 
             {/* 2. Hours of Operation */}
             <div className="category-section">
-              <h3>⏰ Hours of Operation</h3>
+              <h3>Hours of Operation</h3>
 
-              <div className="feature-tags">{renderSmartCategoryTags("hoursOfOperation", analyzeReviewTags())}</div>
+              <div className="feature-tags">{renderSmartDogParkCategoryTags("hoursOfOperation", analyzeDogParkReviewTags())}</div>
             </div>
 
             {/* 3. Safety Level */}
             <div className="category-section">
-              <h3>🛡️ Safety Level</h3>
+              <h3>Safety Level</h3>
 
-              <div className="feature-tags">{renderSmartCategoryTags("safetyLevel", analyzeReviewTags())}</div>
+              <div className="feature-tags">{renderSmartDogParkCategoryTags("safetyLevel", analyzeDogParkReviewTags())}</div>
             </div>
 
             {/* 4. Size & Layout */}
             <div className="category-section">
-              <h3>📏 Size & Layout</h3>
+              <h3>Size & Layout</h3>
 
-              <div className="feature-tags">{renderSmartCategoryTags("sizeAndLayout", analyzeReviewTags())}</div>
+              <div className="feature-tags">{renderSmartDogParkCategoryTags("sizeAndLayout", analyzeDogParkReviewTags())}</div>
             </div>
 
             {/* 5. Amenities & Facilities */}
             <div className="category-section">
-              <h3>🎾 Amenities & Facilities</h3>
+              <h3>Amenities & Facilities</h3>
 
               <div className="feature-tags">
-                {renderSmartCategoryTags("amenitiesAndFacilities", analyzeReviewTags())}
+                {renderSmartDogParkCategoryTags("amenitiesAndFacilities", analyzeDogParkReviewTags())}
               </div>
             </div>
 
             {/* 6. Maintenance & Cleanliness */}
             <div className="category-section">
-              <h3>🧹 Maintenance & Cleanliness</h3>
+              <h3>Maintenance & Cleanliness</h3>
 
               <div className="feature-tags">
-                {renderSmartCategoryTags("maintenanceAndCleanliness", analyzeReviewTags())}
+                {renderSmartDogParkCategoryTags("maintenanceAndCleanliness", analyzeDogParkReviewTags())}
               </div>
             </div>
 
             {/* 7. Crowd & Social Dynamics */}
             <div className="category-section">
-              <h3>👥 Crowd & Social Dynamics</h3>
+              <h3>Crowd & Social Dynamics</h3>
 
               <div className="feature-tags">
-                {renderSmartCategoryTags("crowdAndSocialDynamics", analyzeReviewTags())}
+                {renderSmartDogParkCategoryTags("crowdAndSocialDynamics", analyzeDogParkReviewTags())}
               </div>
             </div>
 
             {/* 8. Rules, Policies & Community */}
             <div className="category-section">
-              <h3>📋 Rules, Policy & Community</h3>
+              <h3>Rules, Policy & Community</h3>
 
               <div className="feature-tags">
-                {renderSmartCategoryTags("rulesPoliciesAndCommunity", analyzeReviewTags())}
+                {renderSmartDogParkCategoryTags("rulesPoliciesAndCommunity", analyzeDogParkReviewTags())}
               </div>
             </div>
           </div>
@@ -2394,7 +2326,7 @@ const PlaceDetails = () => {
                 <>
                   {/* 1. Access & Location - BACKEND ALIGNED */}
             <div className="category-section">
-                    <h3>🅿️ Access & Location</h3>
+                    <h3>Access & Location</h3>
 
               <div className="feature-tags">
                       {renderSmartVetCategoryTags("accessAndLocation", vetTagCounts)}
@@ -2403,7 +2335,7 @@ const PlaceDetails = () => {
 
                   {/* 2. Hours of Operation - BACKEND ALIGNED */}
             <div className="category-section">
-                    <h3>🕐 Hours of Operation</h3>
+                    <h3>Hours of Operation</h3>
 
               <div className="feature-tags">
                       {renderSmartVetCategoryTags("hoursOfOperation", vetTagCounts)}
@@ -2412,7 +2344,7 @@ const PlaceDetails = () => {
 
                   {/* 3. Clinic Environment & Facilities - BACKEND ALIGNED */}
             <div className="category-section">
-                    <h3>🏢 Clinic Environment & Facilities</h3>
+                    <h3>Clinic Environment & Facilities</h3>
 
               <div className="feature-tags">
                       {renderSmartVetCategoryTags("clinicEnvironmentAndFacilities", vetTagCounts)}
@@ -2421,7 +2353,7 @@ const PlaceDetails = () => {
 
                   {/* 4. Cost & Transparency - BACKEND ALIGNED */}
             <div className="category-section">
-                    <h3>💰 Cost & Transparency</h3>
+                    <h3>Cost & Transparency</h3>
 
               <div className="feature-tags">
                       {renderSmartVetCategoryTags("costAndTransparency", vetTagCounts)}
@@ -2430,7 +2362,7 @@ const PlaceDetails = () => {
 
                   {/* 5. Services & Specializations - BACKEND ALIGNED */}
             <div className="category-section">
-                    <h3>🩺 Services & Specializations</h3>
+                    <h3>Services & Specializations</h3>
 
               <div className="feature-tags">
                       {renderSmartVetCategoryTags("servicesAndSpecializations", vetTagCounts)}
@@ -2439,7 +2371,7 @@ const PlaceDetails = () => {
 
                   {/* 6. Emergency & After-Hours Care - BACKEND ALIGNED */}
             <div className="category-section">
-                    <h3>🚨 Emergency & After-Hours Care</h3>
+                    <h3>Emergency & After-Hours Care</h3>
 
               <div className="feature-tags">
                       {renderSmartVetCategoryTags("emergencyAndAfterHours", vetTagCounts)}
@@ -2448,7 +2380,7 @@ const PlaceDetails = () => {
 
                   {/* 7. Staff & Service Quality - BACKEND ALIGNED */}
             <div className="category-section">
-                    <h3>👨‍⚕️ Staff & Service Quality</h3>
+                    <h3>Staff & Service Quality</h3>
 
               <div className="feature-tags">
                       {renderSmartVetCategoryTags("staffAndServiceQuality", vetTagCounts)}
@@ -2477,7 +2409,7 @@ const PlaceDetails = () => {
           <div className="category-tags-grid">
             {/* 1. Access & Location */}
             <div className="category-section">
-              <h3>📍 Access & Location</h3>
+              <h3>Access & Location</h3>
 
               <div className="feature-tags">
                 {renderSmartPetStoreCategoryTags("accessAndLocation", analyzePetStoreReviewTags())}
@@ -2486,7 +2418,7 @@ const PlaceDetails = () => {
 
             {/* 2. Hours of Operation */}
             <div className="category-section">
-              <h3>⏰ Hours of Operation</h3>
+              <h3>Hours of Operation</h3>
 
               <div className="feature-tags">
                 {renderSmartPetStoreCategoryTags("hoursOfOperation", analyzePetStoreReviewTags())}
@@ -2495,7 +2427,7 @@ const PlaceDetails = () => {
 
             {/* 3. Services & Conveniences */}
             <div className="category-section">
-              <h3>🛎️ Services & Conveniences</h3>
+              <h3>Services & Conveniences</h3>
 
               <div className="feature-tags">
                 {renderSmartPetStoreCategoryTags("servicesAndConveniences", analyzePetStoreReviewTags())}
@@ -2504,7 +2436,7 @@ const PlaceDetails = () => {
 
             {/* 4. Product Selection & Quality */}
             <div className="category-section">
-              <h3>🛍️ Product Selection & Quality</h3>
+              <h3>Product Selection & Quality</h3>
 
               <div className="feature-tags">
                 {renderSmartPetStoreCategoryTags("productSelectionAndQuality", analyzePetStoreReviewTags())}
@@ -2513,7 +2445,7 @@ const PlaceDetails = () => {
 
             {/* 5. Pricing & Value */}
             <div className="category-section">
-              <h3>💰 Pricing & Value</h3>
+              <h3>Pricing & Value</h3>
 
               <div className="feature-tags">
                 {renderSmartPetStoreCategoryTags("pricingAndValue", analyzePetStoreReviewTags())}
@@ -2522,7 +2454,7 @@ const PlaceDetails = () => {
 
             {/* 6. Staff Knowledge & Service */}
             <div className="category-section">
-              <h3>👥 Staff Knowledge & Service</h3>
+              <h3>Staff Knowledge & Service</h3>
 
               <div className="feature-tags">
                 {renderSmartPetStoreCategoryTags("staffKnowledgeAndService", analyzePetStoreReviewTags())}
@@ -2548,7 +2480,7 @@ const PlaceDetails = () => {
           <div className="category-tags-grid">
             {/* 1. Access & Location */}
             <div className="category-section">
-              <h3>📍 Access & Location</h3>
+              <h3>Access & Location</h3>
 
               <div className="feature-tags">
                 {renderSmartAnimalShelterCategoryTags("accessAndLocation", analyzeAnimalShelterReviewTags())}
@@ -2557,7 +2489,7 @@ const PlaceDetails = () => {
 
             {/* 2. Hours of Operation */}
             <div className="category-section">
-              <h3>⏰ Hours of Operation</h3>
+              <h3>Hours of Operation</h3>
 
               <div className="feature-tags">
                 {renderSmartAnimalShelterCategoryTags("hoursOfOperation", analyzeAnimalShelterReviewTags())}
@@ -2566,7 +2498,7 @@ const PlaceDetails = () => {
 
             {/* 3. Animal Type Selection */}
             <div className="category-section">
-              <h3>🐾 Animal Type Selection</h3>
+              <h3>Animal Type Selection</h3>
 
               <div className="feature-tags">
                 {renderSmartAnimalShelterCategoryTags("animalTypeSelection", analyzeAnimalShelterReviewTags())}
@@ -2575,7 +2507,7 @@ const PlaceDetails = () => {
 
             {/* 4. Animal Care & Welfare */}
             <div className="category-section">
-              <h3>❤️ Animal Care & Welfare</h3>
+              <h3>Animal Care & Welfare</h3>
 
               <div className="feature-tags">
                 {renderSmartAnimalShelterCategoryTags("animalCareAndWelfare", analyzeAnimalShelterReviewTags())}
@@ -2584,7 +2516,7 @@ const PlaceDetails = () => {
 
             {/* 5. Adoption Process & Support */}
             <div className="category-section">
-              <h3>📋 Adoption Process & Support</h3>
+              <h3>Adoption Process & Support</h3>
 
               <div className="feature-tags">
                 {renderSmartAnimalShelterCategoryTags("adoptionProcessAndSupport", analyzeAnimalShelterReviewTags())}
@@ -2593,7 +2525,7 @@ const PlaceDetails = () => {
 
             {/* 6. Staff & Volunteer Quality */}
             <div className="category-section">
-              <h3>👥 Staff & Volunteer Quality</h3>
+              <h3>Staff & Volunteer Quality</h3>
 
               <div className="feature-tags">
                 {renderSmartAnimalShelterCategoryTags("staffAndVolunteerQuality", analyzeAnimalShelterReviewTags())}
@@ -2608,23 +2540,23 @@ const PlaceDetails = () => {
         {/* Contact Info Card */}
         {(place.phone || place.website || place.opening_hours) && (
           <div className="info-card">
-            <h3>📞 CONTACT</h3>
-            {place.phone && <p>📞 {place.phone}</p>}
+            <h3>CONTACT</h3>
+            {place.phone && <p>{place.phone}</p>}
             {place.website && (
               <p>
                 <a href={place.website} target="_blank" rel="noopener noreferrer" className="website-link">
-                  🌐 Website
+                  Website
                 </a>
               </p>
             )}
-            {place.opening_hours && <p>🕐 {place.opening_hours}</p>}
+            {place.opening_hours && <p>{place.opening_hours}</p>}
           </div>
         )}
 
         {/* Tags Card */}
         {place.tags && place.tags.length > 0 && (
           <div className="info-card">
-            <h3>🏷️ FEATURES</h3>
+            <h3>FEATURES</h3>
             <div className="tags-list">
               {place.tags.map((tag, index) => (
                 <span key={index} className="tag-chip">
@@ -2647,7 +2579,7 @@ const PlaceDetails = () => {
       {/* Reviews Section */}
       <div className="reviews-section">
         <div className="reviews-header">
-          <h2>📝 REVIEWS ({reviews.length})</h2>
+          <h2>REVIEWS ({reviews.length})</h2>
           {mongoUser ? (
             <button
               className="add-review-button"

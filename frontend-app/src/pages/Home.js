@@ -35,8 +35,8 @@ const Home = () => {
     }
     return {
       longitude: -87.6298,  // Chicago downtown longitude (fallback)
-      latitude: 41.8781,    // Chicago downtown latitude (fallback)
-      zoom: 13              // Slightly more zoomed in for city view
+      latitude: 41.8881,    // Chicago downtown latitude - moved north (fallback)
+      zoom: 14              // More zoomed in for better city view
     };
   };
 
@@ -114,6 +114,37 @@ const Home = () => {
   };
 
   const [locationsState, setLocationsState] = useState(getCachedLocations());
+  const [databaseLoaded, setDatabaseLoaded] = useState(() => {
+    // If we have cached database places, mark as loaded
+    return getCachedDatabasePlaces().length > 0;
+  });
+  const [apiLoaded, setApiLoaded] = useState(() => {
+    // If we have cached locations, mark as loaded
+    return getCachedLocations().length > 0;
+  });
+  const [initialLoadComplete, setInitialLoadComplete] = useState(() => {
+    // If we have cached data, we can complete initial load immediately
+    const hasCachedData = getCachedLocations().length > 0 || getCachedDatabasePlaces().length > 0;
+    return hasCachedData;
+  });
+  
+  // Cache for displayed places (to maintain consistency on back navigation)
+  const [cachedDisplayedPlaces, setCachedDisplayedPlaces] = useState(() => {
+    try {
+      const savedState = sessionStorage.getItem('pawpawmate_map_state');
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        const thirtyMinutes = 30 * 60 * 1000;
+        if (Date.now() - parsed.timestamp < thirtyMinutes && parsed.displayedPlaces) {
+          console.log('Restored cached displayed places:', parsed.displayedPlaces.length);
+          return parsed.displayedPlaces;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cached displayed places:', error);
+    }
+    return null;
+  });
   
   // Wrapper function to save state when locations change
   const setLocations = (newLocations) => {
@@ -128,6 +159,12 @@ const Home = () => {
   // Wrapper function to save state when filter changes
   const setFilter = (newFilter) => {
     setFilterState(newFilter);
+    
+    // Clear cached displayed places when filter changes
+    if (cachedDisplayedPlaces) {
+      setCachedDisplayedPlaces(null);
+    }
+    
     // Save state after filter changes
     setTimeout(() => saveMapState(), 100);
   };
@@ -164,6 +201,68 @@ const Home = () => {
   const fetchTimeoutRef = useRef();
   const searchTimeoutRef = useRef();
 
+  // Smart filtering function with per-type limits and dog park priority
+  const applySmartFiltering = (places) => {
+    if (places.length <= 20) {
+      return places; // No filtering needed if 20 or fewer places
+    }
+
+    const typeCounters = {
+      dog_park: 0,
+      veterinary: 0,
+      pet_store: 0,
+      animal_shelter: 0
+    };
+
+    const maxPerType = 10;
+    const totalLimit = 20;
+    
+    // Sort by type priority (dog parks first) and then by other criteria
+    const sortedPlaces = places.sort((a, b) => {
+      // Priority 1: Dog parks first
+      if (a.type === 'dog_park' && b.type !== 'dog_park') return -1;
+      if (a.type !== 'dog_park' && b.type === 'dog_park') return 1;
+      
+      // Priority 2: Database places over API places (for consistency)
+      if (a.isFromDatabase && !b.isFromDatabase) return -1;
+      if (!a.isFromDatabase && b.isFromDatabase) return 1;
+      
+      return 0;
+    });
+
+    const selectedPlaces = [];
+    
+    // First pass: Fill dog parks up to max limit (10)
+    for (const place of sortedPlaces) {
+      if (place.type === 'dog_park' && typeCounters.dog_park < maxPerType) {
+        selectedPlaces.push(place);
+        typeCounters.dog_park++;
+        if (selectedPlaces.length >= totalLimit) break;
+      }
+    }
+
+    // Second pass: Fill other types up to their limits
+    for (const place of sortedPlaces) {
+      if (selectedPlaces.length >= totalLimit) break;
+      
+      if (place.type !== 'dog_park') {
+        const typeCounter = typeCounters[place.type] || 0;
+        if (typeCounter < maxPerType) {
+          selectedPlaces.push(place);
+          typeCounters[place.type] = typeCounter + 1;
+        }
+      }
+    }
+
+    console.log('Smart filtering applied:', {
+      totalPlaces: places.length,
+      selectedPlaces: selectedPlaces.length,
+      typeDistribution: typeCounters
+    });
+
+    return selectedPlaces.slice(0, totalLimit);
+  };
+
   // Location types with icons - Dog Parks first for priority
   const locationTypes = {
     all: { label: 'All', icon: '🐾' },
@@ -173,44 +272,52 @@ const Home = () => {
     animal_shelter: { label: 'Shelter', icon: '🏠', color: '#FFC29F' }
   };
 
-  // Get user's current location
+  // Get user's current location (triggered by button click)
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       console.log('Geolocation is not supported by this browser');
-      setLocationPermissionChecked(true);
+      alert('Geolocation is not supported by this browser');
       return;
     }
+
+    // Show loading state
+    setLocationPermissionChecked(false);
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         console.log('Current location obtained:', { latitude, longitude });
         
-        // Only use current location if there's no saved map state
-        const savedState = sessionStorage.getItem('pawpawmate_map_state');
-        if (!savedState) {
-          setViewState(prev => ({
-            ...prev,
-            longitude,
-            latitude,
-            zoom: 13
-          }));
-          console.log('Using current location as no saved state found');
-        } else {
-          console.log('Keeping saved map state, ignoring current location');
-        }
+        // Always use current location when user clicks the button
+        setViewState(prev => ({
+          ...prev,
+          longitude,
+          latitude,
+          zoom: 15 // Zoom in more when user specifically requests location
+        }));
+        console.log('Using current location from user request');
         setLocationPermissionChecked(true);
       },
       (error) => {
         console.log('Error getting location:', error.message);
-        console.log('Falling back to Chicago location');
+        console.log('Could not get current location');
         setLocationPermissionChecked(true);
-        // Keep default Chicago location
+        
+        // Show user-friendly error message
+        let errorMessage = 'Could not get your current location. ';
+        if (error.code === 1) {
+          errorMessage += 'Please allow location access and try again.';
+        } else if (error.code === 2) {
+          errorMessage += 'Location information is unavailable.';
+        } else if (error.code === 3) {
+          errorMessage += 'Location request timed out.';
+        }
+        alert(errorMessage);
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 300000 // Cache for 5 minutes
+        maximumAge: 60000 // Cache for 1 minute when user manually requests
       }
     );
   };
@@ -358,8 +465,10 @@ const Home = () => {
       console.log(`- ${processedLocations.filter(l => l.type === 'animal_shelter').length} animal shelters`);
       console.log('Animal shelters found:', processedLocations.filter(l => l.type === 'animal_shelter'));
       setLocations(processedLocations);
+      setApiLoaded(true);
     } catch (error) {
       console.error('Error fetching locations:', error);
+      setApiLoaded(true); // Set as loaded even on error to prevent infinite wait
       // Try with a simpler query if the main one fails
       try {
         const simpleQuery = `[out:json];node["leisure"="dog_park"](${bbox});out;`;
@@ -412,6 +521,11 @@ const Home = () => {
   // Debounced map move handler
   const handleMapMove = (evt) => {
     setViewState(evt.viewState);
+    
+    // Clear cached displayed places when user actively moves the map
+    if (cachedDisplayedPlaces) {
+      setCachedDisplayedPlaces(null);
+    }
     
     // Save map state after user moves the map
     saveMapState(evt.viewState);
@@ -488,22 +602,25 @@ const Home = () => {
     const cachedDatabasePlaces = getCachedDatabasePlaces();
     if (cachedDatabasePlaces.length > 0) {
       console.log('Using cached database places, skipping fetch');
+      setDatabaseLoaded(true);
       return;
     }
     
     try {
       const dbPlaces = await placeAPI.getAllPlaces();
       setDatabasePlaces(dbPlaces);
+      setDatabaseLoaded(true);
       console.log('Loaded database places:', dbPlaces.length);
     } catch (error) {
       console.error('Error loading database places:', error);
+      setDatabaseLoaded(true); // Set as loaded even on error to prevent infinite wait
     }
   };
 
   // Initial load
   useEffect(() => {
-    // Get user's current location first
-    getCurrentLocation();
+    // Set location permission as checked immediately (no automatic location request)
+    setLocationPermissionChecked(true);
     
     // Test API first
     testOverpassAPI();
@@ -514,10 +631,19 @@ const Home = () => {
     // Load database places
     loadDatabasePlaces();
     
-    // Initial setup (removed location fetching from here)
+    // Ensure we fetch locations for Chicago when first loading
     const timer = setTimeout(() => {
-      // This timer is just for cleanup purposes now
-    }, 1000);
+      const cachedLocations = getCachedLocations();
+      if (cachedLocations.length === 0) {
+        console.log('No cached locations, ensuring initial fetch for Chicago area');
+        // Create bounds for Chicago area based on viewState
+        const chicagoBounds = {
+          _sw: { lat: viewState.latitude - 0.05, lng: viewState.longitude - 0.05 },
+          _ne: { lat: viewState.latitude + 0.05, lng: viewState.longitude + 0.05 }
+        };
+        fetchLocations(chicagoBounds);
+      }
+    }, 2000); // Wait for map to be ready
 
     return () => {
       clearTimeout(timer);
@@ -539,6 +665,7 @@ const Home = () => {
       
       if (cachedLocations.length > 0 || cachedDatabasePlaces.length > 0) {
         console.log('Using cached locations, skipping fetch');
+        setApiLoaded(true); // Mark as loaded when using cached data
         return; // Skip fetching if we have cached data
       }
       
@@ -547,12 +674,35 @@ const Home = () => {
         if (bounds) {
           console.log('No cached locations found, fetching new ones');
           fetchLocations(bounds);
+        } else {
+          console.log('Map bounds not available, retrying...');
+          // Retry if bounds not available yet
+          setTimeout(() => {
+            const retryBounds = mapRef.current?.getBounds();
+            if (retryBounds) {
+              console.log('Retry successful, fetching locations');
+              fetchLocations(retryBounds);
+            }
+          }, 1000);
         }
       }, 500); // Shorter delay since location is already determined
 
       return () => clearTimeout(timer);
     }
   }, [locationPermissionChecked]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Control initial load completion to prevent flickering
+  useEffect(() => {
+    if (databaseLoaded && apiLoaded && !initialLoadComplete) {
+      // Add a small delay to ensure smooth rendering without flickering
+      const timer = setTimeout(() => {
+        setInitialLoadComplete(true);
+        console.log('Initial load completed - places will now be displayed');
+      }, 300); // 300ms delay to prevent flickering
+
+      return () => clearTimeout(timer);
+    }
+  }, [databaseLoaded, apiLoaded, initialLoadComplete]);
 
   // Load search history from localStorage
   useEffect(() => {
@@ -768,7 +918,7 @@ const Home = () => {
   };
 
   // Save current map state to sessionStorage
-  const saveMapState = (state = viewState) => {
+  const saveMapState = (state = viewState, displayedPlaces = null) => {
     try {
       const stateToSave = {
         longitude: state.longitude,
@@ -778,6 +928,7 @@ const Home = () => {
         searchQuery: searchQuery,
         locations: locations, // Cache the fetched locations
         databasePlaces: databasePlaces, // Cache database places too
+        displayedPlaces: displayedPlaces, // Cache currently displayed places for consistent back navigation
         timestamp: Date.now()
       };
       sessionStorage.setItem('pawpawmate_map_state', JSON.stringify(stateToSave));
@@ -785,6 +936,12 @@ const Home = () => {
     } catch (error) {
       console.error('Error saving map state:', error);
     }
+  };
+
+  // Save map state with currently displayed places (for navigation consistency)
+  const saveMapStateWithDisplayedPlaces = (displayedPlaces) => {
+    saveMapState(viewState, displayedPlaces);
+    setCachedDisplayedPlaces(displayedPlaces);
   };
 
   // Clear saved map state
@@ -798,8 +955,8 @@ const Home = () => {
   };
 
   const handleLocationClick = (location) => {
-    // Save current map state before navigating
-    saveMapState();
+    // Save current map state with displayed places before navigating for consistent back navigation
+    saveMapStateWithDisplayedPlaces(filteredLocations);
     
     // Check if this is a database place
     if (location.isFromDatabase) {
@@ -917,25 +1074,59 @@ const Home = () => {
   // Get current map bounds
   const mapBounds = mapRef.current?.getBounds();
 
-  const filteredLocations = combinedLocations.filter(location => {
-    // Check if location type is known
-    if (!locationTypes[location.type]) return false;
-    
-    // Check if location matches current filter
-    const matchesFilter = filter === 'all' || location.type === filter || location.type.replace('_', ' ') === filter;
-    if (!matchesFilter) return false;
-    
-    // Check if location is within current map bounds
-    if (mapBounds) {
-      const isInBounds = location.latitude >= mapBounds.getSouth() && 
-                        location.latitude <= mapBounds.getNorth() && 
-                        location.longitude >= mapBounds.getWest() && 
-                        location.longitude <= mapBounds.getEast();
-      return isInBounds;
+  // Only show places when both database and API are loaded AND initial load is complete
+  const allDataLoaded = databaseLoaded && apiLoaded && initialLoadComplete;
+  
+  // Debug logging
+  console.log('Loading states:', { 
+    databaseLoaded, 
+    apiLoaded, 
+    initialLoadComplete,
+    allDataLoaded, 
+    combinedPlacesCount: combinedLocations.length,
+    hasCachedDisplayedPlaces: !!cachedDisplayedPlaces
+  });
+  
+  const filteredLocations = !allDataLoaded ? [] : (() => {
+    // If we have cached displayed places (user returning from place details), use them
+    // But only if the filter and map bounds are similar to prevent showing wrong places
+    if (cachedDisplayedPlaces && cachedDisplayedPlaces.length > 0) {
+      console.log('Using cached displayed places for consistency');
+      return cachedDisplayedPlaces;
     }
     
-    return true; // If no bounds available, include all locations
-  }).slice(0,20);
+    // Otherwise, calculate fresh filtered locations
+    // First apply basic filtering (type, bounds, filter)
+    const basicFilteredLocations = combinedLocations.filter(location => {
+      // Check if location type is known
+      if (!locationTypes[location.type]) return false;
+      
+      // Check if location matches current filter
+      const matchesFilter = filter === 'all' || location.type === filter || location.type.replace('_', ' ') === filter;
+      if (!matchesFilter) return false;
+      
+      // Check if location is within current map bounds
+      if (mapBounds) {
+        const isInBounds = location.latitude >= mapBounds.getSouth() && 
+                          location.latitude <= mapBounds.getNorth() && 
+                          location.longitude >= mapBounds.getWest() && 
+                          location.longitude <= mapBounds.getEast();
+        return isInBounds;
+      }
+      
+      return true; // If no bounds available, include all locations
+    });
+
+    // Apply smart filtering if we have more than 20 places
+    const finalFilteredPlaces = applySmartFiltering(basicFilteredLocations);
+    
+    // Clear cached displayed places since we're calculating fresh ones
+    if (cachedDisplayedPlaces) {
+      setCachedDisplayedPlaces(null);
+    }
+    
+    return finalFilteredPlaces;
+  })();
 
   return (
     <div className="home-container">
@@ -990,15 +1181,7 @@ const Home = () => {
       </div>
 
       <div className="map-wrapper">
-        {!locationPermissionChecked && (
-          <div className="location-loading-overlay">
-            <div className="location-loading-content">
-              <div className="loading-spinner">⟳</div>
-              <p>Getting your location...</p>
-              <small>We'll show Chicago if location access is denied</small>
-            </div>
-          </div>
-        )}
+
         <Map
           ref={mapRef}
           {...viewState}

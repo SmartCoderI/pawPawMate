@@ -44,8 +44,8 @@ const LostPets = () => {
     }
     return {
       longitude: -87.6298,  // Chicago downtown longitude (fallback)
-      latitude: 41.8781,    // Chicago downtown latitude (fallback)
-      zoom: 13              // Slightly more zoomed in for city view
+      latitude: 41.8881,    // Chicago downtown latitude - moved north (fallback)
+      zoom: 14              // More zoomed in for better city view
     };
   };
 
@@ -181,44 +181,52 @@ const LostPets = () => {
     }
   };
 
-  // Get user's current location
+  // Get user's current location (triggered by button click)
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       console.log('Geolocation is not supported by this browser');
-      setLocationPermissionChecked(true);
+      alert('Geolocation is not supported by this browser');
       return;
     }
+
+    // Show loading state
+    setLocationPermissionChecked(false);
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         console.log('Current location obtained:', { latitude, longitude });
 
-        // Only use current location if no saved state
-        const savedState = sessionStorage.getItem('pawpawmate_lostpets_map_state');
-        if (!savedState) {
-          setViewState(prev => ({
-            ...prev,
-            longitude,
-            latitude,
-            zoom: 13
-          }));
-          console.log('Using current location as no saved state found');
-        } else {
-          console.log('Keeping saved map state, ignoring current location');
-        }
+        // Always use current location when user clicks the button
+        setViewState(prev => ({
+          ...prev,
+          longitude,
+          latitude,
+          zoom: 15 // Zoom in more when user specifically requests location
+        }));
+        console.log('Using current location from user request');
         setLocationPermissionChecked(true);
       },
       (error) => {
         console.log('Error getting location:', error.message);
-        console.log('Falling back to Chicago location');
+        console.log('Could not get current location');
         setLocationPermissionChecked(true);
-        // Keep default Chicago location
+        
+        // Show user-friendly error message
+        let errorMessage = 'Could not get your current location. ';
+        if (error.code === 1) {
+          errorMessage += 'Please allow location access and try again.';
+        } else if (error.code === 2) {
+          errorMessage += 'Location information is unavailable.';
+        } else if (error.code === 3) {
+          errorMessage += 'Location request timed out.';
+        }
+        alert(errorMessage);
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 300000 // Cache for 5 minutes
+        maximumAge: 60000 // Cache for 1 minute when user manually requests
       }
     );
   };
@@ -360,8 +368,8 @@ const LostPets = () => {
 
   // Initial load
   useEffect(() => {
-    // Get user's current location first
-    getCurrentLocation();
+    // Set location permission as checked immediately (no automatic location request)
+    setLocationPermissionChecked(true);
 
     // Cleanup function
     return () => {
