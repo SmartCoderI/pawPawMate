@@ -70,6 +70,9 @@ const LostPets = () => {
   const [addressInput, setAddressInput] = useState('');
   const [isGeocoding, setIsGeocoding] = useState(false);
 
+  // Mark as Found state
+  const [isMarkingFound, setIsMarkingFound] = useState(false);
+
   // Form data for lost pet reports
   const [lostPetForm, setLostPetForm] = useState({
     petName: '',
@@ -325,6 +328,49 @@ const LostPets = () => {
   // Close popup
   const closePopup = () => {
     setSelectedPet(null);
+  };
+
+  // Mark as Found functions
+  const handleMarkAsFound = async (pet) => {
+    if (!pet || !mongoUser) {
+      alert('Error: Missing required information');
+      return;
+    }
+
+    // Simple confirmation
+    const confirmFound = window.confirm(`Are you sure you want to mark ${pet.petName} as found?`);
+    if (!confirmFound) return;
+
+    try {
+      setIsMarkingFound(true);
+
+      const reunionInfo = {
+        foundAt: new Date().toISOString(),
+        foundLocation: pet.lastSeenLocation,
+        reunionNote: '',
+        reunionPhoto: ''
+      };
+
+      console.log('Marking pet as found:', pet._id);
+
+      await lostPetAPI.updateLostPetStatus(pet._id, {
+        status: 'found',
+        reunionInfo: reunionInfo,
+        userId: mongoUser._id
+      });
+
+      alert('Pet marked as found successfully! 🎉');
+      
+      // Refresh the data and close popup
+      fetchLostPets();
+      closePopup();
+      
+    } catch (error) {
+      console.error('Error marking pet as found:', error);
+      alert('Error marking pet as found. Please try again.');
+    } finally {
+      setIsMarkingFound(false);
+    }
   };
 
   // Handle filter changes
@@ -947,8 +993,7 @@ const LostPets = () => {
                     <button
                       className="found-button"
                       onClick={() => {
-                        // TODO: Implement mark as found functionality
-                        alert('Mark as found functionality coming soon!');
+                        handleMarkAsFound(selectedPet);
                       }}
                     >
                       Mark as Found
@@ -1115,12 +1160,12 @@ const LostPets = () => {
                     </div>
                     <div className="form-group">
                       <label>Email Address *</label>
-                      <input
-                        type="email"
-                        value={lostPetForm.ownerContact.email}
-                        onChange={(e) => handleLostPetFormChange('ownerContact.email', e.target.value)}
-                        required
-                      />
+                        <input
+                          type="email"
+                          value={lostPetForm.ownerContact.email}
+                          onChange={(e) => handleLostPetFormChange('ownerContact.email', e.target.value)}
+                          required
+                        />
                     </div>
                   </div>
 
