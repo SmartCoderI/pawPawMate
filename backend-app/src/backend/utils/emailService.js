@@ -20,7 +20,7 @@ const testConnection = async () => {
 const sendLostPetAlert = async (userEmail, userName, alertData) => {
     const mailOptions = {
         from: {
-            name: 'PawPaw Mate',
+            name: 'PawPawMate',
             address: process.env.GMAIL_USER
         },
         to: userEmail,
@@ -107,7 +107,110 @@ const sendLostPetAlert = async (userEmail, userName, alertData) => {
     }
 };
 
+const sendSightingNotification = async (recipientEmail, recipientName, sightingData, lostPetData) => {
+    const subject = `📍 New Sighting Report for ${lostPetData.petName}`;
+
+    const mailOptions = {
+        from: {
+            name: 'PawPawMate',
+            address: process.env.GMAIL_USER
+        },
+        to: recipientEmail,
+        subject: subject,
+        html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; padding: 20px;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #28a745, #34ce57); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="margin: 0; font-size: 28px;">🎉 Sighting Report!</h1>
+          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Someone has spotted ${lostPetData.petName}!</p>
+        </div>
+        
+        <!-- Content -->
+        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <p style="font-size: 16px; color: #333; margin-bottom: 20px;">Hi ${recipientName},</p>
+          
+          <p style="font-size: 16px; color: #333; margin-bottom: 25px; background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+            <strong>🎉 Great news!</strong> Someone has reported seeing ${lostPetData.petName}. Here are the details:
+          </p>
+          
+          <!-- Pet Info Card -->
+          <div style="border: 3px solid #28a745; border-radius: 15px; padding: 25px; margin: 25px 0; background: #f8fff8;">
+            <h2 style="color: #28a745; text-align: center; margin: 0 0 20px 0; font-size: 24px;">🐕 ${lostPetData.petName}</h2>
+            
+            <div style="background: #e8f5e8; padding: 20px; border-radius: 10px; margin: 20px 0;">
+              <h3 style="margin: 0 0 15px 0; color: #28a745; font-size: 18px;">📍 Sighting Details:</h3>
+              <p style="margin: 8px 0; color: #333;"><strong>Location:</strong> ${sightingData.location.address || 'Address not provided'}</p>
+              <p style="margin: 8px 0; color: #333;"><strong>When:</strong> ${new Date(sightingData.sightingTime).toLocaleDateString()} at ${new Date(sightingData.sightingTime).toLocaleTimeString()}</p>
+              <p style="margin: 8px 0; color: #333;"><strong>Reported by:</strong> ${sightingData.reporterName}</p>
+              ${sightingData.description ? `<p style="margin: 15px 0 5px 0; color: #333;"><strong>Description:</strong></p><p style="margin: 5px 0; color: #555; font-style: italic; background: #f0f0f0; padding: 10px; border-radius: 5px;">"${sightingData.description}"</p>` : ''}
+            </div>
+            
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ffc107;">
+              <p style="margin: 0; color: #856404; font-weight: 500;">
+                <strong>⚡ Act quickly!</strong> Recent sightings are the best leads for finding lost pets. Check the area as soon as possible.
+              </p>
+            </div>
+          </div>
+          
+          <!-- Pet Original Info -->
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h3 style="margin: 0 0 15px 0; color: #495057; font-size: 18px;">🐾 Pet Information:</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <p style="margin: 5px 0; color: #333;"><strong>Species:</strong> ${lostPetData.species}</p>
+              <p style="margin: 5px 0; color: #333;"><strong>Breed:</strong> ${lostPetData.breed || 'Mixed'}</p>
+              <p style="margin: 5px 0; color: #333;"><strong>Color:</strong> ${lostPetData.color}</p>
+              <p style="margin: 5px 0; color: #333;"><strong>Size:</strong> ${lostPetData.size}</p>
+            </div>
+            <p style="margin: 10px 0 5px 0; color: #333;"><strong>Originally lost:</strong> ${new Date(lostPetData.lastSeenTime).toLocaleDateString()} at ${new Date(lostPetData.lastSeenTime).toLocaleTimeString()}</p>
+            <p style="margin: 5px 0; color: #333;"><strong>Original location:</strong> ${lostPetData.lastSeenLocation.address}</p>
+          </div>
+          
+          <!-- Contact Info -->
+          <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h3 style="margin: 0 0 15px 0; color: #1976d2; font-size: 18px;">📞 Owner Contact:</h3>
+            <div style="font-size: 16px;">
+              <p style="margin: 8px 0;"><strong>Name:</strong> ${lostPetData.ownerContact.name}</p>
+              <p style="margin: 8px 0;"><strong>Phone:</strong> <a href="tel:${lostPetData.ownerContact.phone}" style="color: #1976d2; text-decoration: none; font-weight: bold;">${lostPetData.ownerContact.phone}</a></p>
+              <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${lostPetData.ownerContact.email}" style="color: #1976d2; text-decoration: none;">${lostPetData.ownerContact.email}</a></p>
+            </div>
+          </div>
+          
+          <!-- Call to Action -->
+          <div style="text-align: center; margin: 30px 0;">
+            <p style="font-size: 18px; color: #28a745; font-weight: bold; margin-bottom: 15px;">
+              Thank you for helping reunite ${lostPetData.petName} with their family!
+            </p>
+            <p style="font-size: 14px; color: #666; line-height: 1.6;">
+              Recent sightings greatly increase the chances of a successful reunion. Every report helps narrow down the search area.
+            </p>
+          </div>
+          
+          <!-- Footer -->
+          <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px; text-align: center;">
+            <p style="color: #999; font-size: 12px; margin: 5px 0;">
+              This notification was sent because a new sighting has been reported for ${lostPetData.petName}.
+            </p>
+            <p style="color: #999; font-size: 12px; margin: 5px 0;">
+              PawPawMate - Helping pets find their way home 🏠
+            </p>
+          </div>
+        </div>
+      </div>
+    `
+    };
+
+    try {
+        const result = await transporter.sendMail(mailOptions);
+        console.log(`✅ Sighting notification sent successfully to ${recipientEmail}:`, result.messageId);
+        return { success: true, messageId: result.messageId };
+    } catch (error) {
+        console.error(`❌ Failed to send sighting notification to ${recipientEmail}:`, error);
+        return { success: false, error: error.message };
+    }
+};
+
 module.exports = {
     testConnection,
-    sendLostPetAlert
+    sendLostPetAlert,
+    sendSightingNotification
 }
