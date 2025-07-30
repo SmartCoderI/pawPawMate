@@ -287,6 +287,59 @@ exports.addSightingReport = async (req, res) => {
     await lostPet.populate("sightings.reportedBy", "name email profileImage");
 
     console.log('Sighting report added successfully');
+
+    try {
+      const sightingData = {
+        location: sighting.location,
+        sightingTime: sighting.sightingTime,
+        description: sighting.description,
+        reporterName: user.name || 'Anonymous'
+      };
+
+      const lostPetData = {
+        petName: lostPet.petName,
+        species: lostPet.species,
+        breed: lostPet.breed,
+        color: lostPet.color,
+        size: lostPet.size,
+        lastSeenLocation: lostPet.lastSeenLocation,
+        lastSeenTime: lostPet.lastSeenTime,
+        ownerContact: lostPet.ownerContact,
+      };
+
+      const recipients = new Set();
+      if (lostPet.reportedBy.email) {
+        recipients.add(JSON.stringify({
+          email: lostPet.reportedBy.email,
+          name: lostPet.reportedBy.name || 'Pet Owner'
+        }));
+      }
+      if (lostPet.ownerContact.email && lostPet.ownerContact.email !== lostPet.reportedBy.email) {
+        recipients.add(JSON.stringify({
+          email: lostPet.ownerContact.email,
+          name: lostPet.ownerContact.name || 'Contact Person'
+        }));
+      }
+
+      const emailPromises = Array.from(recipients).map(recipientStr => {
+        const recipient = JSON.parse(recipientStr);
+        return emailService.sendSightingNotification(
+          recipient.email,
+          recipient.name,
+          sightingData,
+          lostPetData
+        );
+      })
+
+      const emailResults = await Promise.allSettled(emailPromises)
+      const successful = emailResults.filter(result => result.status === 'fulfilled' && result.value.success).length;
+      const failed = emailResults.length - successful;
+      console.log(`Sighting notification emails sent: ${successful} successful, ${failed} failed`);
+
+    } catch (emailError) {
+      console.error('Error sending sighting notification emails:', emailError);
+    }
+
     res.json(lostPet);
   } catch (error) {
     console.error('Error adding sighting report:', error);
