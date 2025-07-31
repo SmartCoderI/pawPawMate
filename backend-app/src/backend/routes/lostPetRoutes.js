@@ -9,6 +9,7 @@ const {
   deleteLostPetReport,
   getLostPetStats
 } = require("../controllers/lostPetController");
+const { petPhotosUpload } = require("../utils/upload");
 const verifyToken = require("../middleware/auth");
 
 // Get all lost pets with optional filtering
@@ -22,7 +23,7 @@ lostPetRouter.get("/stats", getLostPetStats);
 lostPetRouter.get("/:id", getLostPetById);
 
 // Create a new lost pet report
-lostPetRouter.post("/", createLostPetReport);
+lostPetRouter.post("/", petPhotosUpload, createLostPetReport);
 
 // Add a sighting report to an existing lost pet
 lostPetRouter.post("/:id/sightings", addSightingReport);

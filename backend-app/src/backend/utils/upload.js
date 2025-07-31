@@ -61,56 +61,56 @@ const imageFileFilter = (req, file, cb) => {
 // Custom S3 storage engine
 const s3Storage = hasAWSConfig
   ? {
-      _handleFile: async (req, file, cb) => {
-        try {
-          // Determine folder based on route
-          let folder;
-          if (req.originalUrl.includes("/reviews/upload-images")) {
-            folder = "reviews";
-          } else if (req.originalUrl.includes("/pets/upload")) {
-            folder = "pets";
-          } else if (req.originalUrl.includes("/users/upload-photo")) {
-            folder = "users";
-          } else {
-            folder = "uploads";
-          }
-
-          // Generate unique filename
-          const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-          const ext = path.extname(file.originalname);
-          const key = `${folder}/${uniqueSuffix}${ext.toLowerCase()}`;
-
-          // Upload to S3
-          const { Upload } = require("@aws-sdk/lib-storage");
-          const upload = new Upload({
-            client: s3,
-            params: {
-              Bucket: process.env.AWS_S3_BUCKET_NAME,
-              Key: key,
-              Body: file.stream,
-              ContentType: file.mimetype,
-            },
-          });
-
-          const result = await upload.done();
-
-          cb(null, {
-            key: key,
-            bucket: process.env.AWS_S3_BUCKET_NAME,
-            location: result.Location,
-            etag: result.ETag,
-            size: file.size,
-          });
-        } catch (error) {
-          console.error("S3 upload error:", error);
-          cb(error);
+    _handleFile: async (req, file, cb) => {
+      try {
+        // Determine folder based on route
+        let folder;
+        if (req.originalUrl.includes("/reviews/upload-images")) {
+          folder = "reviews";
+        } else if (req.originalUrl.includes("/pets/upload") || req.originalUrl.includes("/lost-pets/upload")) {
+          folder = "pets";
+        } else if (req.originalUrl.includes("/users/upload-photo")) {
+          folder = "users";
+        } else {
+          folder = "uploads";
         }
-      },
-      _removeFile: (req, file, cb) => {
-        // Optional: implement file removal
-        cb(null);
-      },
-    }
+
+        // Generate unique filename
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        const ext = path.extname(file.originalname);
+        const key = `${folder}/${uniqueSuffix}${ext.toLowerCase()}`;
+
+        // Upload to S3
+        const { Upload } = require("@aws-sdk/lib-storage");
+        const upload = new Upload({
+          client: s3,
+          params: {
+            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Key: key,
+            Body: file.stream,
+            ContentType: file.mimetype,
+          },
+        });
+
+        const result = await upload.done();
+
+        cb(null, {
+          key: key,
+          bucket: process.env.AWS_S3_BUCKET_NAME,
+          location: result.Location,
+          etag: result.ETag,
+          size: file.size,
+        });
+      } catch (error) {
+        console.error("S3 upload error:", error);
+        cb(error);
+      }
+    },
+    _removeFile: (req, file, cb) => {
+      // Optional: implement file removal
+      cb(null);
+    },
+  }
   : null;
 
 // Local storage configuration (fallback)
@@ -121,7 +121,7 @@ const localStorage = multer.diskStorage({
     // Determine upload path based on route
     if (req.originalUrl.includes("/reviews/upload-images")) {
       uploadPath = reviewsDir;
-    } else if (req.originalUrl.includes("/pets/upload")) {
+    } else if (req.originalUrl.includes("/pets/upload") || req.originalUrl.includes("/lost-pets/upload")) {
       uploadPath = petsDir;
     } else if (req.originalUrl.includes("/users/upload-photo")) {
       uploadPath = usersDir;
@@ -141,6 +141,15 @@ const localStorage = multer.diskStorage({
 
 // Choose storage based on AWS configuration
 const storage = hasAWSConfig ? s3Storage : localStorage;
+
+const petPhotosUpload = multer({
+  storage: storage,
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB per file
+    files: 5, // Maximum 5 files
+  }
+}).array("photos", 5);
 
 // Review image upload configuration (supports multiple images)
 const reviewImageUpload = multer({
@@ -176,6 +185,7 @@ module.exports = {
   reviewImageUpload, // Review image upload (multiple images)
   petImageUpload, // Pet image upload (single image)
   userImageUpload, // User profile image upload (single image)
+  petPhotosUpload, // Pet photos upload (multiple images)
   hasAWSConfig,
   s3, // Export s3 instance for direct usage if needed
 };
