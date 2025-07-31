@@ -1,15 +1,14 @@
-
 const User = require("../models/User");
 const mongoose = require("mongoose");
 
 exports.createUser = async (req, res) => {
   try {
-    console.log('Backend: Creating user with data:', req.body);
+    console.log("Backend: Creating user with data:", req.body);
     const user = await User.create(req.body);
-    console.log('Backend: Created user successfully:', user);
+    console.log("Backend: Created user successfully:", user);
     res.status(201).json(user);
   } catch (err) {
-    console.error('Backend: Error creating user:', err);
+    console.error("Backend: Error creating user:", err);
     res.status(400).json({ error: err.message });
   }
 };
@@ -18,18 +17,18 @@ exports.createUser = async (req, res) => {
 exports.getUserByFirebaseUid = async (req, res) => {
   try {
     const uid = req.params.uid.trim();
-    console.log('Backend: Looking for user with Firebase UID:', uid);
+    console.log("Backend: Looking for user with Firebase UID:", uid);
 
     const user = await User.findOne({ uid: uid });
     if (!user) {
-      console.log('Backend: No user found with UID:', uid);
+      console.log("Backend: No user found with UID:", uid);
       return res.status(404).json({ error: "User not found" });
     }
 
-    console.log('Backend: Found user:', user);
+    console.log("Backend: Found user:", user);
     res.json(user);
   } catch (err) {
-    console.error('Backend: Error finding user by UID:', err);
+    console.error("Backend: Error finding user by UID:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -136,7 +135,6 @@ exports.uploadUserPhoto = async (req, res) => {
   }
 };
 
-
 // Helper function to find users near a specific location
 exports.findUserNearLocation = async (lat, lng, radiusMiles = 10) => {
   try {
@@ -148,19 +146,42 @@ exports.findUserNearLocation = async (lat, lng, radiusMiles = 10) => {
         $gte: lat - latDelta,
         $lte: lat + latDelta,
         $exists: true,
-        $ne: null
+        $ne: null,
       },
       "lastLoginLocation.lng": {
         $gte: lng - lngDelta,
         $lte: lng + lngDelta,
         $exists: true,
-        $ne: null
-      }
-    }).select('name email profileImage lastLoginLocation');
+        $ne: null,
+      },
+    }).select("name email profileImage lastLoginLocation");
 
     return nearbyUsers;
   } catch (error) {
     console.error("Error finding users near location:", error);
     throw error;
+  }
+};
+
+// Mark the welcome modal as seen for a user
+exports.markWelcomeModalSeen = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    console.log("Marking welcome modal as seen for user:", userId);
+
+    const user = await User.findByIdAndUpdate(userId, { hasSeenWelcomeModal: true }, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    console.log("Welcome modal status updated successfully for user:", userId);
+    res.status(200).json({
+      message: "Welcome modal status updated successfully.",
+      user,
+    });
+  } catch (error) {
+    console.error("Error marking welcome modal as seen:", error);
+    res.status(500).json({ error: error.message });
   }
 };

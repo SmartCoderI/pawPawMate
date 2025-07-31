@@ -3,19 +3,16 @@
  * Generates contextual prompts based on user, pet, place, and card information
  */
 
+const openaiService = require("./openaiService");
+
 class PromptService {
   /**
-   * Generate prompt for reward card image
-   * @param {Object} user - User information
-   * @param {Object} place - Place information
-   * @param {string} contributionType - Type of contribution (first_review, milestone_achievement, community_approval)
-   * @param {Object} userPets - User's pets array
-   * @param {Object} reviewData - Review data for additional context
-   * @returns {string} - Generated prompt for AI image generation
+   * Generate prompt for reward card image (now async)
+   * @returns {Promise<string>} - Generated prompt for AI image generation
    */
-  generateCardPrompt(user, place, contributionType, userPets = [], reviewData = null) {
-    // Get pet information
-    const petInfo = this.getPetInfo(userPets);
+  async generateCardPrompt(user, place, contributionType, userPets = [], reviewData = null) {
+    // Get pet information, which may involve an async call to the vision API
+    const petInfo = await this.getPetInfo(userPets);
 
     // Get place context
     const placeContext = this.getPlaceContext(place);
@@ -40,76 +37,64 @@ class PromptService {
   }
 
   /**
-   * Translate Chinese personality traits to English
-   * @param {Array} traits - Array of personality traits (may be in Chinese)
-   * @returns {Array} - Array of English personality traits
+   * Extract pet information for prompt (now async)
+   * @returns {Promise<string>} - Pet description string
    */
-  translatePersonalityTraits(traits) {
-    if (!traits || !Array.isArray(traits)) return ["friendly", "happy"];
-
-    const traitMap = {
-      友好: "friendly",
-      活泼: "playful",
-      可爱: "cute",
-      聪明: "smart",
-      忠诚: "loyal",
-      温柔: "gentle",
-      调皮: "mischievous",
-      安静: "calm",
-      独立: "independent",
-      好奇: "curious",
-      勇敢: "brave",
-      害羞: "shy",
-      精力充沛: "energetic",
-      爱玩: "playful",
-      懒惰: "lazy",
-      保护性: "protective",
-    };
-
-    return traits.map((trait) => traitMap[trait] || trait).filter((trait) => trait);
-  }
-
-  /**
-   * Extract pet information for prompt
-   * @param {Array} userPets - User's pets
-   * @returns {Object} - Pet information object
-   */
-  getPetInfo(userPets) {
+  async getPetInfo(userPets) {
     let selectedPet = null;
+    let description = "";
 
+    // Prioritize the user's first pet if available
     if (userPets && userPets.length > 0) {
-      // Prefer the first pet, or use a random one if multiple pets
       selectedPet = userPets[0];
-      console.log(
-        `🐾 Using user's pet: ${selectedPet.name || "Unnamed"} (${selectedPet.species}/${selectedPet.breed})`
-      );
     }
 
-    // Default pets if user has none
-    const defaultPets = [
-      { species: "dog", breed: "Golden Retriever", personalityTraits: ["friendly", "playful"], gender: "unknown" },
-      { species: "cat", breed: "British Shorthair", personalityTraits: ["curious", "independent"], gender: "unknown" },
-      { species: "dog", breed: "Shiba Inu", personalityTraits: ["energetic", "loyal"], gender: "unknown" },
-      { species: "cat", breed: "Maine Coon", personalityTraits: ["calm", "affectionate"], gender: "unknown" },
-    ];
+    // Attempt to get a description from the pet's profile image using the vision API
+    if (selectedPet && selectedPet.profileImage) {
+      console.log(`📸 Found profile image for ${selectedPet.name}. Describing with vision API...`);
+      const visionDescription = await openaiService.describeImage(selectedPet.profileImage);
+      // Use the vision description only if it's not the generic fallback
+      if (visionDescription && visionDescription !== "a lovely pet") {
+        console.log(`✅ Using AI-generated description: "${visionDescription}"`);
+        return visionDescription;
+      }
+      console.log("🤔 Vision API returned a generic description. Falling back to profile data.");
+    }
 
+    // Fallback 1: Use a default pet if no user pet is available
     if (!selectedPet) {
+      const defaultPets = [
+        { species: "dog", breed: "Golden Retriever", personalityTraits: ["friendly", "playful"], color: "golden" },
+        { species: "cat", breed: "Tabby", personalityTraits: ["curious", "independent"], color: "orange" },
+        {
+          species: "dog",
+          breed: "Shiba Inu",
+          personalityTraits: ["energetic", "loyal"],
+          color: "white",
+          accessories: "a blue scarf",
+        },
+        {
+          species: "dog",
+          breed: "Poodle",
+          personalityTraits: ["elegant", "smart"],
+          color: "brown",
+          accessories: "a red collar",
+        },
+      ];
       selectedPet = defaultPets[Math.floor(Math.random() * defaultPets.length)];
-      console.log(`🎲 Using default pet: ${selectedPet.breed} ${selectedPet.species}`);
+      console.log(`🎲 No user pet found. Using default pet: ${selectedPet.breed}`);
     }
 
-    // Extract physical characteristics
-    const physicalTraits = this.getPhysicalTraits(selectedPet);
+    // Fallback 2: Build the description string from the pet's structured profile data
+    console.log(`📝 Building description from pet profile data for: ${selectedPet.breed}`);
+    description = `a ${selectedPet.size || "medium-sized"} ${selectedPet.color || ""} ${selectedPet.breed}`
+      .replace(/  +/g, " ")
+      .trim();
+    if (selectedPet.accessories) {
+      description += ` wearing ${selectedPet.accessories}`;
+    }
 
-    return {
-      species: selectedPet.species || "dog",
-      breed: selectedPet.breed || (selectedPet.species === "cat" ? "Domestic Cat" : "Mixed Breed"),
-      personality: this.translatePersonalityTraits(selectedPet.personalityTraits) || ["friendly", "happy"],
-      name: selectedPet.name || null,
-      gender: selectedPet.gender || "unknown",
-      physicalTraits: physicalTraits,
-      age: this.getAgeCategory(selectedPet.birthDate),
-    };
+    return description;
   }
 
   /**
@@ -169,58 +154,47 @@ class PromptService {
    * @returns {Object} - Place context object
    */
   getPlaceContext(place) {
-    const placeType = place?.type || "dog park";
-    const placeName = place?.name || "a pet-friendly place";
+    const placeType = place?.type?.toLowerCase() || "dog park";
+    console.log(`📍 Generating context for place type: "${placeType}"`);
 
-    console.log(`📍 Generating context for place: ${placeName} (${placeType})`);
-
-    // Place-specific contexts with more detailed descriptions
     const placeContexts = {
-      "dog park": {
-        setting: "beautiful dog park",
-        activity: "playing freely and socializing",
-        atmosphere: "sunny outdoor environment with green grass, trees, and happy dogs playing together",
-        props: "lush grass, shade trees, wooden benches, dog agility equipment, water fountains",
-        mood: "joyful and energetic",
-        colors: "vibrant greens and natural earth tones",
-        lighting: "bright natural sunlight filtering through trees",
-      },
-      vet: {
-        setting: "modern veterinary clinic",
-        activity: "receiving gentle care and attention",
-        atmosphere: "clean, professional, and caring environment with friendly staff",
-        props: "examination table, stethoscope, medical charts, caring veterinarian hands",
-        mood: "calm and reassuring",
-        colors: "clean whites and soft blues",
-        lighting: "bright, clean medical lighting",
-      },
-      "pet store": {
-        setting: "colorful pet store",
-        activity: "exploring toys and treats",
-        atmosphere: "vibrant retail space filled with pet supplies and excitement",
-        props: "shelves of pet food, colorful toys, leashes, treats, pet accessories",
-        mood: "excited and curious",
-        colors: "bright and colorful with warm lighting",
-        lighting: "warm retail lighting highlighting products",
-      },
-      shelter: {
-        setting: "welcoming animal shelter",
-        activity: "meeting potential new families",
-        atmosphere: "hopeful and caring environment with dedicated volunteers",
-        props: "cozy kennels, adoption signs, volunteer badges, blankets, toys",
-        mood: "hopeful and loving",
-        colors: "warm and inviting pastels",
-        lighting: "soft, warm lighting creating a homey feel",
-      },
+      "dog park": [
+        "a dog park with trees and frisbees",
+        "a sunny field where dogs are playing fetch",
+        "a park with happy dogs running on green grass",
+      ],
+      vet: [
+        "an animal clinic with a friendly vet",
+        "a clean and modern veterinary office",
+        "a calm waiting room at the vet's",
+      ],
+      "pet store": [
+        "a pet store with colorful treat shelves",
+        "a cozy indoor grooming salon",
+        "a store filled with aisles of pet toys and food",
+        "a bright and cheerful pet supply shop",
+      ],
+      shelter: [
+        "a welcoming animal shelter with cozy kennels",
+        "an adoption event at a local animal shelter",
+        "a shelter where volunteers are playing with pets",
+        "a hopeful place where pets wait for their new families",
+      ],
     };
 
-    const context = placeContexts[placeType] || placeContexts["dog park"];
+    // Find the first key in placeContexts that is included in the placeType string
+    const matchedKey = Object.keys(placeContexts).find((key) => placeType.includes(key.replace("_", " ")));
 
-    // Add specific place name to context
-    context.placeName = placeName;
-    context.placeType = placeType;
+    let options;
+    if (matchedKey && placeContexts[matchedKey]) {
+      options = placeContexts[matchedKey];
+    } else {
+      // Fallback to the default if no match is found
+      options = placeContexts["dog park"];
+    }
 
-    return context;
+    // Return a random description from the selected options
+    return options[Math.floor(Math.random() * options.length)];
   }
 
   /**
@@ -287,34 +261,13 @@ class PromptService {
   buildPrompt(components) {
     const { petInfo, placeContext, contributionContext, reviewContext, userName } = components;
 
-    // Base style for all images
-    const baseStyle =
-      "Studio Ghibli inspired anime style, whimsical and magical atmosphere, hand-drawn animation style, watercolor, gentle lighting, dreamy and enchanting, Miyazaki-inspired art";
+    // The base style is now the main template
+    let prompt =
+      "A flat, vintage-style cartoon illustration showing [pet_description] at [place_description]. The pet looks happy and playful. The scene is warm, friendly, and colorful, drawn in a retro children’s picture book style. Use soft, earthy colors, thick outlines, and simple shapes.";
 
-    // Detailed pet description including physical traits
-    const physicalDesc = `${petInfo.physicalTraits.size} ${petInfo.physicalTraits.build} ${petInfo.species} with ${petInfo.physicalTraits.coat} coat`;
-    const personalityDesc = petInfo.personality.join(" and ");
-    const ageDesc = petInfo.age !== "adult" ? `${petInfo.age} ` : "";
-
-    const petDescription = `${ageDesc}${physicalDesc}, ${personalityDesc} in nature`;
-
-    // Place-specific activity with detailed context
-    const placeActivity = `at ${placeContext.placeName}, a ${placeContext.setting}, ${contributionContext.action}`;
-
-    // Enhanced mood description
-    const moodDescription = `expressing ${contributionContext.mood} emotions, ${placeContext.mood} in the ${placeContext.atmosphere}`;
-
-    // Rich environmental details
-    const environment = `The scene features ${placeContext.props}, with ${placeContext.colors} and ${placeContext.lighting}`;
-
-    // Celebration element with context
-    const celebration = `celebrating ${contributionContext.celebration} ${contributionContext.emoji}`;
-
-    // Technical specifications
-    const technicalSpecs = "High quality illustration, detailed character design, expressive eyes, dynamic pose";
-
-    // Combine all elements with better flow
-    const prompt = `${petDescription} ${placeActivity}, ${moodDescription}, ${celebration}. ${environment}. ${baseStyle}. ${technicalSpecs}. No text, words, or letters in the image.`;
+    // Replace placeholders with dynamic content
+    prompt = prompt.replace("[pet_description]", petInfo);
+    prompt = prompt.replace("[place_description]", placeContext);
 
     console.log("🎨 Final generated prompt:", prompt);
     return prompt;
