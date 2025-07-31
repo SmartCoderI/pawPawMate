@@ -46,6 +46,46 @@
   }
 }
 
+/* Sign-in prompt for non-authenticated users at top */
+.sign-in-prompt-top {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #E8F5E8, #C8E6C9);
+  border: 3px solid #4CAF50;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 4px 4px 0px #2E7D32;
+}
+
+.sign-in-prompt-top h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.4rem;
+  color: #2E7D32;
+  font-weight: 700;
+}
+
+.sign-in-prompt-top p {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: #2E7D32;
+  font-weight: 600;
+}
+
+.sign-in-prompt-top ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+  display: inline-block;
+}
+
+.sign-in-prompt-top li {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #2E7D32;
+  font-weight: 500;
+}
+
 /* Loading state */
 .loading-state {
   text-align: center;
