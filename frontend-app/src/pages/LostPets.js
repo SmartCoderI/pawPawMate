@@ -104,6 +104,56 @@ const LostPets = () => {
   const mapRef = useRef();
   const fetchTimeoutRef = useRef();
 
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [previewPhotos, setPreviewPhotos] = useState([]);
+
+  const handlePhotoSelect = (event) => {
+    const files = Array.from(event.target.files);
+    console.log('Selected files:', files.length, files.map(f => f.name));
+
+    if (files.length > 5) {
+      alert('You can only upload up to 5 photos at a time.');
+      return;
+    }
+
+    const validFiles = [];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        alert(`${file.name} is not a valid image type. Please use JPEG, PNG, GIF, or WebP.`);
+        continue;
+      }
+
+      if (file.size > maxSize) {
+        alert(`${file.name} is too large. Please use images smaller than 5MB.`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    console.log('Valid files after filtering:', validFiles.length, validFiles.map(f => f.name));
+
+    if (validFiles.length === 0) return;
+    const previews = validFiles.map(file => ({
+      file,
+      url: URL.createObjectURL(file),
+      name: file.name
+    }));
+    setPreviewPhotos(previews);
+    handleLostPetFormChange('photos', validFiles);
+  };
+
+  const removePhoto = (index) => {
+    const newPreviews = previewPhotos.filter((_, i) => i !== index);
+    const newFiles = lostPetForm.photos.filter((_, i) => i !== index);
+    URL.revokeObjectURL(previewPhotos[index].url);
+    setPreviewPhotos(newPreviews);
+    handleLostPetFormChange('photos', newFiles);
+  };
+
 
   useEffect(() => {
     const petIdFromNav = location.state?.focusedPetId;
@@ -214,7 +264,7 @@ const LostPets = () => {
         console.log('Error getting location:', error.message);
         console.log('Could not get current location');
         setLocationPermissionChecked(true);
-        
+
         // Show user-friendly error message
         let errorMessage = 'Could not get your current location. ';
         if (error.code === 1) {
@@ -360,11 +410,11 @@ const LostPets = () => {
       });
 
       alert('Pet marked as found successfully! 🎉');
-      
+
       // Refresh the data and close popup
       fetchLostPets();
       closePopup();
-      
+
     } catch (error) {
       console.error('Error marking pet as found:', error);
       alert('Error marking pet as found. Please try again.');
@@ -453,6 +503,10 @@ const LostPets = () => {
 
   // Handle form input changes
   const handleLostPetFormChange = (field, value) => {
+    if (field === 'photos') {
+      console.log('Setting photos in form state:', value.length, value.map(f => f.name));
+    }
+
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
       setLostPetForm(prev => ({
@@ -531,6 +585,11 @@ const LostPets = () => {
 
   // Reset forms
   const resetForms = () => {
+    previewPhotos.forEach(preview => {
+      URL.revokeObjectURL(preview.url);
+    });
+    setPreviewPhotos([]);
+
     setLostPetForm({
       petName: '',
       species: 'dog',
@@ -633,6 +692,7 @@ const LostPets = () => {
       };
 
       console.log('Submitting lost pet report:', reportData);
+      console.log('Photos in reportData:', reportData.photos?.length || 0, reportData.photos?.map(f => f.name) || []);
       const newReport = await lostPetAPI.createLostPetReport(reportData);
       console.log('Lost pet report created:', newReport);
 
@@ -1160,12 +1220,12 @@ const LostPets = () => {
                     </div>
                     <div className="form-group">
                       <label>Email Address *</label>
-                        <input
-                          type="email"
-                          value={lostPetForm.ownerContact.email}
-                          onChange={(e) => handleLostPetFormChange('ownerContact.email', e.target.value)}
-                          required
-                        />
+                      <input
+                        type="email"
+                        value={lostPetForm.ownerContact.email}
+                        onChange={(e) => handleLostPetFormChange('ownerContact.email', e.target.value)}
+                        required
+                      />
                     </div>
                   </div>
 
@@ -1211,6 +1271,48 @@ const LostPets = () => {
                         />
                       </div>
                     </div>
+                  </div>
+
+                  <div className="form-section">
+                    <h3>Photos</h3>
+                    <div className="form-group">
+                      <label>Pet Photos (optional, max 5 photos)</label>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        multiple
+                        onChange={handlePhotoSelect}
+                        disabled={isSubmitting}
+                        className="photo-input"
+                      />
+                      <small className="photo-help">
+                        Upload up to 5 photos of your pet. Supported formats: JPEG, PNG, WebP (max 5MB each)
+                      </small>
+                    </div>
+
+                    {previewPhotos.length > 0 && (
+                      <div className="photo-previews">
+                        <p><strong>Selected Photos:</strong></p>
+                        <div className="preview-grid">
+                          {previewPhotos.map((preview, index) => (
+                            <div key={index} className="preview-item">
+                              <img src={preview.url} alt={`Preview ${index + 1}`} className="preview-image" />
+                              <div className="preview-info">
+                                <small className="preview-name">{preview.name}</small>
+                                <button
+                                  type="button"
+                                  className="remove-photo-btn"
+                                  onClick={() => removePhoto(index)}
+                                  disabled={isSubmitting}
+                                  title="Remove photo"
+                                >✕</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                   </div>
 
                   <div className="form-actions">

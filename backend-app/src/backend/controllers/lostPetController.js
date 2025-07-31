@@ -2,6 +2,7 @@ const LostPet = require("../models/LostPet");
 const User = require("../models/User");
 const { findUserNearLocation } = require("./userController");
 const emailService = require("../utils/emailService");
+const { hasAWSConfig } = require("../utils/upload");
 
 let io;
 const setSocketIO = (socketIO) => {
@@ -12,6 +13,7 @@ const setSocketIO = (socketIO) => {
 exports.createLostPetReport = async (req, res) => {
   try {
     console.log('Lost pet report creation request:', req.body);
+    console.log('Uploaded files: ', req.files?.length || 0);
 
     const {
       petName,
@@ -27,19 +29,36 @@ exports.createLostPetReport = async (req, res) => {
       collar,
       favoritePlaces,
       reward,
-      photos,
       userId
     } = req.body;
 
+    // Parse JSON fields that come as strings from FormData
+    let parsedLastSeenLocation, parsedOwnerContact, parsedFavoritePlaces;
+
+    try {
+      parsedLastSeenLocation = typeof lastSeenLocation === 'string'
+        ? JSON.parse(lastSeenLocation)
+        : lastSeenLocation;
+      parsedOwnerContact = typeof ownerContact === 'string'
+        ? JSON.parse(ownerContact)
+        : ownerContact;
+      parsedFavoritePlaces = typeof favoritePlaces === 'string'
+        ? JSON.parse(favoritePlaces)
+        : (favoritePlaces || []);
+    } catch (parseError) {
+      console.error('Error parsing JSON fields:', parseError);
+      return res.status(400).json({ error: "Invalid JSON format in request data" });
+    }
+
     // Validate required fields
-    if (!petName || !species || !color || !size || !lastSeenLocation || !lastSeenTime || !ownerContact || !userId) {
+    if (!petName || !species || !color || !size || !parsedLastSeenLocation || !lastSeenTime || !parsedOwnerContact || !userId) {
       return res.status(400).json({
         error: "Missing required fields: petName, species, color, size, lastSeenLocation, lastSeenTime, ownerContact, userId"
       });
     }
 
     // Validate coordinates
-    if (!lastSeenLocation.lat || !lastSeenLocation.lng) {
+    if (!parsedLastSeenLocation.lat || !parsedLastSeenLocation.lng) {
       return res.status(400).json({ error: "Valid coordinates (lat, lng) are required for last seen location" });
     }
 
@@ -48,6 +67,17 @@ exports.createLostPetReport = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    let photoUrls = [];
+    if (req.files && req.files.length > 0) {
+      if (hasAWSConfig) {
+        photoUrls = req.files.map(file => file.location);
+        console.log('Photos uploaded to S3: ', photoUrls);
+      } else {
+        photoUrls = req.files.map(file => `/uploads/pets/${file.filename}`);
+        console.log('Photos uploaded locally:', photoUrls);
+      }
+    };
 
     // Create the lost pet report
     const lostPet = await LostPet.create({
@@ -59,17 +89,17 @@ exports.createLostPetReport = async (req, res) => {
       features: features || "",
       status: "missing", // Default status
       lastSeenLocation: {
-        lat: Number(lastSeenLocation.lat),
-        lng: Number(lastSeenLocation.lng),
-        address: lastSeenLocation.address || ""
+        lat: Number(parsedLastSeenLocation.lat),
+        lng: Number(parsedLastSeenLocation.lng),
+        address: parsedLastSeenLocation.address || ""
       },
       lastSeenTime: new Date(lastSeenTime),
-      ownerContact,
+      ownerContact: parsedOwnerContact,
       microchip: microchip || "",
       collar: collar || "",
       favoritePlaces: favoritePlaces || [],
       reward: reward || "",
-      photos: photos || [],
+      photos: photoUrls,
       reportedBy: userId
     });
 
@@ -77,7 +107,7 @@ exports.createLostPetReport = async (req, res) => {
     await lostPet.populate("reportedBy", "name email profileImage");
 
     try {
-      let nearbyUsers = await findUserNearLocation(lostPet.lastSeenLocation.lat, lostPet.lastSeenLocation.lng, 10);
+      let nearbyUsers = await findUserNearLocation(lostPet.lastSeenLocation.lat, lostPet.lastSeenLocation.lng, 5);
       nearbyUsers = nearbyUsers.filter(u => u._id.toString() !== userId);
       if (nearbyUsers.length > 0 && io) {
         const alertData = {
@@ -107,18 +137,18 @@ exports.createLostPetReport = async (req, res) => {
           console.log(`Real-time alerts sent to ${nearbyUsers.length} users`);
         }
 
-        const emailPromises = nearbyUsers.map(user => {
-          return emailService.sendLostPetAlert(user.email, user.name, alertData);
-        });
+        // const emailPromises = nearbyUsers.map(user => {
+        //   return emailService.sendLostPetAlert(user.email, user.name, alertData);
+        // });
 
-        try {
-          const emailResults = await Promise.allSettled(emailPromises);
-          const successful = emailResults.filter(result => emailResults.status === 'fulfilled' && result.value.success).length;
-          const failed = emailResults.length - successful;
-          console.log(`Email alerts sent: ${successful} successful, ${failed} failed`);
-        } catch (emailError) {
-          console.error('Error sending email alerts:', emailError);
-        }
+        // try {
+        //   const emailResults = await Promise.allSettled(emailPromises);
+        //   const successful = emailResults.filter(result => result.status === 'fulfilled' && result.value.success).length;
+        //   const failed = emailResults.length - successful;
+        //   console.log(`Email alerts sent: ${successful} successful, ${failed} failed`);
+        // } catch (emailError) {
+        //   console.error('Error sending email alerts:', emailError);
+        // }
       }
 
     } catch (error) {

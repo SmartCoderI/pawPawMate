@@ -353,8 +353,63 @@ export const lostPetAPI = {
 
   // Create a new lost pet report
   createLostPetReport: async (reportData) => {
+    console.log('API: createLostPetReport called with photos:', reportData.photos?.length || 0);
+
+    if (reportData.photos && reportData.photos.length > 0) {
+      console.log('API: Photo validation starting for', reportData.photos.length, 'photos');
+
+      if (reportData.photos.length > 5) {
+        throw new Error('Maximum 5 photos allowed');
+      }
+
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+      for (const photo of reportData.photos) {
+        if (photo.size > maxSize) {
+          throw new Error(`Photo "${photo.name}" is too large. Maximum size is 5MB.`);
+        }
+        if (!allowedTypes.includes(photo.type)) {
+          throw new Error(`Photo "${photo.name}" has unsupported format. Use JPEG, PNG, GIF, or WebP.`);
+        }
+      }
+      console.log('API: Photo validation passed');
+    }
+
+    const formData = new FormData();
+
+    formData.append('petName', reportData.petName);
+    formData.append('species', reportData.species);
+    formData.append('breed', reportData.breed || '');
+    formData.append('color', reportData.color);
+    formData.append('size', reportData.size);
+    formData.append('features', reportData.features || '');
+    formData.append('lastSeenTime', reportData.lastSeenTime);
+    formData.append('microchip', reportData.microchip || '');
+    formData.append('collar', reportData.collar || '');
+    formData.append('reward', reportData.reward || '');
+    formData.append('userId', reportData.userId);
+
+    formData.append('lastSeenLocation', JSON.stringify(reportData.lastSeenLocation));
+    formData.append('ownerContact', JSON.stringify(reportData.ownerContact));
+    formData.append('favoritePlaces', JSON.stringify(reportData.favoritePlaces || []));
+
+    if (reportData.photos && reportData.photos.length > 0) {
+      console.log('API: Appending', reportData.photos.length, 'photos to FormData');
+      reportData.photos.forEach((photo, index) => {
+        console.log(`API: Appending photo ${index + 1}: ${photo.name} (${photo.size} bytes)`);
+        formData.append('photos', photo);
+      });
+    } else {
+      console.log('API: No photos to append to FormData');
+    }
+
     try {
-      const response = await api.post("/lostpets", reportData);
+      const response = await api.post("/lostpets", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error("API: Error creating lost pet report:", error);
