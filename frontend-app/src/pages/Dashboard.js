@@ -61,41 +61,38 @@ const Dashboard = () => {
     );
   }
 
-  // Only require mongoUser since that's what we need for the dashboard functionality
-  if (!mongoUser) {
-    return (
-      <div className="dashboard-container">
-        <div className="auth-prompt">
-          <h2>Please sign in to view your dashboard</h2>
-          <p>Track your contributions and collectible reward cards</p>
-          <div style={{ marginTop: '20px', fontSize: '12px', color: '#999' }}>
-            Debug: mongoUser={mongoUser ? 'present' : 'null'}, firebaseUser={firebaseUser ? 'present' : 'null'}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Show different content for authenticated vs non-authenticated users
+  const isAuthenticated = mongoUser && firebaseUser;
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-tabs">
-        <button 
-          className={`tab ${activeTab === "cards" ? "active" : ""}`} 
-          onClick={() => setActiveTab("cards")}
-        >
-          🏆 My Cards
-        </button>
-        <button
-          className={`tab ${activeTab === "achievements" ? "active" : ""}`}
-          onClick={() => setActiveTab("achievements")}
-        >
-          🎯 Achievements
-        </button>
-      </div>
+      {!isAuthenticated && (
+        <div className="guest-banner">
+          <h2>🎉 Welcome to PawPawMate Community Cards!</h2>
+          <p>See what fellow pet lovers have earned. Sign in to start collecting your own reward cards!</p>
+        </div>
+      )}
+      
+      {isAuthenticated && (
+        <div className="dashboard-tabs">
+          <button 
+            className={`tab ${activeTab === "cards" ? "active" : ""}`} 
+            onClick={() => setActiveTab("cards")}
+          >
+            🏆 My Cards
+          </button>
+          <button
+            className={`tab ${activeTab === "achievements" ? "active" : ""}`}
+            onClick={() => setActiveTab("achievements")}
+          >
+            🎯 Achievements
+          </button>
+        </div>
+      )}
 
       <div className="dashboard-content">
         {activeTab === "cards" ? (
-          <CardsList />
+          <CardsList isAuthenticated={isAuthenticated} />
         ) : (
           <div className="achievements-section">
             <div className="achievements-content">

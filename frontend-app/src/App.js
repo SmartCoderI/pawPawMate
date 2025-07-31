@@ -82,20 +82,16 @@ const Navigation = () => {
             <span>PawPawMate</span>
           </Link>
           <ul className="nav-menu">
-            {firebaseUser && mongoUser && (
-              <>
-                <li className="nav-item">
-                  <Link to="/dashboard" className="nav-link-styled">
-                    Reward Cards
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link to="/lost-pets" className="nav-link-styled">
-                    Lost Pets
-                  </Link>
-                </li>
-              </>
-            )}
+            <li className="nav-item">
+              <Link to="/dashboard" className="nav-link-styled">
+                Reward Cards
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link to="/lost-pets" className="nav-link-styled">
+                Lost Pets
+              </Link>
+            </li>
             {firebaseUser && mongoUser ? (
               <li className="nav-item">
                 <Link to="/profile" className="nav-link-styled">
