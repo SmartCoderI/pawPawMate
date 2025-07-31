@@ -2,6 +2,8 @@ import React from "react";
 import "./Card.css";
 
 const Card = ({ card, onHelpfulClick }) => {
+  console.log("[Debug] Card data received in component:", JSON.stringify(card, null, 2));
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -24,34 +26,21 @@ const Card = ({ card, onHelpfulClick }) => {
     }
   };
 
-  const getPlaceTypeFromLocation = (locationName) => {
-    // Try to infer place type from location name
-    const name = locationName.toLowerCase();
-    if (name.includes("dog park") || name.includes("park")) {
-      return "dog_park";
-    } else if (name.includes("vet") || name.includes("clinic")) {
-      return "veterinary";
-    } else if (name.includes("pet store") || name.includes("store")) {
-      return "pet_store";
-    } else if (name.includes("shelter") || name.includes("rescue")) {
-      return "animal_shelter";
-    }
-    return "dog_park"; // Default to dog park
-  };
-
   const getHeaderColorForPlaceType = (placeType) => {
-    switch (placeType) {
-      case "dog_park":
-        return "#90EE90"; // Light green for dog parks
-      case "veterinary":
-        return "#87CEEB"; // Sky blue for veterinary clinics
-      case "pet_store":
-        return "#F4A460"; // Sandy brown for pet stores
-      case "animal_shelter":
-        return "#DDA0DD"; // Plum for animal shelters
-      default:
-        return "#90EE90"; // Default to light green
+    // Use a nullish coalescing operator for a cleaner default
+    const type = placeType?.toLowerCase() || "dog_park";
+    console.log("placeType", placeType);
+
+    if (type.includes("dog park") || type.includes("dog_park")) {
+      return "#90EE90"; // Light green
+    } else if (type.includes("vet") || type.includes("veterinary")) {
+      return "#87CEEB"; // Sky blue
+    } else if (type.includes("pet store") || type.includes("pet_store")) {
+      return "#F4A460"; // Sandy brown
+    } else if (type.includes("shelter") || type.includes("animal_shelter")) {
+      return "#DDA0DD"; // Plum
     }
+    return "#90EE90"; // Default
   };
 
   const handleHelpfulClick = () => {
@@ -60,8 +49,8 @@ const Card = ({ card, onHelpfulClick }) => {
     }
   };
 
-  // Get place type and corresponding color
-  const placeType = getPlaceTypeFromLocation(card.locationName);
+  // Get place type and corresponding color directly from the card data
+  const placeType = card.placeId?.type;
   const headerColor = getHeaderColorForPlaceType(placeType);
 
   return (

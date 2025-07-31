@@ -164,6 +164,45 @@ class OpenAIService {
     }
   }
 
+  async describeImage(imageUrl) {
+    if (!this.isConfigured()) {
+      throw new Error("OpenAI service is not configured.");
+    }
+
+    try {
+      console.log(`👁️‍🗨️ Analyzing image with GPT-4 Vision: ${imageUrl}`);
+      const response = await this.client.chat.completions.create({
+        model: "gpt-4-turbo",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Describe the pet in this image in a single, concise sentence. Focus on its main colors, breed, and any notable features like accessories. For example: 'a fluffy white Samoyed with a happy expression' or 'a sleek black cat with bright green eyes'.",
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: imageUrl,
+                },
+              },
+            ],
+          },
+        ],
+        max_tokens: 60,
+      });
+
+      const description = response.choices[0].message.content;
+      console.log(`✅ Image description generated: "${description}"`);
+      return description;
+    } catch (error) {
+      console.error("❌ Error describing image with OpenAI Vision:", error);
+      // Return a generic description on failure to avoid breaking the card generation
+      return "a lovely pet";
+    }
+  }
+
   /**
    * Check if OpenAI service is properly configured
    * @returns {boolean} - True if configured, false otherwise

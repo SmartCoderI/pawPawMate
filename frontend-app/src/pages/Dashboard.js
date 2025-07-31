@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../contexts/UserContext";
 import CardsList from "../components/CardsList";
+import WelcomeModal from "../components/WelcomeModal";
 import "../styles/Dashboard.css";
-import api from '../services/api';
+import api, { userAPI } from "../services/api";
 
 const Dashboard = () => {
-  const { mongoUser, firebaseUser } = useUser();
+  const { mongoUser, firebaseUser, updateMongoUser } = useUser();
   const [activeTab, setActiveTab] = useState("cards");
   const [userStats, setUserStats] = useState({
     cardsCount: 0,
     reviewsCount: 0,
-    helpfulVotes: 0
+    helpfulVotes: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [welcomeClosedManually, setWelcomeClosedManually] = useState(false);
 
   // Debug logging
   console.log("Dashboard - mongoUser:", mongoUser);
@@ -41,7 +44,7 @@ const Dashboard = () => {
         setUserStats({
           cardsCount: cards.length,
           reviewsCount: reviews.length,
-          helpfulVotes: totalHelpfulVotes
+          helpfulVotes: totalHelpfulVotes,
         });
       } catch (error) {
         console.error("Error loading user stats:", error);
@@ -53,6 +56,41 @@ const Dashboard = () => {
     loadUserStats();
   }, [mongoUser]);
 
+  // Check if welcome modal should be shown
+  useEffect(() => {
+    // Only show welcome modal if:
+    // 1. User exists
+    // 2. User hasn't seen the welcome modal before
+    // 3. User has no cards yet (new user)
+    // 4. Modal wasn't manually closed in this session
+    if (
+      mongoUser &&
+      !mongoUser.hasSeenWelcomeModal &&
+      userStats.cardsCount === 0 &&
+      !welcomeClosedManually &&
+      !loading
+    ) {
+      setShowWelcome(true);
+    } else {
+      setShowWelcome(false);
+    }
+  }, [mongoUser, userStats.cardsCount, welcomeClosedManually, loading]);
+
+  const handleCloseWelcomeModal = async () => {
+    console.log("Closing welcome modal");
+    setShowWelcome(false);
+    setWelcomeClosedManually(true);
+
+    try {
+      // Update the user state in the context to reflect the welcome modal has been seen
+      await updateMongoUser({ hasSeenWelcomeModal: true });
+      console.log("Welcome modal status updated successfully");
+    } catch (error) {
+      console.error("Failed to update welcome modal status:", error);
+      // Even if the API call fails, keep the modal closed locally
+    }
+  };
+
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -60,6 +98,7 @@ const Dashboard = () => {
       </div>
     );
   }
+
 
   // Show different content for authenticated vs non-authenticated users
   const isAuthenticated = mongoUser && firebaseUser;
@@ -90,6 +129,7 @@ const Dashboard = () => {
         </div>
       )}
 
+
       <div className="dashboard-content">
         {activeTab === "cards" ? (
           <CardsList isAuthenticated={isAuthenticated} />
@@ -98,39 +138,37 @@ const Dashboard = () => {
             <div className="achievements-content">
               <h2>🎯 Your Achievements</h2>
               <div className="achievements-grid">
-                <div className={`achievement-badge ${userStats.cardsCount >= 1 ? 'earned' : 'locked'}`}>
+                <div className={`achievement-badge ${userStats.cardsCount >= 1 ? "earned" : "locked"}`}>
                   <div className="badge-icon">🌟</div>
                   <h3>First Card</h3>
                   <p>Earn your first reward card</p>
-                  <span className="badge-status">
-                    {userStats.cardsCount >= 1 ? '✅ Earned' : '🔒 Locked'}
-                  </span>
+                  <span className="badge-status">{userStats.cardsCount >= 1 ? "✅ Earned" : "🔒 Locked"}</span>
                 </div>
-                
-                <div className={`achievement-badge ${userStats.reviewsCount > 0 ? 'earned' : 'locked'}`}>
+
+                <div className={`achievement-badge ${userStats.reviewsCount > 0 ? "earned" : "locked"}`}>
                   <div className="badge-icon">📝</div>
                   <h3>Review Master</h3>
                   <p>Submit detailed reviews</p>
                   <span className="badge-status">
-                    {userStats.reviewsCount > 0 ? `📝 ${userStats.reviewsCount} reviews` : '🔒 0 reviews'}
+                    {userStats.reviewsCount > 0 ? `📝 ${userStats.reviewsCount} reviews` : "🔒 0 reviews"}
                   </span>
                 </div>
-                
-                <div className={`achievement-badge ${userStats.cardsCount > 0 ? 'earned' : 'locked'}`}>
+
+                <div className={`achievement-badge ${userStats.cardsCount > 0 ? "earned" : "locked"}`}>
                   <div className="badge-icon">🏆</div>
                   <h3>Card Collector</h3>
                   <p>Collect reward cards</p>
                   <span className="badge-status">
-                    {userStats.cardsCount > 0 ? `🏆 ${userStats.cardsCount} cards` : '🔒 0 cards'}
+                    {userStats.cardsCount > 0 ? `🏆 ${userStats.cardsCount} cards` : "🔒 0 cards"}
                   </span>
                 </div>
-                
-                <div className={`achievement-badge ${userStats.helpfulVotes > 0 ? 'earned' : 'locked'}`}>
+
+                <div className={`achievement-badge ${userStats.helpfulVotes > 0 ? "earned" : "locked"}`}>
                   <div className="badge-icon">👍</div>
                   <h3>Community Helper</h3>
                   <p>Receive helpful votes</p>
                   <span className="badge-status">
-                    {userStats.helpfulVotes > 0 ? `👍 ${userStats.helpfulVotes} votes` : '🔒 0 votes'}
+                    {userStats.helpfulVotes > 0 ? `👍 ${userStats.helpfulVotes} votes` : "🔒 0 votes"}
                   </span>
                 </div>
               </div>
@@ -138,6 +176,7 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+      {showWelcome && mongoUser && <WelcomeModal user={mongoUser} onClose={handleCloseWelcomeModal} />}
     </div>
   );
 };
