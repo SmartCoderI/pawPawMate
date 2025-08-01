@@ -137,18 +137,18 @@ exports.createLostPetReport = async (req, res) => {
           console.log(`Real-time alerts sent to ${nearbyUsers.length} users`);
         }
 
-        // const emailPromises = nearbyUsers.map(user => {
-        //   return emailService.sendLostPetAlert(user.email, user.name, alertData);
-        // });
+        const emailPromises = nearbyUsers.map(user => {
+          return emailService.sendLostPetAlert(user.email, user.name, alertData);
+        });
 
-        // try {
-        //   const emailResults = await Promise.allSettled(emailPromises);
-        //   const successful = emailResults.filter(result => result.status === 'fulfilled' && result.value.success).length;
-        //   const failed = emailResults.length - successful;
-        //   console.log(`Email alerts sent: ${successful} successful, ${failed} failed`);
-        // } catch (emailError) {
-        //   console.error('Error sending email alerts:', emailError);
-        // }
+        try {
+          const emailResults = await Promise.allSettled(emailPromises);
+          const successful = emailResults.filter(result => result.status === 'fulfilled' && result.value.success).length;
+          const failed = emailResults.length - successful;
+          console.log(`Email alerts sent: ${successful} successful, ${failed} failed`);
+        } catch (emailError) {
+          console.error('Error sending email alerts:', emailError);
+        }
       }
 
     } catch (error) {
@@ -257,6 +257,8 @@ exports.getLostPetById = async (req, res) => {
 exports.addSightingReport = async (req, res) => {
   try {
     const { id } = req.params;
+
+    console.log('Sighting report creation request:', req.body);
     const {
       location,
       sightingTime,
@@ -265,15 +267,25 @@ exports.addSightingReport = async (req, res) => {
       userId
     } = req.body;
 
+    let parsedLocation;
+    try {
+      parsedLocation = typeof location === 'string'
+        ? JSON.parse(location)
+        : location;
+    } catch (parseError) {
+      console.error('Error parsing location JSON:', parseError);
+      return res.status(400).json({ error: "Invalid JSON format in location data" });
+    }
+
     // Validate required fields
-    if (!location || !sightingTime || !userId) {
+    if (!parsedLocation || !sightingTime || !userId) {
       return res.status(400).json({
         error: "Missing required fields: location, sightingTime, userId"
       });
     }
 
     // Validate coordinates
-    if (!location.lat || !location.lng) {
+    if (!parsedLocation.lat || !parsedLocation.lng) {
       return res.status(400).json({ error: "Valid coordinates (lat, lng) are required for sighting location" });
     }
 
@@ -289,17 +301,28 @@ exports.addSightingReport = async (req, res) => {
       return res.status(404).json({ error: "Lost pet report not found" });
     }
 
+    let photoUrls = [];
+    if (req.files && req.files.length > 0) {
+      if (hasAWSConfig) {
+        photoUrls = req.files.map(file => file.location);
+        console.log('Sighting photos uploaded to S3: ', photoUrls);
+      } else {
+        photoUrls = req.files.map(file => `/uploads/pets/${file.filename}`);
+        console.log('Sighting photos uploaded locally:', photoUrls);
+      }
+    }
+
     // Add the sighting
     const sighting = {
       reportedBy: userId,
       location: {
-        lat: Number(location.lat),
-        lng: Number(location.lng),
-        address: location.address || ""
+        lat: Number(parsedLocation.lat),
+        lng: Number(parsedLocation.lng),
+        address: parsedLocation.address || ""
       },
       sightingTime: new Date(sightingTime),
       description: description || "",
-      photos: photos || [],
+      photos: photoUrls,
       reportedAt: new Date()
     };
 

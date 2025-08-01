@@ -26,7 +26,7 @@ lostPetRouter.get("/:id", getLostPetById);
 lostPetRouter.post("/", petPhotosUpload, createLostPetReport);
 
 // Add a sighting report to an existing lost pet
-lostPetRouter.post("/:id/sightings", addSightingReport);
+lostPetRouter.post("/:id/sightings", petPhotosUpload, addSightingReport);
 
 // Update lost pet status (mark as found, etc.)
 lostPetRouter.put("/:id/status", updateLostPetStatus);
