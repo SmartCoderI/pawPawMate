@@ -434,7 +434,47 @@ export const lostPetAPI = {
   // Add a sighting report to an existing lost pet
   addSightingReport: async (lostPetId, sightingData) => {
     try {
-      const response = await api.post(`/lostpets/${lostPetId}/sightings`, sightingData);
+      console.log('API: addSightingReport called with photos:', sightingData.photos?.length || 0);
+
+      if (sightingData.photos && sightingData.photos.length > 0) {
+        if (sightingData.photos.length > 5) {
+          throw new Error('Maximum 5 photos allowed');
+        }
+
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+        for (const photo of sightingData.photos) {
+          if (photo.size > maxSize) {
+            throw new Error(`Photo "${photo.name}" is too large. Maximum size is 5MB.`);
+          }
+          if (!allowedTypes.includes(photo.type)) {
+            throw new Error(`Photo "${photo.name}" has unsupported format. Use JPEG, PNG, GIF, or WebP.`);
+          }
+        }
+      }
+
+      const formData = new FormData();
+
+      formData.append('sightingTime', sightingData.sightingTime);
+      formData.append('description', sightingData.description || '');
+      formData.append('userId', sightingData.userId);
+
+      if (sightingData.location) {
+        formData.append('location', JSON.stringify(sightingData.location));
+      }
+      if (sightingData.photos && sightingData.photos.length > 0) {
+        sightingData.photos.forEach((photo, index) => {
+          console.log(`API: Appending sighting photo ${index + 1}: ${photo.name} (${photo.size} bytes)`);
+          formData.append('photos', photo);
+        });
+      }
+
+      const response = await api.post(`/lostpets/${lostPetId}/sightings`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error("API: Error adding sighting report:", error);

@@ -107,12 +107,18 @@ const LostPets = () => {
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [previewPhotos, setPreviewPhotos] = useState([]);
 
-  const handlePhotoSelect = (event) => {
+  const handlePhotoSelect = (event, formType) => {
     const files = Array.from(event.target.files);
     console.log('Selected files:', files.length, files.map(f => f.name));
 
+    previewPhotos.forEach(preview => {
+      URL.revokeObjectURL(preview.url);
+    });
+    setPreviewPhotos([]);
+
     if (files.length > 5) {
       alert('You can only upload up to 5 photos at a time.');
+      event.target.value = '';
       return;
     }
 
@@ -136,22 +142,33 @@ const LostPets = () => {
 
     console.log('Valid files after filtering:', validFiles.length, validFiles.map(f => f.name));
 
-    if (validFiles.length === 0) return;
+    if (validFiles.length === 0) {
+      event.target.value = '';
+      return;
+    }
     const previews = validFiles.map(file => ({
       file,
       url: URL.createObjectURL(file),
       name: file.name
     }));
     setPreviewPhotos(previews);
-    handleLostPetFormChange('photos', validFiles);
+    if (formType === 'lost') {
+      handleLostPetFormChange('photos', validFiles);
+    } else {
+      handleSightingFormChange('photos', validFiles);
+    }
   };
 
   const removePhoto = (index) => {
     const newPreviews = previewPhotos.filter((_, i) => i !== index);
-    const newFiles = lostPetForm.photos.filter((_, i) => i !== index);
+    const newFiles = previewPhotos.filter((_, i) => i !== index).map(p => p.file);
     URL.revokeObjectURL(previewPhotos[index].url);
     setPreviewPhotos(newPreviews);
-    handleLostPetFormChange('photos', newFiles);
+    if (reportType === 'lost') {
+      handleLostPetFormChange('photos', newFiles);
+    } else {
+      handleSightingFormChange('photos', newFiles);
+    }
   };
 
 
@@ -590,6 +607,11 @@ const LostPets = () => {
     });
     setPreviewPhotos([]);
 
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => {
+      input.value = '';
+    });
+
     setLostPetForm({
       petName: '',
       species: 'dog',
@@ -758,6 +780,7 @@ const LostPets = () => {
       };
 
       console.log('Submitting sighting report:', sightingData);
+      console.log(JSON.stringify(sightingData.location));
       const updatedPet = await lostPetAPI.addSightingReport(selectedPet._id, sightingData);
       console.log('Sighting report added:', updatedPet);
 
@@ -1281,7 +1304,7 @@ const LostPets = () => {
                         type="file"
                         accept="image/jpeg,image/jpg,image/png,image/webp"
                         multiple
-                        onChange={handlePhotoSelect}
+                        onChange={(e) => handlePhotoSelect(e, 'lost')}
                         disabled={isSubmitting}
                         className="photo-input"
                       />
@@ -1393,6 +1416,48 @@ const LostPets = () => {
                         <small>You can click on a different location on the map or enter a new address to change this.</small>
                       </div>
                     )}
+                  </div>
+
+                  <div className="form-section">
+                    <h3>Photos</h3>
+                    <div className="form-group">
+                      <label>Pet Photos (optional, max 5 photos)</label>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        multiple
+                        onChange={(e) => handlePhotoSelect(e, 'sighting')}
+                        disabled={isSubmitting}
+                        className="photo-input"
+                      />
+                      <small className="photo-help">
+                        Upload up to 5 photos of your pet. Supported formats: JPEG, PNG, WebP (max 5MB each)
+                      </small>
+                    </div>
+
+                    {previewPhotos.length > 0 && (
+                      <div className="photo-previews">
+                        <p><strong>Selected Photos:</strong></p>
+                        <div className="preview-grid">
+                          {previewPhotos.map((preview, index) => (
+                            <div key={index} className="preview-item">
+                              <img src={preview.url} alt={`Preview ${index + 1}`} className="preview-image" />
+                              <div className="preview-info">
+                                <small className="preview-name">{preview.name}</small>
+                                <button
+                                  type="button"
+                                  className="remove-photo-btn"
+                                  onClick={() => removePhoto(index)}
+                                  disabled={isSubmitting}
+                                  title="Remove photo"
+                                >✕</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                   </div>
 
                   <div className="form-actions">
