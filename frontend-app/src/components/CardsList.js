@@ -4,33 +4,39 @@ import Card from "./Card";
 import "./CardsList.css";
 import api from "../services/api";
 
-const CardsList = () => {
+const CardsList = ({ isAuthenticated = true }) => {
   const { mongoUser } = useUser();
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchUserCards = async () => {
-      if (!mongoUser?._id) {
-        setLoading(false);
-        return;
-      }
-
+    const fetchCards = async () => {
       try {
-        const response = await api.get(`/cards/user/${mongoUser._id}`);
+        let response;
+        if (isAuthenticated && mongoUser?._id) {
+          // Fetch user's personal cards
+          response = await api.get(`/cards/user/${mongoUser._id}`);
+        } else {
+          // Fetch all community cards for non-authenticated users
+          response = await api.get(`/cards/all`);
+        }
+        
         const cardsData = response.data;
         setCards(cardsData);
       } catch (err) {
         console.error("Error fetching cards:", err);
-        setError("Failed to load your cards. Please try again later.");
+        const errorMessage = isAuthenticated 
+          ? "Failed to load your cards. Please try again later."
+          : "Failed to load community cards. Please try again later.";
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserCards();
-  }, [mongoUser]);
+    fetchCards();
+  }, [mongoUser, isAuthenticated]);
 
   const handleHelpfulClick = async (cardId) => {
     try {
@@ -53,7 +59,7 @@ const CardsList = () => {
     return (
       <div className="cards-list-container">
         <div className="loading-state">
-          <h2>Loading your cards...</h2>
+          <h2>{isAuthenticated ? "Loading your cards..." : "Loading community cards..."}</h2>
           <div className="loading-spinner">🔄</div>
         </div>
       </div>
@@ -71,42 +77,60 @@ const CardsList = () => {
     );
   }
 
-  if (!mongoUser) {
-    return (
-      <div className="cards-list-container">
-        <div className="no-user-state">
-          <h2>Please log in to view your cards</h2>
-        </div>
-      </div>
-    );
-  }
+  // Remove the mongoUser check since we now support non-authenticated users
 
   return (
     <div className="cards-list-container">
+      {!isAuthenticated && (
+        <div className="sign-in-prompt-top">
+          <h2>💡 Sign in to start earning your own reward cards!</h2>
+          <p>Start earning reward cards by:</p>
+          <ul>
+            <li>🌟 Writing your first review</li>
+            <li>📝 Reaching review milestones (3rd, 6th, 9th, etc.)</li>
+            <li>👍 Getting community approval (5+ upvotes)</li>
+          </ul>
+        </div>
+      )}
+      
       <div className="cards-list-header">
-        <h1>🏆 My Reward Cards</h1>
+        <h1>{isAuthenticated ? "🏆 My Reward Cards" : "🏆 Community Reward Cards"}</h1>
         <p className="cards-count">
-          {cards.length} {cards.length === 1 ? "card" : "cards"} earned
+          {cards.length} {cards.length === 1 ? "card" : "cards"} {isAuthenticated ? "earned" : "in community"}
         </p>
       </div>
 
       {cards.length === 0 ? (
         <div className="no-cards-state">
           <div className="no-cards-content">
-            <h2>🎯 No cards yet!</h2>
-            <p>Start earning reward cards by:</p>
-            <ul>
-              <li>🌟 Writing your first review</li>
-              <li>📝 Reaching review milestones (3rd, 6th, 9th, etc.)</li>
-              <li>👍 Getting community approval (5+ upvotes)</li>
-            </ul>
-            <p>Each meaningful contribution gets you closer to earning collectible cards!</p>
+            {isAuthenticated ? (
+              <>
+                <h2>🎯 No cards yet!</h2>
+                <p>Start earning reward cards by:</p>
+                <ul>
+                  <li>🌟 Writing your first review</li>
+                  <li>📝 Reaching review milestones (3rd, 6th, 9th, etc.)</li>
+                  <li>👍 Getting community approval (5+ upvotes)</li>
+                </ul>
+                <p>Each meaningful contribution gets you closer to earning collectible cards!</p>
+              </>
+            ) : (
+              <>
+                <h2>🎯 No community cards yet!</h2>
+                <p>Be among the first to start earning reward cards!</p>
+                <p>Sign in and contribute to the community to see cards appear here.</p>
+              </>
+            )}
           </div>
         </div>
       ) : (
         <div className="cards-grid">
           {cards.map((card) => (
-            <Card key={card._id} card={card} onHelpfulClick={handleHelpfulClick} />
+            <Card 
+              key={card._id} 
+              card={card} 
+              onHelpfulClick={isAuthenticated ? handleHelpfulClick : null} 
+            />
           ))}
         </div>
       )}
