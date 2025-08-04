@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Map, { Marker, NavigationControl, GeolocateControl } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useUser } from '../contexts/UserContext';
@@ -12,6 +12,7 @@ import '../styles/Home.css';
 const Home = () => {
   const { firebaseUser, mongoUser } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Check for saved map state first.
   const getSavedMapState = () => {
@@ -183,9 +184,10 @@ const Home = () => {
   
   // Wrapper function to save state when database places change
   const setDatabasePlaces = (newPlaces) => {
-    setDatabasePlacesState(newPlaces);
-    // Save state after database places change
-    setTimeout(() => saveMapState(), 100);
+    const actualNewPlaces = typeof newPlaces === 'function' ? newPlaces(databasePlacesState) : newPlaces;
+    setDatabasePlacesState(actualNewPlaces);
+    // Save state after database places change with updated places
+    setTimeout(() => saveMapState(), 150);
   };
   
   const databasePlaces = databasePlacesState;
@@ -597,10 +599,10 @@ const Home = () => {
   };
 
   // Load database places
-  const loadDatabasePlaces = async () => {
-    // Check if we have cached database places first
+  const loadDatabasePlaces = async (forceRefresh = false) => {
+    // Check if we have cached database places first (unless forced refresh)
     const cachedDatabasePlaces = getCachedDatabasePlaces();
-    if (cachedDatabasePlaces.length > 0) {
+    if (cachedDatabasePlaces.length > 0 && !forceRefresh) {
       console.log('Using cached database places, skipping fetch');
       setDatabaseLoaded(true);
       return;
@@ -616,6 +618,15 @@ const Home = () => {
       setDatabaseLoaded(true); // Set as loaded even on error to prevent infinite wait
     }
   };
+
+  // Check for place deletion on location change (when returning from PlaceDetails)
+  useEffect(() => {
+    if (location.state?.deletedPlaceId) {
+      handlePlaceDeleted(location.state.deletedPlaceId);
+      // Clear the state to prevent repeated deletions
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initial load
   useEffect(() => {
@@ -703,6 +714,20 @@ const Home = () => {
       return () => clearTimeout(timer);
     }
   }, [databaseLoaded, apiLoaded, initialLoadComplete]);
+
+  // Add window focus detection to refresh places when user returns from other tabs/apps
+  useEffect(() => {
+    const handleFocus = () => {
+      // Small delay to allow navigation state to be processed first
+      setTimeout(() => {
+        console.log('Window focused - checking for place updates');
+        loadDatabasePlaces(true); // Force refresh when window gets focus
+      }, 100);
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   // Load search history from localStorage
   useEffect(() => {
@@ -1045,11 +1070,56 @@ const Home = () => {
   const handlePlaceCreated = (newPlace) => {
     console.log('New place created:', newPlace);
     
-    // Add to database places
-    setDatabasePlaces(prev => [...prev, newPlace]);
+    // Add to database places immediately using functional update to avoid race conditions
+    setDatabasePlaces(prevPlaces => {
+      const updatedPlaces = [...prevPlaces, newPlace];
+      // Force cache update with the new place after state update
+      setTimeout(() => {
+        saveMapState(viewState);
+      }, 100);
+      return updatedPlaces;
+    });
     
-    // Navigate to the new place
-    navigate(`/place/${newPlace._id}`);
+    // Close the modal and reset coordinates
+    setShowPlaceModal(false);
+    setClickedCoordinates(null);
+    
+    // Show success message
+    console.log(`✅ New ${newPlace.type} "${newPlace.name}" created successfully and will appear on the map!`);
+  };
+
+  // Handle place deletion - remove from map state
+  const handlePlaceDeleted = (deletedPlaceId) => {
+    console.log('Place deleted:', deletedPlaceId);
+    
+    // Remove from database places immediately
+    setDatabasePlaces(prevPlaces => {
+      const updatedPlaces = prevPlaces.filter(place => place._id !== deletedPlaceId);
+      // Force cache update after place removal
+      setTimeout(() => {
+        saveMapState(viewState);
+      }, 100);
+      return updatedPlaces;
+    });
+    
+    // Also refresh database places to ensure consistency (fallback mechanism)
+    setTimeout(() => {
+      loadDatabasePlaces(true); // Force refresh
+    }, 500);
+    
+    // Show success message
+    console.log(`✅ Place removed from map successfully!`);
+  };
+
+  // Map database place types to display types
+  const mapPlaceType = (dbType) => {
+    const typeMapping = {
+      'dog park': 'dog_park',
+      'vet': 'veterinary',
+      'pet store': 'pet_store', 
+      'shelter': 'animal_shelter'
+    };
+    return typeMapping[dbType] || dbType.replace(' ', '_');
   };
 
   // Combine OSM locations and database places
@@ -1058,7 +1128,7 @@ const Home = () => {
     ...databasePlaces.map(place => ({
       id: place._id,
       name: place.name,
-      type: place.type.replace(' ', '_'), // Convert "dog park" to "dog_park" for consistency
+      type: mapPlaceType(place.type), // Proper type mapping for consistent icons
       latitude: place.coordinates?.lat || 0,
       longitude: place.coordinates?.lng || 0,
       description: place.description || '',

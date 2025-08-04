@@ -638,7 +638,7 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
               <div className="form-group">
                 <label>Surgery Capabilities:</label>
                 <div className="checkbox-group">
-                  {["routine_spay_neuter", "orthopedic", "emergency", "dental", "none"].map((surgery) => (
+                  {["routine_spay_neuter", "orthopedic", "emergency", "dental"].map((surgery) => (
                     <label key={surgery}>
                       <input
                         type="checkbox"
@@ -656,7 +656,7 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
               <div className="form-group">
                 <label>Specializations:</label>
                 <div className="checkbox-group">
-                  {["cardiology", "dermatology", "oncology", "behavior", "exotic_animals", "none"].map((specialization) => (
+                  {["cardiology", "dermatology", "oncology", "behavior", "exotic_animals"].map((specialization) => (
                     <label key={specialization}>
                       <input
                         type="checkbox"

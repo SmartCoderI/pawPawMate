@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import api, { placeAPI, reviewAPI } from "../services/api";
+import CardNotificationPopup from "../components/CardNotificationPopup";
 import "../styles/PlaceDetails.css";
 
 const PlaceDetails = () => {
@@ -35,6 +36,10 @@ const PlaceDetails = () => {
 
   // Barrage 
   const [barrageQueue, setBarrageQueue] = useState([]);
+  
+  // Card notification popup state
+  const [showCardNotification, setShowCardNotification] = useState(false);
+  const [cardType, setCardType] = useState('');
 
   // Helper function to get barrage top position based on screen width
   const getBarrageTop = () => {
@@ -682,8 +687,13 @@ const PlaceDetails = () => {
       await placeAPI.deletePlace(place._id, mongoUser._id);
       console.log("Place deleted successfully");
 
-      // Navigate back to home after successful deletion
-      navigate("/");
+      // Navigate back to home with deletion info to update map state
+      navigate("/", { 
+        state: { 
+          deletedPlaceId: place._id,
+          deletedPlaceName: place.name 
+        } 
+      });
     } catch (error) {
       console.error("Error deleting place:", error);
       alert(error.response?.data?.error || "Failed to delete place. Please try again.");
@@ -867,6 +877,11 @@ const PlaceDetails = () => {
 
         const createdReview = await reviewAPI.createReview(reviewData);
         
+        // Check if a card was triggered and show notification
+        if (createdReview.cardTriggered) {
+          setCardType(createdReview.cardType || '');
+          setShowCardNotification(true);
+        }
 
         // Extract the place ID from the review response
         const actualPlaceId = createdReview.placeId;
@@ -987,6 +1002,12 @@ const PlaceDetails = () => {
       console.log("Submitting review with data:", reviewData);
       const createdReview = await reviewAPI.createReview(reviewData);
       console.log("Review created successfully:", createdReview);
+
+      // Check if a card was triggered and show notification
+      if (createdReview.cardTriggered) {
+        setCardType(createdReview.cardType || '');
+        setShowCardNotification(true);
+      }
 
       // Reload reviews
       const updatedReviews = await reviewAPI.getReviewsByPlace(id);
@@ -3347,7 +3368,7 @@ const PlaceDetails = () => {
                     <div className="form-group">
                       <label>On-Site Diagnostics</label>
                       <div className="checkbox-group">
-                        {["xray", "ultrasound", "bloodwork", "ecg", "none"].map((diagnostic) => (
+                        {["xray", "ultrasound", "bloodwork", "ecg"].map((diagnostic) => (
                           <label key={diagnostic}>
                             <input
                               type="checkbox"
@@ -3377,7 +3398,7 @@ const PlaceDetails = () => {
                     <div className="form-group">
                       <label>Surgery Capabilities</label>
                     <div className="checkbox-group">
-                        {["routine_spay_neuter", "orthopedic", "emergency", "dental", "none"].map((surgery) => (
+                        {["routine_spay_neuter", "orthopedic", "emergency", "dental"].map((surgery) => (
                           <label key={surgery}>
                         <input
                           type="checkbox"
@@ -3407,7 +3428,7 @@ const PlaceDetails = () => {
                     <div className="form-group">
                       <label>Specializations</label>
                       <div className="checkbox-group">
-                        {["cardiology", "dermatology", "oncology", "behavior", "exotic_animals", "none"].map((specialization) => (
+                        {["cardiology", "dermatology", "oncology", "behavior", "exotic_animals"].map((specialization) => (
                           <label key={specialization}>
                             <input
                               type="checkbox"
@@ -4429,6 +4450,13 @@ const PlaceDetails = () => {
           </div>
         </div>
       )}
+
+      {/* Card Notification Popup */}
+      <CardNotificationPopup 
+        show={showCardNotification}
+        cardType={cardType}
+        onClose={() => setShowCardNotification(false)}
+      />
     </div>
   );
 };

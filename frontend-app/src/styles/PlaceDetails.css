@@ -8,6 +8,32 @@
   color: #000000;
 }
 
+/* Checkbox alignment for vet clinic forms */
+.place-details-container .checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.place-details-container .checkbox-group label {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  margin-bottom: 0;
+  padding: 4px 0;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.place-details-container .checkbox-group input[type="checkbox"] {
+  margin-right: 10px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
 /* Global overflow control for place details */
 .place-details-container {
   overflow-x: hidden;
