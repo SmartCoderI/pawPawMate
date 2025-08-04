@@ -690,6 +690,10 @@ exports.addReview = async (req, res) => {
 
     console.log("Review created successfully:", review);
 
+    // Track if this review triggers a new card (for frontend notification)
+    let cardTriggered = false;
+    let cardType = "";
+
     // REWARD CARD GENERATION LOGIC
     try {
       // Step 1: Content Validity Check (Anti-spam)
@@ -741,13 +745,24 @@ exports.addReview = async (req, res) => {
 
         // Generate the card if eligible
         if (shouldGenerateCard) {
+          // Set flags for frontend notification
+          cardTriggered = true;
+          cardType = contributionType;
+
           // Get place name for the card
           const place = await Place.findById(finalPlaceId);
           const locationName = place ? place.name : "Unknown Location";
 
-          await generateRewardCard(userId, review._id, finalPlaceId, locationName, contributionType);
+          // Generate card asynchronously in background - don't await to avoid blocking response
+          generateRewardCard(userId, review._id, finalPlaceId, locationName, contributionType)
+            .then(() => {
+              console.log(`✅ Reward card generated for user ${userId} - ${contributionType}`);
+            })
+            .catch((cardError) => {
+              console.error("Error generating reward card in background:", cardError);
+            });
 
-          console.log(`✅ Reward card generated for user ${userId} - ${contributionType}`);
+          console.log(`🎯 Reward card generation started in background for user ${userId} - ${contributionType}`);
         } else {
           console.log(
             `No card generated - Review count: ${userReviewCount}, Not first review or multiple of 3, or card already exists`
@@ -763,6 +778,8 @@ exports.addReview = async (req, res) => {
     const responseData = {
       ...review.toObject(),
       placeId: finalPlaceId, // Ensure we return the actual place ID used
+      cardTriggered: cardTriggered, // Flag to show card notification popup
+      cardType: cardType // Type of card being generated (for future use)
     };
 
     res.status(201).json(responseData);
@@ -1754,16 +1771,22 @@ exports.likeReview = async (req, res) => {
           const place = await Place.findById(placeId);
           const locationName = place ? place.name : "Unknown Location";
           
-          // Generate the popular review card
-          await generateRewardCard(
+          // Generate popular review card asynchronously in background - don't await to avoid blocking response
+          generateRewardCard(
             reviewAuthorId, 
             reviewId, 
             placeId, 
             locationName, 
             "popular_review"
-          );
+          )
+            .then(() => {
+              console.log(`✅ Popular review card generated for user ${reviewAuthorId} - review with ${updatedReview.likeCount} likes`);
+            })
+            .catch((cardError) => {
+              console.error("Error generating popular review card in background:", cardError);
+            });
           
-          console.log(`✅ Popular review card generated for user ${reviewAuthorId} - review with ${updatedReview.likeCount} likes`);
+          console.log(`🎯 Popular review card generation started in background for user ${reviewAuthorId} - review with ${updatedReview.likeCount} likes`);
         } else {
           console.log(`User already has a popular review card for this review`);
         }

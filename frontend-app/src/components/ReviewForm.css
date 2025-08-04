@@ -235,7 +235,7 @@
 .checkbox-group {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
+  gap: 12px;
   margin-top: 8px;
 }
 
@@ -244,11 +244,16 @@
   align-items: center;
   font-weight: normal;
   margin-bottom: 0;
+  padding: 4px 0;
+  cursor: pointer;
 }
 
 .checkbox-group input[type="checkbox"] {
-  margin-right: 8px;
-  width: auto;
+  margin-right: 10px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
 /* Form Actions */
