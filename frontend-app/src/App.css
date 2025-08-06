@@ -197,6 +197,7 @@ body {
 
 .main-content {
   min-height: calc(100vh - 100px);
+  height: auto;
   background: #F5F5DC; /* Changed from #FFF59F to match consistent beige background */
   display: flex;
   flex-direction: column;
