@@ -26,6 +26,7 @@
           "noSharpEdges": true
         },
         "sizeAndLayout": {
+          "dogSize": "all_sizes",
           "separateAreas": "yes_small_large",
           "runningSpace": "enough",
           "drainagePerformance": "excellent"
@@ -45,10 +46,9 @@
           "equipmentCondition": "good"
         },
         "crowdAndSocialDynamics": {
-          "peakDays": ["saturday", "sunday"],
+          "overallCrowd": "moderate",
           "peakHours": "5-7 PM",
           "socialEvents": ["dog_meet_events", "training_classes"],
-          "ownerCulture": "excellent",
           "wastePickup": "always",
           "ownerFriendliness": "very_friendly"
         },
@@ -87,6 +87,7 @@
           "noSharpEdges": true
         },
         "sizeAndLayout": {
+          "dogSize": "medium",
           "separateAreas": "yes_small_large",
           "runningSpace": "enough",
           "drainagePerformance": "good"
@@ -106,10 +107,9 @@
           "equipmentCondition": "fair"
         },
         "crowdAndSocialDynamics": {
-          "peakDays": ["friday", "saturday", "sunday"],
+          "overallCrowd": "crowded",
           "peakHours": "6-8 PM",
           "socialEvents": ["dog_meet_events"],
-          "ownerCulture": "good",
           "wastePickup": "usually",
           "ownerFriendliness": "friendly"
         },
@@ -148,6 +148,7 @@
           "noSharpEdges": false
         },
         "sizeAndLayout": {
+          "dogSize": "small",
           "separateAreas": "no",
           "runningSpace": "limited",
           "drainagePerformance": "poor"
@@ -167,10 +168,9 @@
           "equipmentCondition": "poor"
         },
         "crowdAndSocialDynamics": {
-          "peakDays": ["saturday", "sunday"],
+          "overallCrowd": "quiet",
           "peakHours": "4-6 PM",
           "socialEvents": ["none"],
-          "ownerCulture": "fair",
           "wastePickup": "sometimes",
           "ownerFriendliness": "neutral"
         },
@@ -209,6 +209,7 @@
           "noSharpEdges": false
         },
         "sizeAndLayout": {
+          "dogSize": "medium",
           "separateAreas": "no",
           "runningSpace": "tight",
           "drainagePerformance": "poor"
@@ -228,10 +229,9 @@
           "equipmentCondition": "poor"
         },
         "crowdAndSocialDynamics": {
-          "peakDays": ["saturday"],
+          "overallCrowd": "moderate",
           "peakHours": "3-5 PM",
           "socialEvents": ["none"],
-          "ownerCulture": "poor",
           "wastePickup": "rarely",
           "ownerFriendliness": "unfriendly"
         },

@@ -185,6 +185,7 @@ const PlaceDetails = () => {
         noSharpEdges: false,
       },
       sizeAndLayout: {
+        dogSize: "",
         separateAreas: "",
         runningSpace: "",
         drainagePerformance: "",
@@ -204,11 +205,7 @@ const PlaceDetails = () => {
         equipmentCondition: "",
       },
       crowdAndSocialDynamics: {
-        peakDays: [],
-        peakHours: "",
-        socialEvents: [],
-        ownerCulture: "",
-        wastePickup: "",
+        overallCrowd: "",
         ownerFriendliness: "",
       },
       rulesPoliciesAndCommunity: {
@@ -1085,6 +1082,7 @@ const PlaceDetails = () => {
       },
       // 4. Size & Layout - ALIGNED WITH BACKEND
       sizeAndLayout: {
+        dogSize: { large: 0, medium: 0, small: 0, all_sizes: 0 },
         runningSpace: { enough: 0, limited: 0, tight: 0 },
         drainagePerformance: { excellent: 0, good: 0, poor: 0 },
       },
@@ -1102,8 +1100,7 @@ const PlaceDetails = () => {
       },
       // 7. Crowd & Social Dynamics - ALIGNED WITH BACKEND
       crowdAndSocialDynamics: {
-        peakDays: { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 },
-        ownerCulture: { excellent: 0, good: 0, fair: 0, poor: 0 },
+        overallCrowd: { crowded: 0, moderate: 0, quiet: 0 },
         ownerFriendliness: { very_friendly: 0, friendly: 0, neutral: 0, unfriendly: 0 },
       },
       // 8. Rules, Policies & Community - ALIGNED WITH BACKEND
@@ -1146,6 +1143,7 @@ const PlaceDetails = () => {
         // 4. Size & Layout - ALIGNED WITH BACKEND
         if (dpReview.sizeAndLayout) {
           const szl = dpReview.sizeAndLayout;
+          if (szl.dogSize) tagCounts.sizeAndLayout.dogSize[szl.dogSize]++;
           if (szl.runningSpace) tagCounts.sizeAndLayout.runningSpace[szl.runningSpace]++;
           if (szl.drainagePerformance) tagCounts.sizeAndLayout.drainagePerformance[szl.drainagePerformance]++;
         }
@@ -1169,15 +1167,7 @@ const PlaceDetails = () => {
         // 7. Crowd & Social Dynamics - ALIGNED WITH BACKEND
         if (dpReview.crowdAndSocialDynamics) {
           const csd = dpReview.crowdAndSocialDynamics;
-          // Handle peakDays as array
-          if (csd.peakDays && Array.isArray(csd.peakDays)) {
-            csd.peakDays.forEach(day => {
-              if (tagCounts.crowdAndSocialDynamics.peakDays[day] !== undefined) {
-                tagCounts.crowdAndSocialDynamics.peakDays[day]++;
-              }
-            });
-          }
-          if (csd.ownerCulture) tagCounts.crowdAndSocialDynamics.ownerCulture[csd.ownerCulture]++;
+          if (csd.overallCrowd) tagCounts.crowdAndSocialDynamics.overallCrowd[csd.overallCrowd]++;
           if (csd.ownerFriendliness) tagCounts.crowdAndSocialDynamics.ownerFriendliness[csd.ownerFriendliness]++;
         }
 
@@ -1240,6 +1230,10 @@ const PlaceDetails = () => {
       ],
       // 4. Size & Layout - ALIGNED WITH BACKEND
       sizeAndLayout: [
+        { category: "sizeAndLayout", field: "dogSize", value: "large", label: "🐕 Large Dogs" },
+        { category: "sizeAndLayout", field: "dogSize", value: "medium", label: "🐕 Medium Dogs" },
+        { category: "sizeAndLayout", field: "dogSize", value: "small", label: "🐕 Small Dogs" },
+        { category: "sizeAndLayout", field: "dogSize", value: "all_sizes", label: "🐕 All Sizes" },
         { category: "sizeAndLayout", field: "runningSpace", value: "enough", label: "🏃 Enough Space" },
         { category: "sizeAndLayout", field: "runningSpace", value: "limited", label: "🏃 Limited Space" },
         { category: "sizeAndLayout", field: "runningSpace", value: "tight", label: "🏃 Tight Space" },
@@ -1272,13 +1266,9 @@ const PlaceDetails = () => {
       ],
       // 7. Crowd & Social Dynamics - ALIGNED WITH BACKEND
       crowdAndSocialDynamics: [
-        { category: "crowdAndSocialDynamics", field: "peakDays", value: "saturday", label: "📅 Busy Saturdays" },
-        { category: "crowdAndSocialDynamics", field: "peakDays", value: "sunday", label: "📅 Busy Sundays" },
-        { category: "crowdAndSocialDynamics", field: "peakDays", value: "friday", label: "📅 Busy Fridays" },
-        { category: "crowdAndSocialDynamics", field: "ownerCulture", value: "excellent", label: "⭐ Excellent Culture" },
-        { category: "crowdAndSocialDynamics", field: "ownerCulture", value: "good", label: "⭐ Good Culture" },
-        { category: "crowdAndSocialDynamics", field: "ownerCulture", value: "fair", label: "⭐ Fair Culture" },
-        { category: "crowdAndSocialDynamics", field: "ownerCulture", value: "poor", label: "⭐ Poor Culture" },
+        { category: "crowdAndSocialDynamics", field: "overallCrowd", value: "crowded", label: "👥 Crowded" },
+        { category: "crowdAndSocialDynamics", field: "overallCrowd", value: "moderate", label: "👥 Moderate Crowd" },
+        { category: "crowdAndSocialDynamics", field: "overallCrowd", value: "quiet", label: "👥 Quiet" },
         { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "very_friendly", label: "😊 Very Friendly" },
         { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "friendly", label: "🙂 Friendly" },
         { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "neutral", label: "😐 Neutral" },
@@ -2875,6 +2865,30 @@ const PlaceDetails = () => {
                   <div className="form-section">
                     <h5>📏 Size & Layout</h5>
                     <div className="form-group">
+                      <label>Dog Size</label>
+                      <select
+                        value={reviewForm.dogParkReview.sizeAndLayout.dogSize}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            dogParkReview: {
+                              ...reviewForm.dogParkReview,
+                              sizeAndLayout: {
+                                ...reviewForm.dogParkReview.sizeAndLayout,
+                                dogSize: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="large">Large Dogs</option>
+                        <option value="medium">Medium Dogs</option>
+                        <option value="small">Small Dogs</option>
+                        <option value="all_sizes">All Sizes</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
                       <label>Separate Areas</label>
                       <select
                         value={reviewForm.dogParkReview.sizeAndLayout.separateAreas}
@@ -2925,6 +2939,32 @@ const PlaceDetails = () => {
                   {/* 5. Amenities & Facilities */}
                   <div className="form-section">
                     <h5>🎾 Amenities & Facilities</h5>
+                    
+                    <div className="form-group">
+                      <label>Water Access</label>
+                      <select
+                        value={reviewForm.dogParkReview.amenitiesAndFacilities.waterAccess}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            dogParkReview: {
+                              ...reviewForm.dogParkReview,
+                              amenitiesAndFacilities: {
+                                ...reviewForm.dogParkReview.amenitiesAndFacilities,
+                                waterAccess: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="drinking_fountain">Drinking Fountain</option>
+                        <option value="fire_hydrant">Fire Hydrant</option>
+                        <option value="pool">Pool</option>
+                        <option value="none">None</option>
+                      </select>
+                    </div>
+                    
                     <div className="form-group">
                       <label>Seating Level</label>
                       <select
@@ -2948,7 +2988,51 @@ const PlaceDetails = () => {
                         <option value="no_seat">No Seat</option>
                       </select>
                     </div>
+                    
+                    <div className="form-group">
+                      <label>Shade and Cover</label>
+                      <select
+                        value={reviewForm.dogParkReview.amenitiesAndFacilities.shadeAndCover}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            dogParkReview: {
+                              ...reviewForm.dogParkReview,
+                              amenitiesAndFacilities: {
+                                ...reviewForm.dogParkReview.amenitiesAndFacilities,
+                                shadeAndCover: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="trees">Trees</option>
+                        <option value="shade_structures">Shade Structures</option>
+                        <option value="none">None</option>
+                      </select>
+                    </div>
+                    
                     <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={reviewForm.dogParkReview.amenitiesAndFacilities.biodegradableBags}
+                          onChange={(e) =>
+                            setReviewForm({
+                              ...reviewForm,
+                              dogParkReview: {
+                                ...reviewForm.dogParkReview,
+                                amenitiesAndFacilities: {
+                                  ...reviewForm.dogParkReview.amenitiesAndFacilities,
+                                  biodegradableBags: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                        />
+                        Biodegradable Bags
+                      </label>
                       <label>
                         <input
                           type="checkbox"
@@ -3045,6 +3129,29 @@ const PlaceDetails = () => {
                   <div className="form-section">
                     <h5>👥 Crowd & Social Dynamics</h5>
                     <div className="form-group">
+                      <label>Overall Crowd</label>
+                      <select
+                        value={reviewForm.dogParkReview.crowdAndSocialDynamics.overallCrowd}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            dogParkReview: {
+                              ...reviewForm.dogParkReview,
+                              crowdAndSocialDynamics: {
+                                ...reviewForm.dogParkReview.crowdAndSocialDynamics,
+                                overallCrowd: e.target.value,
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <option value="">Select...</option>
+                        <option value="crowded">Crowded</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="quiet">Quiet</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
                       <label>Owner Friendliness</label>
                       <select
                         value={reviewForm.dogParkReview.crowdAndSocialDynamics.ownerFriendliness}
@@ -3067,26 +3174,6 @@ const PlaceDetails = () => {
                         <option value="neutral">Neutral</option>
                         <option value="unfriendly">Unfriendly</option>
                       </select>
-                    </div>
-                    <div className="form-group">
-                      <label>Peak Hours</label>
-                      <input
-                        type="text"
-                        value={reviewForm.dogParkReview.crowdAndSocialDynamics.peakHours}
-                        onChange={(e) =>
-                          setReviewForm({
-                            ...reviewForm,
-                            dogParkReview: {
-                              ...reviewForm.dogParkReview,
-                              crowdAndSocialDynamics: {
-                                ...reviewForm.dogParkReview.crowdAndSocialDynamics,
-                                peakHours: e.target.value,
-                              },
-                            },
-                          })
-                        }
-                        placeholder="e.g., 5-7 PM"
-                      />
                     </div>
                   </div>
 

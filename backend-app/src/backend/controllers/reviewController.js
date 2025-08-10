@@ -178,7 +178,10 @@ const validateDogParkReview = (dogParkReview) => {
 
   // 4. Validate sizeAndLayout - ALIGNED WITH MODEL
   if (dogParkReview.sizeAndLayout) {
-    const { runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
+    const { dogSize, runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
+    if (dogSize && !["large", "medium", "small", "all_sizes"].includes(dogSize)) {
+      errors.push("Invalid dogSize value");
+    }
     if (runningSpace && !["enough", "limited", "tight"].includes(runningSpace)) {
       errors.push("Invalid runningSpace value");
     }
@@ -215,20 +218,12 @@ const validateDogParkReview = (dogParkReview) => {
 
   // 7. Validate crowdAndSocialDynamics - ALIGNED WITH MODEL
   if (dogParkReview.crowdAndSocialDynamics) {
-    const { ownerCulture, ownerFriendliness, peakDays } = dogParkReview.crowdAndSocialDynamics;
-    if (ownerCulture && !["excellent", "good", "fair", "poor"].includes(ownerCulture)) {
-      errors.push("Invalid ownerCulture value");
+    const { overallCrowd, ownerFriendliness } = dogParkReview.crowdAndSocialDynamics;
+    if (overallCrowd && !["crowded", "moderate", "quiet"].includes(overallCrowd)) {
+      errors.push("Invalid overallCrowd value");
     }
     if (ownerFriendliness && !["very_friendly", "friendly", "neutral", "unfriendly"].includes(ownerFriendliness)) {
       errors.push("Invalid ownerFriendliness value");
-    }
-    if (peakDays && Array.isArray(peakDays)) {
-      const validDays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
-      peakDays.forEach((day, index) => {
-        if (!validDays.includes(day)) {
-          errors.push(`Invalid peak day at index ${index}: ${day}`);
-        }
-      });
     }
   }
 
@@ -884,6 +879,7 @@ exports.getDogParkReviewStats = async (req, res) => {
       },
       // 4. Size & Layout - ALIGNED WITH MODEL
       sizeAndLayout: {
+        dogSize: {},
         runningSpace: {},
         drainagePerformance: {},
       },
@@ -901,8 +897,7 @@ exports.getDogParkReviewStats = async (req, res) => {
       },
       // 7. Crowd & Social Dynamics - ALIGNED WITH MODEL
       crowdAndSocialDynamics: {
-        peakDays: {},
-        ownerCulture: {},
+        overallCrowd: {},
         ownerFriendliness: {},
       },
       // 8. Rules, Policies & Community - ALIGNED WITH MODEL
@@ -952,7 +947,11 @@ exports.getDogParkReviewStats = async (req, res) => {
 
         // 4. Size & Layout - ALIGNED WITH MODEL
         if (dogParkReview.sizeAndLayout) {
-          const { runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
+          const { dogSize, runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
+          if (dogSize) {
+            categoryStats.sizeAndLayout.dogSize[dogSize] =
+              (categoryStats.sizeAndLayout.dogSize[dogSize] || 0) + 1;
+          }
           if (runningSpace) {
             categoryStats.sizeAndLayout.runningSpace[runningSpace] =
               (categoryStats.sizeAndLayout.runningSpace[runningSpace] || 0) + 1;
@@ -996,16 +995,10 @@ exports.getDogParkReviewStats = async (req, res) => {
 
         // 7. Crowd & Social Dynamics - ALIGNED WITH MODEL
         if (dogParkReview.crowdAndSocialDynamics) {
-          const { peakDays, ownerCulture, ownerFriendliness } = dogParkReview.crowdAndSocialDynamics;
-          if (peakDays && Array.isArray(peakDays)) {
-            peakDays.forEach((day) => {
-              categoryStats.crowdAndSocialDynamics.peakDays[day] =
-                (categoryStats.crowdAndSocialDynamics.peakDays[day] || 0) + 1;
-            });
-          }
-          if (ownerCulture) {
-            categoryStats.crowdAndSocialDynamics.ownerCulture[ownerCulture] =
-              (categoryStats.crowdAndSocialDynamics.ownerCulture[ownerCulture] || 0) + 1;
+          const { overallCrowd, ownerFriendliness } = dogParkReview.crowdAndSocialDynamics;
+          if (overallCrowd) {
+            categoryStats.crowdAndSocialDynamics.overallCrowd[overallCrowd] =
+              (categoryStats.crowdAndSocialDynamics.overallCrowd[overallCrowd] || 0) + 1;
           }
           if (ownerFriendliness) {
             categoryStats.crowdAndSocialDynamics.ownerFriendliness[ownerFriendliness] =
