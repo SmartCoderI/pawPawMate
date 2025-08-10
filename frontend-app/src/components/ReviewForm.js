@@ -35,6 +35,7 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
       surveillanceCameras: false,
     },
     sizeAndLayout: {
+      dogSize: "",
       runningSpace: "",
       drainagePerformance: "",
     },
@@ -49,8 +50,7 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
       equipmentCondition: "",
     },
     crowdAndSocialDynamics: {
-      peakDays: [],
-      ownerCulture: "",
+      overallCrowd: "",
       ownerFriendliness: "",
     },
     rulesPoliciesAndCommunity: {
@@ -389,10 +389,10 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
           accessAndLocation: { parkingDifficulty: "" },
           hoursOfOperation: { is24Hours: false, specificHours: "" },
           safetyLevel: { fencingCondition: "", nightIllumination: false, firstAidStation: false, surveillanceCameras: false },
-          sizeAndLayout: { runningSpace: "", drainagePerformance: "" },
+          sizeAndLayout: { dogSize: "", runningSpace: "", drainagePerformance: "" },
           amenitiesAndFacilities: { seatingLevel: "", shadeAndCover: "", biodegradableBags: false, waterAccess: "" },
           maintenanceAndCleanliness: { overallCleanliness: "", equipmentCondition: "" },
-          crowdAndSocialDynamics: { peakDays: [], ownerCulture: "", ownerFriendliness: "" },
+          crowdAndSocialDynamics: { overallCrowd: "", ownerFriendliness: "" },
           rulesPoliciesAndCommunity: { leashPolicy: "", communityEnforcement: "" },
         });
       }
@@ -1204,6 +1204,20 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
               <h5>4. Size & Layout</h5>
 
               <div className="form-group">
+                <label>Dog Size:</label>
+                <select
+                  value={dogParkReview.sizeAndLayout.dogSize}
+                  onChange={(e) => handleDogParkChange("sizeAndLayout", "dogSize", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="large">Large Dogs</option>
+                  <option value="medium">Medium Dogs</option>
+                  <option value="small">Small Dogs</option>
+                  <option value="all_sizes">All Sizes</option>
+                </select>
+              </div>
+
+              <div className="form-group">
                 <label>Separate Areas:</label>
                 <select
                   value={dogParkReview.sizeAndLayout.separateAreas}
@@ -1351,86 +1365,31 @@ const ReviewForm = ({ placeId, placeData, onReviewSubmitted, onCancel }) => {
               <h5>7. Crowd & Social Dynamics</h5>
 
               <div className="form-group">
-                <label>Peak Days:</label>
-                <div className="checkbox-group">
-                  {["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].map((day) => (
-                    <label key={day}>
-                      <input
-                        type="checkbox"
-                        checked={(dogParkReview.crowdAndSocialDynamics.peakDays || []).includes(day)}
-                        onChange={(e) =>
-                          handleArrayFieldChange("crowdAndSocialDynamics", "peakDays", day, e.target.checked)
-                        }
-                      />
-                      {day.charAt(0).toUpperCase() + day.slice(1)}
-                    </label>
-                  ))}
-                </div>
+                <label>Overall Crowd:</label>
+                <select
+                  value={dogParkReview.crowdAndSocialDynamics.overallCrowd}
+                  onChange={(e) => handleDogParkChange("crowdAndSocialDynamics", "overallCrowd", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="crowded">Crowded</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="quiet">Quiet</option>
+                </select>
               </div>
 
               <div className="form-group">
-                <label>Peak Hours:</label>
-                <input
-                  type="text"
-                  value={dogParkReview.crowdAndSocialDynamics.peakHours}
-                  onChange={(e) => handleDogParkChange("crowdAndSocialDynamics", "peakHours", e.target.value)}
-                  placeholder="e.g., 5-7 PM"
-                />
+                <label>Owner Friendliness:</label>
+                <select
+                  value={dogParkReview.crowdAndSocialDynamics.ownerFriendliness}
+                  onChange={(e) => handleDogParkChange("crowdAndSocialDynamics", "ownerFriendliness", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  <option value="very_friendly">Very Friendly</option>
+                  <option value="friendly">Friendly</option>
+                  <option value="neutral">Neutral</option>
+                  <option value="unfriendly">Unfriendly</option>
+                </select>
               </div>
-
-              <div className="form-group">
-                <label>Social Events:</label>
-                <div className="checkbox-group">
-                  {["dog_meet_events", "training_classes", "adoption_events", "none"].map((event) => (
-                    <label key={event}>
-                      <input
-                        type="checkbox"
-                        checked={(dogParkReview.crowdAndSocialDynamics.socialEvents || []).includes(event)}
-                        onChange={(e) =>
-                          handleArrayFieldChange("crowdAndSocialDynamics", "socialEvents", event, e.target.checked)
-                        }
-                      />
-                      {event.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {["ownerCulture", "wastePickup", "ownerFriendliness"].map((field) => (
-                <div key={field} className="form-group">
-                  <label>{field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}:</label>
-                  <select
-                    value={dogParkReview.crowdAndSocialDynamics[field]}
-                    onChange={(e) => handleDogParkChange("crowdAndSocialDynamics", field, e.target.value)}
-                  >
-                    <option value="">Select...</option>
-                    {field === "ownerCulture" && (
-                      <>
-                        <option value="excellent">Excellent</option>
-                        <option value="good">Good</option>
-                        <option value="fair">Fair</option>
-                        <option value="poor">Poor</option>
-                      </>
-                    )}
-                    {field === "wastePickup" && (
-                      <>
-                        <option value="always">Always</option>
-                        <option value="usually">Usually</option>
-                        <option value="sometimes">Sometimes</option>
-                        <option value="rarely">Rarely</option>
-                      </>
-                    )}
-                    {field === "ownerFriendliness" && (
-                      <>
-                        <option value="very_friendly">Very Friendly</option>
-                        <option value="friendly">Friendly</option>
-                        <option value="neutral">Neutral</option>
-                        <option value="unfriendly">Unfriendly</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              ))}
             </div>
 
             {/* 8. Rules, Policies & Community */}

@@ -98,9 +98,10 @@ const ReviewList = ({ reviews = [] }) => {
 
     // 4. Size & Layout
     if (dogParkReview.sizeAndLayout) {
-      const { separateAreas, runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
+      const { dogSize, separateAreas, runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
       const details = [];
 
+      if (dogSize) details.push(`Dog Size: ${dogSize === 'all_sizes' ? 'All Sizes' : dogSize}`);
       if (separateAreas) details.push(`Separate Areas: ${separateAreas.replace(/_/g, " ")}`);
       if (runningSpace) details.push(`Running Space: ${runningSpace}`);
       if (drainagePerformance) details.push(`Drainage: ${drainagePerformance}`);
@@ -145,15 +146,14 @@ const ReviewList = ({ reviews = [] }) => {
 
     // 7. Crowd & Social Dynamics
     if (dogParkReview.crowdAndSocialDynamics) {
-      const { peakDays, peakHours, socialEvents, ownerCulture, wastePickup, ownerFriendliness } =
+      const { overallCrowd, peakHours, socialEvents, wastePickup, ownerFriendliness } =
         dogParkReview.crowdAndSocialDynamics;
       const details = [];
 
-      if (peakDays && peakDays.length > 0) details.push(`Peak Days: ${peakDays.join(", ")}`);
+      if (overallCrowd) details.push(`Crowd Level: ${overallCrowd}`);
       if (peakHours) details.push(`Peak Hours: ${peakHours}`);
       if (socialEvents && socialEvents.length > 0)
         details.push(`Events: ${socialEvents.join(", ").replace(/_/g, " ")}`);
-      if (ownerCulture) details.push(`Owner Culture: ${ownerCulture}`);
       if (wastePickup) details.push(`Waste Pickup: ${wastePickup}`);
       if (ownerFriendliness) details.push(`Owner Friendliness: ${ownerFriendliness.replace(/_/g, " ")}`);
 

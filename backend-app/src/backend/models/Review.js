@@ -41,16 +41,17 @@ const reviewSchema = new mongoose.Schema({
 
     // 4. Size & Layout
     sizeAndLayout: {
+      dogSize: { type: String, enum: ["large", "medium", "small", "all_sizes"], required: false },
       runningSpace: { type: String, enum: ["enough", "limited", "tight"], required: false },
       drainagePerformance: { type: String, enum: ["excellent", "good", "poor"], required: false },
     },
 
     // 5. Amenities & Facilities
     amenitiesAndFacilities: {
+      waterAccess: { type: String, enum: ["drinking_fountain", "fire_hydrant", "pool", "none"], required: false },
       seatingLevel: { type: String, enum: ["bench", "gazebo", "no_seat"], required: false },
       shadeAndCover: { type: String, enum: ["trees", "shade_structures", "none"], required: false },
       biodegradableBags: { type: Boolean, required: false },
-      waterAccess: { type: String, enum: ["drinking_fountain", "fire_hydrant", "pool", "none"], required: false },
     },
 
     // 6. Maintenance & Cleanliness
@@ -61,12 +62,7 @@ const reviewSchema = new mongoose.Schema({
 
     // 7. Crowd & Social Dynamics
     crowdAndSocialDynamics: {
-      peakDays: {
-        type: [String],
-        enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
-        required: false,
-      },
-      ownerCulture: { type: String, enum: ["excellent", "good", "fair", "poor"], required: false },
+      overallCrowd: { type: String, enum: ["crowded", "moderate", "quiet"], required: false },
       ownerFriendliness: {
         type: String,
         enum: ["very_friendly", "friendly", "neutral", "unfriendly"],
@@ -109,6 +105,7 @@ const reviewSchema = new mongoose.Schema({
       // Transparency
       feesExplainedUpfront: { type: Boolean, required: false },
       insuranceAccepted: { type: Boolean, required: false },
+      
     },
 
     // 5. Services & Specializations
@@ -245,4 +242,4 @@ const reviewSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Review", reviewSchema); 
+module.exports = mongoose.model("Review", reviewSchema);

@@ -48,9 +48,26 @@ const CardNotificationPopup = ({ show, cardType, onClose }) => {
     }
   };
 
+
+  const handleCloseClick = () => {
+    setIsVisible(false);
+    // Call onClose after fade-out animation completes
+    setTimeout(() => {
+      onClose();
+    }, 300); // Match CSS transition duration
+  };
+
   return (
     <div className={`card-notification-overlay ${isVisible ? 'visible' : ''}`}>
       <div className={`card-notification-popup ${isVisible ? 'visible' : ''}`}>
+        <button 
+          className="card-notification-close" 
+          onClick={handleCloseClick}
+          aria-label="Close notification"
+        >
+          ×
+        </button>
+
         <div className="card-notification-icon">
           🎉
         </div>
