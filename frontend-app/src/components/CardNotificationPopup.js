@@ -48,6 +48,7 @@ const CardNotificationPopup = ({ show, cardType, onClose }) => {
     }
   };
 
+
   const handleCloseClick = () => {
     setIsVisible(false);
     // Call onClose after fade-out animation completes
@@ -66,6 +67,7 @@ const CardNotificationPopup = ({ show, cardType, onClose }) => {
         >
           ×
         </button>
+
         <div className="card-notification-icon">
           🎉
         </div>

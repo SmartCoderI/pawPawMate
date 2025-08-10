@@ -106,6 +106,7 @@ const LostPets = () => {
 
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [previewPhotos, setPreviewPhotos] = useState([]);
+  const [photoIndex, setPhotoIndex] = useState(0);
 
   const handlePhotoSelect = (event, formType) => {
     const files = Array.from(event.target.files);
@@ -208,6 +209,20 @@ const LostPets = () => {
       }
     }
   }, [focusPetId, lostPets, shouldCenterOnPet]);
+
+  useEffect(() => {
+    if (selectedPet?.photos?.length > 1) {
+      const interval = setInterval(() => {
+        setPhotoIndex((prev) => (prev + 1) % selectedPet.photos.length);
+      }, 3000); // Change photo every 3 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [selectedPet?.photos?.length]);
+
+  useEffect(() => {
+    setPhotoIndex(0);
+  }, [selectedPet]);
 
   // Status types with colors and icons
   const statusTypes = {
@@ -390,6 +405,7 @@ const LostPets = () => {
   // Handle lost pet pin click
   const handlePetClick = (pet) => {
     setSelectedPet(pet);
+    console.log("logging pet:", pet);
   };
 
   // Close popup
@@ -898,7 +914,7 @@ const LostPets = () => {
         </div>
       </div>
 
-      <div className="map-wrapper">
+      <div className="lostpet-map-wrapper map-wrapper">
         {!locationPermissionChecked && (
           <div className="location-loading-overlay">
             <div className="location-loading-content">
@@ -1011,11 +1027,53 @@ const LostPets = () => {
 
                 {selectedPet.photos && selectedPet.photos.length > 0 && (
                   <div className="pet-popup-photo">
-                    <img
-                      src={selectedPet.photos[0]}
-                      alt={selectedPet.petName}
-                      style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px' }}
-                    />
+                    <div className="photo-carousel">
+                      <img
+                        src={selectedPet.photos[photoIndex % selectedPet.photos.length]}
+                        alt={`${selectedPet.petName} - Photo ${photoIndex + 1}`}
+                        style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px' }}
+                      />
+
+                      {selectedPet.photos.length > 1 && (
+                        <>
+                          <button
+                            className="photo-nav photo-prev"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPhotoIndex((prev) => (prev - 1 + selectedPet.photos.length) % selectedPet.photos.length);
+                            }}
+                          >
+                            ‹
+                          </button>
+                          <button
+                            className="photo-nav photo-next"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPhotoIndex((prev) => (prev + 1) % selectedPet.photos.length);
+                            }}
+                          >
+                            ›
+                          </button>
+
+                          <div className="photo-indicators">
+                            {selectedPet.photos.map((_, index) => (
+                              <button
+                                key={index}
+                                className={`photo-indicator ${index === (photoIndex % selectedPet.photos.length) ? 'active' : ''}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPhotoIndex(index);
+                                }}
+                              />
+                            ))}
+                          </div>
+
+                          <div className="photo-counter">
+                            {(photoIndex % selectedPet.photos.length) + 1} / {selectedPet.photos.length}
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 )}
 
