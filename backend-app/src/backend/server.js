@@ -38,11 +38,10 @@ app.use(
   cors({
     origin: [
       process.env.FRONTEND_URL || "http://localhost:3000",
-      "http://localhost:3001", // Alternative frontend port
-      "http://localhost:3000", // Default frontend port
+      "http://localhost:3001" // Alternative frontend port
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "ngrok-skip-browser-warning"],
   })
 );
 
@@ -94,4 +93,4 @@ const PORT = process.env.BACKEND_PORT || process.env.PORT || 5001;
 
 
 //starts the HTTP + websocket server on the desired port
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, "0.0.0.0", () => console.log(`Server running on port ${PORT}`));
