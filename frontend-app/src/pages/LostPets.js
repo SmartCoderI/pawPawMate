@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Map, { Marker, NavigationControl, GeolocateControl, Popup } from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { useUser } from '../contexts/UserContext';
-import { lostPetAPI } from '../services/api';
-import '../styles/LostPets.css';
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import Map, { Marker, NavigationControl, GeolocateControl, Popup } from "react-map-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useUser } from "../contexts/UserContext";
+import { lostPetAPI } from "../services/api";
+import "../styles/LostPets.css";
 
 const LostPets = () => {
   const { firebaseUser, mongoUser } = useUser();
@@ -21,31 +21,31 @@ const LostPets = () => {
         return {
           longitude: location.state.centerLocation.lng,
           latitude: location.state.centerLocation.lat,
-          zoom: 15
+          zoom: 15,
         };
       }
 
-      const savedState = sessionStorage.getItem('pawpawmate_lostpets_map_state');
+      const savedState = sessionStorage.getItem("pawpawmate_lostpets_map_state");
       if (savedState) {
         const parsed = JSON.parse(savedState);
 
         // Check if saved state is less than 30 minutes old
         const thirtyMinutes = 30 * 60 * 1000;
         if (Date.now() - parsed.timestamp < thirtyMinutes) {
-          console.log('Restored saved lost pets map state:', parsed);
+          console.log("Restored saved lost pets map state:", parsed);
           return parsed;
         } else {
-          console.log('Saved lost pets map state expired, clearing');
-          sessionStorage.removeItem('pawpawmate_lostpets_map_state');
+          console.log("Saved lost pets map state expired, clearing");
+          sessionStorage.removeItem("pawpawmate_lostpets_map_state");
         }
       }
     } catch (error) {
-      console.error('Error loading saved lost pets map state:', error);
+      console.error("Error loading saved lost pets map state:", error);
     }
     return {
-      longitude: -87.6298,  // Chicago downtown longitude (fallback)
-      latitude: 41.8881,    // Chicago downtown latitude - moved north (fallback)
-      zoom: 14              // More zoomed in for better city view
+      longitude: -87.6298, // Chicago downtown longitude (fallback)
+      latitude: 41.8881, // Chicago downtown latitude - moved north (fallback)
+      zoom: 14, // More zoomed in for better city view
     };
   };
 
@@ -57,17 +57,17 @@ const LostPets = () => {
   const [loading, setLoading] = useState(false);
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [speciesFilter, setSpeciesFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [speciesFilter, setSpeciesFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
 
   // UI state
   const [selectedPet, setSelectedPet] = useState(null);
   const [showReportForm, setShowReportForm] = useState(false);
   const [clickedCoordinates, setClickedCoordinates] = useState(null);
-  const [reportType, setReportType] = useState('lost'); // 'lost' or 'sighting'
+  const [reportType, setReportType] = useState("lost"); // 'lost' or 'sighting'
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [addressInput, setAddressInput] = useState('');
+  const [addressInput, setAddressInput] = useState("");
   const [isGeocoding, setIsGeocoding] = useState(false);
 
   // Mark as Found state
@@ -75,30 +75,30 @@ const LostPets = () => {
 
   // Form data for lost pet reports
   const [lostPetForm, setLostPetForm] = useState({
-    petName: '',
-    species: 'dog',
-    breed: '',
-    color: '',
-    size: 'medium',
-    features: '',
-    lastSeenTime: '',
+    petName: "",
+    species: "dog",
+    breed: "",
+    color: "",
+    size: "medium",
+    features: "",
+    lastSeenTime: "",
     ownerContact: {
-      name: '',
-      phone: '',
-      email: ''
+      name: "",
+      phone: "",
+      email: "",
     },
-    microchip: '',
-    collar: '',
-    favoritePlaces: '',
-    reward: '',
-    photos: []
+    microchip: "",
+    collar: "",
+    favoritePlaces: "",
+    reward: "",
+    photos: [],
   });
 
   // Form data for sighting reports
   const [sightingForm, setSightingForm] = useState({
-    sightingTime: '',
-    description: '',
-    photos: []
+    sightingTime: "",
+    description: "",
+    photos: [],
   });
 
   const mapRef = useRef();
@@ -108,23 +108,42 @@ const LostPets = () => {
   const [previewPhotos, setPreviewPhotos] = useState([]);
   const [photoIndex, setPhotoIndex] = useState(0);
 
+  // Ensure popup content starts at the top when opening details
+  useEffect(() => {
+    if (selectedPet) {
+      requestAnimationFrame(() => {
+        const popupEl =
+          document.querySelector(".mapboxgl-popup-content .pet-popup") ||
+          document.querySelector(".pet-detail-modal .pet-popup") ||
+          document.querySelector(".pet-popup");
+        if (popupEl) {
+          popupEl.scrollTop = 0;
+        }
+      });
+    }
+  }, [selectedPet]);
+
   const handlePhotoSelect = (event, formType) => {
     const files = Array.from(event.target.files);
-    console.log('Selected files:', files.length, files.map(f => f.name));
+    console.log(
+      "Selected files:",
+      files.length,
+      files.map((f) => f.name)
+    );
 
-    previewPhotos.forEach(preview => {
+    previewPhotos.forEach((preview) => {
       URL.revokeObjectURL(preview.url);
     });
     setPreviewPhotos([]);
 
     if (files.length > 5) {
-      alert('You can only upload up to 5 photos at a time.');
-      event.target.value = '';
+      alert("You can only upload up to 5 photos at a time.");
+      event.target.value = "";
       return;
     }
 
     const validFiles = [];
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     for (const file of files) {
@@ -141,37 +160,40 @@ const LostPets = () => {
       validFiles.push(file);
     }
 
-    console.log('Valid files after filtering:', validFiles.length, validFiles.map(f => f.name));
+    console.log(
+      "Valid files after filtering:",
+      validFiles.length,
+      validFiles.map((f) => f.name)
+    );
 
     if (validFiles.length === 0) {
-      event.target.value = '';
+      event.target.value = "";
       return;
     }
-    const previews = validFiles.map(file => ({
+    const previews = validFiles.map((file) => ({
       file,
       url: URL.createObjectURL(file),
-      name: file.name
+      name: file.name,
     }));
     setPreviewPhotos(previews);
-    if (formType === 'lost') {
-      handleLostPetFormChange('photos', validFiles);
+    if (formType === "lost") {
+      handleLostPetFormChange("photos", validFiles);
     } else {
-      handleSightingFormChange('photos', validFiles);
+      handleSightingFormChange("photos", validFiles);
     }
   };
 
   const removePhoto = (index) => {
     const newPreviews = previewPhotos.filter((_, i) => i !== index);
-    const newFiles = previewPhotos.filter((_, i) => i !== index).map(p => p.file);
+    const newFiles = previewPhotos.filter((_, i) => i !== index).map((p) => p.file);
     URL.revokeObjectURL(previewPhotos[index].url);
     setPreviewPhotos(newPreviews);
-    if (reportType === 'lost') {
-      handleLostPetFormChange('photos', newFiles);
+    if (reportType === "lost") {
+      handleLostPetFormChange("photos", newFiles);
     } else {
-      handleSightingFormChange('photos', newFiles);
+      handleSightingFormChange("photos", newFiles);
     }
   };
-
 
   useEffect(() => {
     const petIdFromNav = location.state?.focusedPetId;
@@ -190,22 +212,20 @@ const LostPets = () => {
 
   useEffect(() => {
     if (focusPetId && lostPets.length > 0 && shouldCenterOnPet) {
-      const targetPet = lostPets.find(pet => pet._id === focusPetId);
+      const targetPet = lostPets.find((pet) => pet._id === focusPetId);
       if (targetPet) {
-        console.log('Found target pet, centering and showing:', targetPet);
-        setViewState(prev => ({
+        console.log("Found target pet, centering and showing:", targetPet);
+        setViewState((prev) => ({
           ...prev,
           longitude: targetPet.lastSeenLocation.lng,
           latitude: targetPet.lastSeenLocation.lat,
-          zoom: 16
+          zoom: 16,
         }));
         setSelectedPet(targetPet);
         setShouldCenterOnPet(false); // Reset after centering
         setFocusPetId(null); // Clear focusPetId to prevent re-centering
       } else {
-        fetchLostPets().then(() => {
-
-        });
+        fetchLostPets().then(() => {});
       }
     }
   }, [focusPetId, lostPets, shouldCenterOnPet]);
@@ -226,27 +246,27 @@ const LostPets = () => {
 
   // Status types with colors and icons
   const statusTypes = {
-    all: { label: 'All Status', icon: '🐾', color: '#6b7280' },
-    missing: { label: 'Missing', icon: '❌', color: '#dc2626' }, // Red
-    seen: { label: 'Seen', icon: '👀', color: '#eab308' },     // Yellow  
-    found: { label: 'Found', icon: '✅', color: '#22c55e' }    // Green
+    all: { label: "All Status", icon: "🐾", color: "#6b7280" },
+    missing: { label: "Missing", icon: "❌", color: "#dc2626" }, // Red
+    seen: { label: "Seen", icon: "👀", color: "#eab308" }, // Yellow
+    found: { label: "Found", icon: "✅", color: "#22c55e" }, // Green
   };
 
   // Species types for filtering
   const speciesTypes = {
-    all: { label: 'All Species', icon: '🐾' },
-    dog: { label: 'Dogs', icon: '🐕' },
-    cat: { label: 'Cats', icon: '🐱' },
-    other: { label: 'Other', icon: '🐾' }
+    all: { label: "All Species", icon: "🐾" },
+    dog: { label: "Dogs", icon: "🐕" },
+    cat: { label: "Cats", icon: "🐱" },
+    other: { label: "Other", icon: "🐾" },
   };
 
   // Date filter options
   const dateFilterOptions = {
-    all: { label: 'All Time' },
-    1: { label: 'Last 24 Hours' },
-    3: { label: 'Last 3 Days' },
-    7: { label: 'Last Week' },
-    30: { label: 'Last Month' }
+    all: { label: "All Time" },
+    1: { label: "Last 24 Hours" },
+    3: { label: "Last 3 Days" },
+    7: { label: "Last Week" },
+    30: { label: "Last Month" },
   };
 
   // Save map state to session storage
@@ -258,19 +278,19 @@ const LostPets = () => {
         statusFilter,
         speciesFilter,
         dateFilter,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
-      sessionStorage.setItem('pawpawmate_lostpets_map_state', JSON.stringify(mapState));
+      sessionStorage.setItem("pawpawmate_lostpets_map_state", JSON.stringify(mapState));
     } catch (error) {
-      console.error('Error saving lost pets map state:', error);
+      console.error("Error saving lost pets map state:", error);
     }
   };
 
   // Get user's current location (triggered by button click)
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      console.log('Geolocation is not supported by this browser');
-      alert('Geolocation is not supported by this browser');
+      console.log("Geolocation is not supported by this browser");
+      alert("Geolocation is not supported by this browser");
       return;
     }
 
@@ -280,38 +300,38 @@ const LostPets = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        console.log('Current location obtained:', { latitude, longitude });
+        console.log("Current location obtained:", { latitude, longitude });
 
         // Always use current location when user clicks the button
-        setViewState(prev => ({
+        setViewState((prev) => ({
           ...prev,
           longitude,
           latitude,
-          zoom: 15 // Zoom in more when user specifically requests location
+          zoom: 15, // Zoom in more when user specifically requests location
         }));
-        console.log('Using current location from user request');
+        console.log("Using current location from user request");
         setLocationPermissionChecked(true);
       },
       (error) => {
-        console.log('Error getting location:', error.message);
-        console.log('Could not get current location');
+        console.log("Error getting location:", error.message);
+        console.log("Could not get current location");
         setLocationPermissionChecked(true);
 
         // Show user-friendly error message
-        let errorMessage = 'Could not get your current location. ';
+        let errorMessage = "Could not get your current location. ";
         if (error.code === 1) {
-          errorMessage += 'Please allow location access and try again.';
+          errorMessage += "Please allow location access and try again.";
         } else if (error.code === 2) {
-          errorMessage += 'Location information is unavailable.';
+          errorMessage += "Location information is unavailable.";
         } else if (error.code === 3) {
-          errorMessage += 'Location request timed out.';
+          errorMessage += "Location request timed out.";
         }
         alert(errorMessage);
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 60000 // Cache for 1 minute when user manually requests
+        maximumAge: 60000, // Cache for 1 minute when user manually requests
       }
     );
   };
@@ -321,24 +341,24 @@ const LostPets = () => {
     if (!mapRef.current) return;
 
     setLoading(true);
-    console.log('Fetching lost pets...');
+    console.log("Fetching lost pets...");
 
     try {
       const bounds = mapRef.current.getBounds();
       const filters = {};
 
       // Add status filter
-      if (statusFilter !== 'all') {
+      if (statusFilter !== "all") {
         filters.status = statusFilter;
       }
 
       // Add species filter
-      if (speciesFilter !== 'all') {
+      if (speciesFilter !== "all") {
         filters.species = speciesFilter;
       }
 
       // Add date filter
-      if (dateFilter !== 'all') {
+      if (dateFilter !== "all") {
         filters.dateRange = parseInt(dateFilter);
       }
 
@@ -346,16 +366,16 @@ const LostPets = () => {
       if (bounds) {
         filters.bounds = {
           _sw: bounds.getSouthWest(),
-          _ne: bounds.getNorthEast()
+          _ne: bounds.getNorthEast(),
         };
       }
 
-      console.log('Fetching lost pets with filters:', filters);
+      console.log("Fetching lost pets with filters:", filters);
       const lostPetsData = await lostPetAPI.getAllLostPets(filters);
       console.log(`Found ${lostPetsData.length} lost pets`);
       setLostPets(lostPetsData);
     } catch (error) {
-      console.error('Error fetching lost pets:', error);
+      console.error("Error fetching lost pets:", error);
     } finally {
       setLoading(false);
     }
@@ -382,28 +402,37 @@ const LostPets = () => {
   // Handle map click (for adding new reports)
   const handleMapClick = (event) => {
     if (!mongoUser) {
-      alert('Please sign in to report a lost pet or sighting');
+      alert("Please sign in to report a lost pet or sighting");
       return;
     }
 
     const { lngLat } = event;
     setClickedCoordinates({
       lat: lngLat.lat,
-      lng: lngLat.lng
+      lng: lngLat.lng,
     });
 
     // Clear address input when clicking on map
-    setAddressInput('');
+    setAddressInput("");
 
     // Only show form if not already open
     if (!showReportForm) {
-      setReportType('sighting'); // Default to sighting when clicking map
+      setReportType("sighting"); // Default to sighting when clicking map
       setShowReportForm(true);
     }
   };
 
   // Handle lost pet pin click
   const handlePetClick = (pet) => {
+    // Center map on the clicked pet before opening details so popup/modal is fully visible
+    setViewState((prev) => ({
+      ...prev,
+      longitude: pet.lastSeenLocation.lng,
+      latitude: pet.lastSeenLocation.lat,
+      zoom: Math.max(prev.zoom, 15),
+      transitionDuration: 500,
+    }));
+
     setSelectedPet(pet);
     console.log("logging pet:", pet);
   };
@@ -416,7 +445,7 @@ const LostPets = () => {
   // Mark as Found functions
   const handleMarkAsFound = async (pet) => {
     if (!pet || !mongoUser) {
-      alert('Error: Missing required information');
+      alert("Error: Missing required information");
       return;
     }
 
@@ -430,27 +459,26 @@ const LostPets = () => {
       const reunionInfo = {
         foundAt: new Date().toISOString(),
         foundLocation: pet.lastSeenLocation,
-        reunionNote: '',
-        reunionPhoto: ''
+        reunionNote: "",
+        reunionPhoto: "",
       };
 
-      console.log('Marking pet as found:', pet._id);
+      console.log("Marking pet as found:", pet._id);
 
       await lostPetAPI.updateLostPetStatus(pet._id, {
-        status: 'found',
+        status: "found",
         reunionInfo: reunionInfo,
-        userId: mongoUser._id
+        userId: mongoUser._id,
       });
 
-      alert('Pet marked as found successfully! 🎉');
+      alert("Pet marked as found successfully! 🎉");
 
       // Refresh the data and close popup
       fetchLostPets();
       closePopup();
-
     } catch (error) {
-      console.error('Error marking pet as found:', error);
-      alert('Error marking pet as found. Please try again.');
+      console.error("Error marking pet as found:", error);
+      alert("Error marking pet as found. Please try again.");
     } finally {
       setIsMarkingFound(false);
     }
@@ -485,13 +513,13 @@ const LostPets = () => {
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
     if (diffDays > 0) {
-      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
     } else if (diffHours > 0) {
-      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
     } else if (diffMinutes > 0) {
-      return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+      return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""} ago`;
     } else {
-      return 'Just now';
+      return "Just now";
     }
   };
 
@@ -520,14 +548,14 @@ const LostPets = () => {
   }, [locationPermissionChecked]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Get filtered lost pets
-  const filteredLostPets = lostPets.filter(pet => {
+  const filteredLostPets = lostPets.filter((pet) => {
     // Status filter
-    if (statusFilter !== 'all' && pet.status !== statusFilter) {
+    if (statusFilter !== "all" && pet.status !== statusFilter) {
       return false;
     }
 
     // Species filter
-    if (speciesFilter !== 'all' && pet.species !== speciesFilter) {
+    if (speciesFilter !== "all" && pet.species !== speciesFilter) {
       return false;
     }
 
@@ -536,31 +564,35 @@ const LostPets = () => {
 
   // Handle form input changes
   const handleLostPetFormChange = (field, value) => {
-    if (field === 'photos') {
-      console.log('Setting photos in form state:', value.length, value.map(f => f.name));
+    if (field === "photos") {
+      console.log(
+        "Setting photos in form state:",
+        value.length,
+        value.map((f) => f.name)
+      );
     }
 
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      setLostPetForm(prev => ({
+    if (field.includes(".")) {
+      const [parent, child] = field.split(".");
+      setLostPetForm((prev) => ({
         ...prev,
         [parent]: {
           ...prev[parent],
-          [child]: value
-        }
+          [child]: value,
+        },
       }));
     } else {
-      setLostPetForm(prev => ({
+      setLostPetForm((prev) => ({
         ...prev,
-        [field]: value
+        [field]: value,
       }));
     }
   };
 
   const handleSightingFormChange = (field, value) => {
-    setSightingForm(prev => ({
+    setSightingForm((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -571,7 +603,9 @@ const LostPets = () => {
     setIsGeocoding(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&addressdetails=1`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          address
+        )}&limit=1&addressdetails=1`
       );
       const data = await response.json();
 
@@ -579,26 +613,26 @@ const LostPets = () => {
         const result = data[0];
         const coordinates = {
           lat: parseFloat(result.lat),
-          lng: parseFloat(result.lon)
+          lng: parseFloat(result.lon),
         };
 
         setClickedCoordinates(coordinates);
 
         // Update map view to show the geocoded location
-        setViewState(prev => ({
+        setViewState((prev) => ({
           ...prev,
           longitude: coordinates.lng,
           latitude: coordinates.lat,
-          zoom: 15
+          zoom: 15,
         }));
 
-        console.log('Geocoded address:', address, 'to coordinates:', coordinates);
+        console.log("Geocoded address:", address, "to coordinates:", coordinates);
       } else {
-        alert('Address not found. Please try a different address or click on the map.');
+        alert("Address not found. Please try a different address or click on the map.");
       }
     } catch (error) {
-      console.error('Geocoding error:', error);
-      alert('Error finding address. Please try again or click on the map.');
+      console.error("Geocoding error:", error);
+      alert("Error finding address. Please try again or click on the map.");
     } finally {
       setIsGeocoding(false);
     }
@@ -618,42 +652,42 @@ const LostPets = () => {
 
   // Reset forms
   const resetForms = () => {
-    previewPhotos.forEach(preview => {
+    previewPhotos.forEach((preview) => {
       URL.revokeObjectURL(preview.url);
     });
     setPreviewPhotos([]);
 
     const fileInputs = document.querySelectorAll('input[type="file"]');
-    fileInputs.forEach(input => {
-      input.value = '';
+    fileInputs.forEach((input) => {
+      input.value = "";
     });
 
     setLostPetForm({
-      petName: '',
-      species: 'dog',
-      breed: '',
-      color: '',
-      size: 'medium',
-      features: '',
-      lastSeenTime: '',
+      petName: "",
+      species: "dog",
+      breed: "",
+      color: "",
+      size: "medium",
+      features: "",
+      lastSeenTime: "",
       ownerContact: {
-        name: '',
-        phone: '',
-        email: ''
+        name: "",
+        phone: "",
+        email: "",
       },
-      microchip: '',
-      collar: '',
-      favoritePlaces: '',
-      reward: '',
-      photos: []
+      microchip: "",
+      collar: "",
+      favoritePlaces: "",
+      reward: "",
+      photos: [],
     });
     setSightingForm({
-      sightingTime: '',
-      description: '',
-      photos: []
+      sightingTime: "",
+      description: "",
+      photos: [],
     });
     setClickedCoordinates(null);
-    setAddressInput('');
+    setAddressInput("");
     setShowReportForm(false);
     setIsSubmitting(false);
   };
@@ -662,45 +696,45 @@ const LostPets = () => {
   const handleLostPetSubmit = async (e) => {
     e.preventDefault();
     if (!mongoUser) {
-      alert('Please sign in to submit a lost pet report.');
+      alert("Please sign in to submit a lost pet report.");
       return;
     }
 
     if (!clickedCoordinates) {
-      alert('Please select a location where your pet got lost by typing an address or clicking on the map.');
+      alert("Please select a location where your pet got lost by typing an address or clicking on the map.");
       return;
     }
 
     // Validate required fields
     if (!lostPetForm.petName.trim()) {
-      alert('Please enter your pet\'s name.');
+      alert("Please enter your pet's name.");
       return;
     }
     if (!lostPetForm.color.trim()) {
-      alert('Please enter your pet\'s color.');
+      alert("Please enter your pet's color.");
       return;
     }
     if (!lostPetForm.lastSeenTime) {
-      alert('Please enter when your pet got lost.');
+      alert("Please enter when your pet got lost.");
       return;
     }
     if (!lostPetForm.ownerContact.name.trim()) {
-      alert('Please enter your name.');
+      alert("Please enter your name.");
       return;
     }
     if (!lostPetForm.ownerContact.phone.trim()) {
-      alert('Please enter your phone number.');
+      alert("Please enter your phone number.");
       return;
     }
     if (!lostPetForm.ownerContact.email.trim()) {
-      alert('Please enter your email address.');
+      alert("Please enter your email address.");
       return;
     }
 
     setIsSubmitting(true);
     try {
       // Get address from coordinates using reverse geocoding
-      let address = '';
+      let address = "";
       try {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${clickedCoordinates.lat}&lon=${clickedCoordinates.lng}&zoom=18&addressdetails=1`
@@ -710,12 +744,15 @@ const LostPets = () => {
           address = data.display_name;
         }
       } catch (geoError) {
-        console.warn('Reverse geocoding failed:', geoError);
+        console.warn("Reverse geocoding failed:", geoError);
       }
 
       // Convert favoritePlaces string to array
       const favoritePlacesArray = lostPetForm.favoritePlaces
-        ? lostPetForm.favoritePlaces.split(',').map(place => place.trim()).filter(place => place.length > 0)
+        ? lostPetForm.favoritePlaces
+            .split(",")
+            .map((place) => place.trim())
+            .filter((place) => place.length > 0)
         : [];
 
       const reportData = {
@@ -724,22 +761,22 @@ const LostPets = () => {
         lastSeenLocation: {
           lat: clickedCoordinates.lat,
           lng: clickedCoordinates.lng,
-          address: address
+          address: address,
         },
-        userId: mongoUser._id
+        userId: mongoUser._id,
       };
 
-      console.log('Submitting lost pet report:', reportData);
-      console.log('Photos in reportData:', reportData.photos?.length || 0, reportData.photos?.map(f => f.name) || []);
+      console.log("Submitting lost pet report:", reportData);
+      console.log("Photos in reportData:", reportData.photos?.length || 0, reportData.photos?.map((f) => f.name) || []);
       const newReport = await lostPetAPI.createLostPetReport(reportData);
-      console.log('Lost pet report created:', newReport);
+      console.log("Lost pet report created:", newReport);
 
       // Refresh the map data
       fetchLostPets();
       resetForms();
-      alert('Lost pet report submitted successfully!');
+      alert("Lost pet report submitted successfully!");
     } catch (error) {
-      console.error('Error submitting lost pet report:', error);
+      console.error("Error submitting lost pet report:", error);
 
       // More specific error handling
       if (error.response && error.response.data && error.response.data.error) {
@@ -747,7 +784,7 @@ const LostPets = () => {
       } else if (error.message) {
         alert(`Submission failed: ${error.message}`);
       } else {
-        alert('Error submitting report. Please check your internet connection and try again.');
+        alert("Error submitting report. Please check your internet connection and try again.");
       }
     } finally {
       setIsSubmitting(false);
@@ -758,21 +795,23 @@ const LostPets = () => {
   const handleSightingSubmit = async (e) => {
     e.preventDefault();
     if (!mongoUser || !clickedCoordinates) {
-      alert('Please select a location on the map and make sure you are logged in.');
+      alert("Please select a location on the map and make sure you are logged in.");
       return;
     }
 
     if (!selectedPet) {
       // This is a general sighting report - we'll need to create a new lost pet entry
       // For now, alert the user to select a specific pet
-      alert('Please first click on a lost pet pin on the map to report a sighting for that specific pet. If you found a new lost pet, please use "Report Lost Pet" instead.');
+      alert(
+        'Please first click on a lost pet pin on the map to report a sighting for that specific pet. If you found a new lost pet, please use "Report Lost Pet" instead.'
+      );
       return;
     }
 
     setIsSubmitting(true);
     try {
       // Get address from coordinates
-      let address = '';
+      let address = "";
       try {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${clickedCoordinates.lat}&lon=${clickedCoordinates.lng}&zoom=18&addressdetails=1`
@@ -782,7 +821,7 @@ const LostPets = () => {
           address = data.display_name;
         }
       } catch (geoError) {
-        console.warn('Reverse geocoding failed:', geoError);
+        console.warn("Reverse geocoding failed:", geoError);
       }
 
       const sightingData = {
@@ -790,23 +829,23 @@ const LostPets = () => {
         location: {
           lat: clickedCoordinates.lat,
           lng: clickedCoordinates.lng,
-          address: address
+          address: address,
         },
-        userId: mongoUser._id
+        userId: mongoUser._id,
       };
 
-      console.log('Submitting sighting report:', sightingData);
+      console.log("Submitting sighting report:", sightingData);
       console.log(JSON.stringify(sightingData.location));
       const updatedPet = await lostPetAPI.addSightingReport(selectedPet._id, sightingData);
-      console.log('Sighting report added:', updatedPet);
+      console.log("Sighting report added:", updatedPet);
 
       // Refresh the map data
       fetchLostPets();
       resetForms();
-      alert('Sighting report submitted successfully!');
+      alert("Sighting report submitted successfully!");
     } catch (error) {
-      console.error('Error submitting sighting report:', error);
-      alert('Error submitting sighting report. Please try again.');
+      console.error("Error submitting sighting report:", error);
+      alert("Error submitting sighting report. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -822,11 +861,11 @@ const LostPets = () => {
               className="report-button lost-button"
               onClick={() => {
                 if (!mongoUser) {
-                  alert('Please sign in to report a lost pet');
+                  alert("Please sign in to report a lost pet");
                   return;
                 }
                 setShowReportForm(true);
-                setReportType('lost');
+                setReportType("lost");
               }}
             >
               Report Lost Pet
@@ -835,11 +874,11 @@ const LostPets = () => {
               className="report-button seen-button"
               onClick={() => {
                 if (!mongoUser) {
-                  alert('Please sign in to report a sighting');
+                  alert("Please sign in to report a sighting");
                   return;
                 }
                 setShowReportForm(true);
-                setReportType('sighting');
+                setReportType("sighting");
               }}
             >
               Report Seen Pet
@@ -848,6 +887,18 @@ const LostPets = () => {
         </div>
 
         <div className="filter-section">
+          <div className="filter-toggle">
+            <button
+              type="button"
+              className="filter-toggle-button"
+              onClick={() => {
+                const container = document.querySelector(".filter-section");
+                if (container) container.classList.toggle("collapsed");
+              }}
+            >
+              Filters ▾
+            </button>
+          </div>
           {/* Status Filter */}
           <div className="filter-group">
             <label>Status:</label>
@@ -855,7 +906,7 @@ const LostPets = () => {
               {Object.entries(statusTypes).map(([key, { label, icon }]) => (
                 <button
                   key={key}
-                  className={`filter-button status-${key} ${statusFilter === key ? 'active' : ''}`}
+                  className={`filter-button status-${key} ${statusFilter === key ? "active" : ""}`}
                   onClick={() => handleStatusFilterChange(key)}
                 >
                   <span className="filter-icon">{icon}</span>
@@ -872,7 +923,7 @@ const LostPets = () => {
               {Object.entries(speciesTypes).map(([key, { label, icon }]) => (
                 <button
                   key={key}
-                  className={`filter-button ${speciesFilter === key ? 'active' : ''}`}
+                  className={`filter-button ${speciesFilter === key ? "active" : ""}`}
                   onClick={() => handleSpeciesFilterChange(key)}
                 >
                   <span className="filter-icon">{icon}</span>
@@ -889,7 +940,7 @@ const LostPets = () => {
               {Object.entries(dateFilterOptions).map(([key, { label }]) => (
                 <button
                   key={key}
-                  className={`filter-button ${dateFilter === key ? 'active' : ''}`}
+                  className={`filter-button ${dateFilter === key ? "active" : ""}`}
                   onClick={() => handleDateFilterChange(key)}
                 >
                   {label}
@@ -906,9 +957,8 @@ const LostPets = () => {
 
         <div className="map-instructions">
           <p>
-            📍 <strong>Red pins:</strong> Missing pets |
-            👀 <strong>Yellow pins:</strong> Recently seen |
-            ✅ <strong>Green pins:</strong> Found pets
+            📍 <strong>Red pins:</strong> Missing pets | 👀 <strong>Yellow pins:</strong> Recently seen | ✅{" "}
+            <strong>Green pins:</strong> Found pets
           </p>
           <p>Click on any pin for details, or click on the map to report a sighting</p>
         </div>
@@ -929,19 +979,21 @@ const LostPets = () => {
           {...viewState}
           onMove={handleMapMove}
           onClick={handleMapClick}
-          style={{ width: '100%', height: '100%' }}
+          style={{ width: "100%", height: "100%" }}
           mapStyle={process.env.REACT_APP_MAPBOX_STYLE}
           mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
+          dragPan={!selectedPet}
+          dragRotate={!selectedPet}
+          scrollZoom={!selectedPet}
+          touchZoomRotate={!selectedPet}
+          keyboard={!selectedPet}
+          doubleClickZoom={!selectedPet}
         >
           <NavigationControl position="top-right" />
-          <GeolocateControl
-            position="top-right"
-            trackUserLocation
-            showUserHeading
-          />
+          <GeolocateControl position="top-right" trackUserLocation showUserHeading />
 
           {/* Lost Pet Markers */}
-          {filteredLostPets.map(pet => (
+          {filteredLostPets.map((pet) => (
             <Marker
               key={pet._id}
               longitude={pet.lastSeenLocation.lng}
@@ -953,52 +1005,45 @@ const LostPets = () => {
               }}
             >
               <div
-                className={`lost-pet-marker status-${pet.status} ${focusPetId === pet._id ? 'focused-marker' : ''}`}
+                className={`lost-pet-marker status-${pet.status} ${focusPetId === pet._id ? "focused-marker" : ""}`}
                 style={{
-                  backgroundColor: statusTypes[pet.status]?.color || '#6b7280',
-                  fontSize: focusPetId === pet._id ? '28px' : '24px', // Make focused marker larger
-                  width: focusPetId === pet._id ? '56px' : '48px',
-                  height: focusPetId === pet._id ? '56px' : '48px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  border: focusPetId === pet._id ? '4px solid #3b82f6' : '3px solid white', // Blue border for focused
-                  boxShadow: focusPetId === pet._id
-                    ? '0 4px 12px rgba(59, 130, 246, 0.5)'
-                    : '0 2px 8px rgba(0,0,0,0.3)',
-                  animation: focusPetId === pet._id ? 'pulse 2s infinite' : 'none'
+                  backgroundColor: statusTypes[pet.status]?.color || "#6b7280",
+                  fontSize: focusPetId === pet._id ? "28px" : "24px", // Make focused marker larger
+                  width: focusPetId === pet._id ? "56px" : "48px",
+                  height: focusPetId === pet._id ? "56px" : "48px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  border: focusPetId === pet._id ? "4px solid #3b82f6" : "3px solid white", // Blue border for focused
+                  boxShadow:
+                    focusPetId === pet._id ? "0 4px 12px rgba(59, 130, 246, 0.5)" : "0 2px 8px rgba(0,0,0,0.3)",
+                  animation: focusPetId === pet._id ? "pulse 2s infinite" : "none",
                 }}
               >
-                <span className="marker-icon">
-                  {statusTypes[pet.status]?.icon || '🐾'}
-                </span>
+                <span className="marker-icon">{statusTypes[pet.status]?.icon || "🐾"}</span>
               </div>
             </Marker>
           ))}
 
           {/* Selected Location Marker (when form is open) */}
           {showReportForm && clickedCoordinates && (
-            <Marker
-              longitude={clickedCoordinates.lng}
-              latitude={clickedCoordinates.lat}
-              anchor="bottom"
-            >
+            <Marker longitude={clickedCoordinates.lng} latitude={clickedCoordinates.lat} anchor="bottom">
               <div
                 className="location-selection-marker"
                 style={{
-                  backgroundColor: '#3b82f6',
-                  fontSize: '20px',
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '3px solid white',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                  animation: 'pulse 2s infinite'
+                  backgroundColor: "#3b82f6",
+                  fontSize: "20px",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "3px solid white",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                  animation: "pulse 2s infinite",
                 }}
               >
                 <span className="marker-icon">📍</span>
@@ -1014,7 +1059,9 @@ const LostPets = () => {
               onClose={closePopup}
               closeButton={true}
               closeOnClick={false}
+              closeOnMove={false}
               anchor="top"
+              offset={[0, -260]}
               maxWidth="400px"
             >
               <div className="pet-popup">
@@ -1031,7 +1078,7 @@ const LostPets = () => {
                       <img
                         src={selectedPet.photos[photoIndex % selectedPet.photos.length]}
                         alt={`${selectedPet.petName} - Photo ${photoIndex + 1}`}
-                        style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px' }}
+                        style={{ width: "100%", maxHeight: "200px", objectFit: "cover", borderRadius: "8px" }}
                       />
 
                       {selectedPet.photos.length > 1 && (
@@ -1040,7 +1087,9 @@ const LostPets = () => {
                             className="photo-nav photo-prev"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setPhotoIndex((prev) => (prev - 1 + selectedPet.photos.length) % selectedPet.photos.length);
+                              setPhotoIndex(
+                                (prev) => (prev - 1 + selectedPet.photos.length) % selectedPet.photos.length
+                              );
                             }}
                           >
                             ‹
@@ -1059,7 +1108,9 @@ const LostPets = () => {
                             {selectedPet.photos.map((_, index) => (
                               <button
                                 key={index}
-                                className={`photo-indicator ${index === (photoIndex % selectedPet.photos.length) ? 'active' : ''}`}
+                                className={`photo-indicator ${
+                                  index === photoIndex % selectedPet.photos.length ? "active" : ""
+                                }`}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setPhotoIndex(index);
@@ -1078,50 +1129,75 @@ const LostPets = () => {
                 )}
 
                 <div className="pet-popup-details">
-                  <p><strong>Species:</strong> {selectedPet.species} {selectedPet.breed && `(${selectedPet.breed})`}</p>
-                  <p><strong>Color:</strong> {selectedPet.color}</p>
-                  <p><strong>Size:</strong> {selectedPet.size}</p>
+                  <p>
+                    <strong>Species:</strong> {selectedPet.species} {selectedPet.breed && `(${selectedPet.breed})`}
+                  </p>
+                  <p>
+                    <strong>Color:</strong> {selectedPet.color}
+                  </p>
+                  <p>
+                    <strong>Size:</strong> {selectedPet.size}
+                  </p>
                   {selectedPet.features && (
-                    <p><strong>Features:</strong> {selectedPet.features}</p>
+                    <p>
+                      <strong>Features:</strong> {selectedPet.features}
+                    </p>
                   )}
 
                   <div className="location-time-info">
-                    <p><strong>Last seen:</strong> {formatTimeAgo(selectedPet.lastSeenTime)}</p>
+                    <p>
+                      <strong>Last seen:</strong> {formatTimeAgo(selectedPet.lastSeenTime)}
+                    </p>
                     {selectedPet.lastSeenLocation.address && (
-                      <p><strong>Location:</strong> {selectedPet.lastSeenLocation.address}</p>
+                      <p>
+                        <strong>Location:</strong> {selectedPet.lastSeenLocation.address}
+                      </p>
                     )}
                   </div>
 
                   <div className="contact-info">
-                    <p><strong>Contact:</strong> {selectedPet.ownerContact.name}</p>
-                    <p><strong>Phone:</strong> {selectedPet.ownerContact.phone}</p>
-                    <p><strong>Email:</strong> {selectedPet.ownerContact.email}</p>
+                    <p>
+                      <strong>Contact:</strong> {selectedPet.ownerContact.name}
+                    </p>
+                    <p>
+                      <strong>Phone:</strong> {selectedPet.ownerContact.phone}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {selectedPet.ownerContact.email}
+                    </p>
                   </div>
 
                   {selectedPet.reward && (
                     <div className="reward-info">
-                      <p><strong>Reward:</strong> {selectedPet.reward}</p>
+                      <p>
+                        <strong>Reward:</strong> {selectedPet.reward}
+                      </p>
                     </div>
                   )}
 
                   {selectedPet.sightings && selectedPet.sightings.length > 0 && (
                     <div className="sightings-info">
-                      <p><strong>Recent sightings:</strong> {selectedPet.sightings.length}</p>
-                      <small>Last sighting: {formatTimeAgo(selectedPet.sightings[selectedPet.sightings.length - 1].reportedAt)}</small>
+                      <p>
+                        <strong>Recent sightings:</strong> {selectedPet.sightings.length}
+                      </p>
+                      <small>
+                        Last sighting:{" "}
+                        {formatTimeAgo(selectedPet.sightings[selectedPet.sightings.length - 1].reportedAt)}
+                      </small>
                     </div>
                   )}
                 </div>
 
                 <div className="pet-popup-actions">
-                  {mongoUser && selectedPet.status !== 'found' && (
+                  {mongoUser && selectedPet.status !== "found" && (
                     <button
                       className="sighting-button"
                       onClick={() => {
                         setClickedCoordinates({
                           lat: selectedPet.lastSeenLocation.lat,
-                          lng: selectedPet.lastSeenLocation.lng
+                          lng: selectedPet.lastSeenLocation.lng,
                         });
-                        setReportType('sighting');
+                        setReportType("sighting");
                         setShowReportForm(true);
                         // Keep selectedPet for sighting submission
                       }}
@@ -1130,7 +1206,7 @@ const LostPets = () => {
                     </button>
                   )}
 
-                  {mongoUser && mongoUser._id === selectedPet.reportedBy._id && selectedPet.status !== 'found' && (
+                  {mongoUser && mongoUser._id === selectedPet.reportedBy._id && selectedPet.status !== "found" && (
                     <button
                       className="found-button"
                       onClick={() => {
@@ -1150,15 +1226,13 @@ const LostPets = () => {
       {/* Report Form Modal */}
       {showReportForm && (
         <div className="modal-overlay" onClick={() => resetForms()}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>
-                {reportType === 'lost' ? 'Report Lost Pet' : 'Report Sighting'}
-              </h2>
+              <h2>{reportType === "lost" ? "Report Lost Pet" : "Report Sighting"}</h2>
               <button onClick={() => resetForms()}>✕</button>
             </div>
             <div className="modal-body">
-              {reportType === 'lost' ? (
+              {reportType === "lost" ? (
                 <form onSubmit={handleLostPetSubmit} className="report-form">
                   <div className="form-section">
                     <h3>Pet Information</h3>
@@ -1168,7 +1242,7 @@ const LostPets = () => {
                         <input
                           type="text"
                           value={lostPetForm.petName}
-                          onChange={(e) => handleLostPetFormChange('petName', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("petName", e.target.value)}
                           required
                         />
                       </div>
@@ -1176,7 +1250,7 @@ const LostPets = () => {
                         <label>Species *</label>
                         <select
                           value={lostPetForm.species}
-                          onChange={(e) => handleLostPetFormChange('species', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("species", e.target.value)}
                           required
                         >
                           <option value="dog">Dog</option>
@@ -1191,7 +1265,7 @@ const LostPets = () => {
                         <input
                           type="text"
                           value={lostPetForm.breed}
-                          onChange={(e) => handleLostPetFormChange('breed', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("breed", e.target.value)}
                           placeholder="e.g., Golden Retriever"
                         />
                       </div>
@@ -1200,7 +1274,7 @@ const LostPets = () => {
                         <input
                           type="text"
                           value={lostPetForm.color}
-                          onChange={(e) => handleLostPetFormChange('color', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("color", e.target.value)}
                           required
                           placeholder="e.g., Brown, Black with white spots"
                         />
@@ -1209,7 +1283,7 @@ const LostPets = () => {
                         <label>Size *</label>
                         <select
                           value={lostPetForm.size}
-                          onChange={(e) => handleLostPetFormChange('size', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("size", e.target.value)}
                           required
                         >
                           <option value="small">Small</option>
@@ -1222,7 +1296,7 @@ const LostPets = () => {
                       <label>Distinguishing Features</label>
                       <textarea
                         value={lostPetForm.features}
-                        onChange={(e) => handleLostPetFormChange('features', e.target.value)}
+                        onChange={(e) => handleLostPetFormChange("features", e.target.value)}
                         placeholder="Any unique markings, scars, or features..."
                         rows={3}
                       />
@@ -1240,7 +1314,7 @@ const LostPets = () => {
                           onChange={(e) => handleAddressChange(e.target.value)}
                           placeholder="Enter address where your pet got lost (e.g., 123 Main St, Chicago, IL)"
                           onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                               e.preventDefault();
                               handleAddressSubmit();
                             }
@@ -1252,10 +1326,12 @@ const LostPets = () => {
                           disabled={!addressInput.trim() || isGeocoding}
                           className="geocode-button"
                         >
-                          {isGeocoding ? '...' : 'Find'}
+                          {isGeocoding ? "..." : "Find"}
                         </button>
                       </div>
-                      <small className="address-help">Type an address and click "Find", or click directly on the map</small>
+                      <small className="address-help">
+                        Type an address and click "Find", or click directly on the map
+                      </small>
                     </div>
 
                     <div className="form-group">
@@ -1263,16 +1339,22 @@ const LostPets = () => {
                       <input
                         type="datetime-local"
                         value={lostPetForm.lastSeenTime}
-                        onChange={(e) => handleLostPetFormChange('lastSeenTime', e.target.value)}
+                        onChange={(e) => handleLostPetFormChange("lastSeenTime", e.target.value)}
                         required
                       />
                     </div>
 
                     {clickedCoordinates && (
                       <div className="location-info">
-                        <p><strong>Selected Location:</strong></p>
-                        <p>{clickedCoordinates.lat.toFixed(6)}, {clickedCoordinates.lng.toFixed(6)}</p>
-                        <small>You can click on a different location on the map or enter a new address to change this.</small>
+                        <p>
+                          <strong>Selected Location:</strong>
+                        </p>
+                        <p>
+                          {clickedCoordinates.lat.toFixed(6)}, {clickedCoordinates.lng.toFixed(6)}
+                        </p>
+                        <small>
+                          You can click on a different location on the map or enter a new address to change this.
+                        </small>
                       </div>
                     )}
                   </div>
@@ -1285,7 +1367,7 @@ const LostPets = () => {
                         <input
                           type="text"
                           value={lostPetForm.ownerContact.name}
-                          onChange={(e) => handleLostPetFormChange('ownerContact.name', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("ownerContact.name", e.target.value)}
                           required
                         />
                       </div>
@@ -1294,7 +1376,7 @@ const LostPets = () => {
                         <input
                           type="tel"
                           value={lostPetForm.ownerContact.phone}
-                          onChange={(e) => handleLostPetFormChange('ownerContact.phone', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("ownerContact.phone", e.target.value)}
                           required
                         />
                       </div>
@@ -1304,7 +1386,7 @@ const LostPets = () => {
                       <input
                         type="email"
                         value={lostPetForm.ownerContact.email}
-                        onChange={(e) => handleLostPetFormChange('ownerContact.email', e.target.value)}
+                        onChange={(e) => handleLostPetFormChange("ownerContact.email", e.target.value)}
                         required
                       />
                     </div>
@@ -1318,7 +1400,7 @@ const LostPets = () => {
                         <input
                           type="text"
                           value={lostPetForm.microchip}
-                          onChange={(e) => handleLostPetFormChange('microchip', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("microchip", e.target.value)}
                           placeholder="If your pet is microchipped"
                         />
                       </div>
@@ -1327,7 +1409,7 @@ const LostPets = () => {
                         <input
                           type="text"
                           value={lostPetForm.collar}
-                          onChange={(e) => handleLostPetFormChange('collar', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("collar", e.target.value)}
                           placeholder="Color, type, tags..."
                         />
                       </div>
@@ -1338,7 +1420,7 @@ const LostPets = () => {
                         <input
                           type="text"
                           value={lostPetForm.favoritePlaces}
-                          onChange={(e) => handleLostPetFormChange('favoritePlaces', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("favoritePlaces", e.target.value)}
                           placeholder="Parks, streets where your pet likes to go (separate with commas)"
                         />
                       </div>
@@ -1347,7 +1429,7 @@ const LostPets = () => {
                         <input
                           type="text"
                           value={lostPetForm.reward}
-                          onChange={(e) => handleLostPetFormChange('reward', e.target.value)}
+                          onChange={(e) => handleLostPetFormChange("reward", e.target.value)}
                           placeholder="e.g., $100"
                         />
                       </div>
@@ -1362,7 +1444,7 @@ const LostPets = () => {
                         type="file"
                         accept="image/jpeg,image/jpg,image/png,image/webp"
                         multiple
-                        onChange={(e) => handlePhotoSelect(e, 'lost')}
+                        onChange={(e) => handlePhotoSelect(e, "lost")}
                         disabled={isSubmitting}
                         className="photo-input"
                       />
@@ -1373,7 +1455,9 @@ const LostPets = () => {
 
                     {previewPhotos.length > 0 && (
                       <div className="photo-previews">
-                        <p><strong>Selected Photos:</strong></p>
+                        <p>
+                          <strong>Selected Photos:</strong>
+                        </p>
                         <div className="preview-grid">
                           {previewPhotos.map((preview, index) => (
                             <div key={index} className="preview-item">
@@ -1386,14 +1470,15 @@ const LostPets = () => {
                                   onClick={() => removePhoto(index)}
                                   disabled={isSubmitting}
                                   title="Remove photo"
-                                >✕</button>
+                                >
+                                  ✕
+                                </button>
                               </div>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
-
                   </div>
 
                   <div className="form-actions">
@@ -1401,7 +1486,7 @@ const LostPets = () => {
                       Cancel
                     </button>
                     <button type="submit" disabled={isSubmitting} className="submit-button">
-                      {isSubmitting ? 'Submitting...' : 'Submit Report'}
+                      {isSubmitting ? "Submitting..." : "Submit Report"}
                     </button>
                   </div>
                 </form>
@@ -1411,12 +1496,19 @@ const LostPets = () => {
                     <h3>Sighting Information</h3>
                     {selectedPet ? (
                       <div className="selected-pet-info">
-                        <p><strong>Reporting sighting for:</strong> {selectedPet.petName} ({selectedPet.species})</p>
+                        <p>
+                          <strong>Reporting sighting for:</strong> {selectedPet.petName} ({selectedPet.species})
+                        </p>
                       </div>
                     ) : (
                       <div className="no-pet-selected-info">
-                        <p><strong>💡 To report a sighting:</strong> First click on a lost pet pin on the map, then click "Report Sighting" from the popup.</p>
-                        <p>If you found a different lost pet not shown on the map, please use "Report Lost Pet" instead.</p>
+                        <p>
+                          <strong>💡 To report a sighting:</strong> First click on a lost pet pin on the map, then click
+                          "Report Sighting" from the popup.
+                        </p>
+                        <p>
+                          If you found a different lost pet not shown on the map, please use "Report Lost Pet" instead.
+                        </p>
                       </div>
                     )}
 
@@ -1429,7 +1521,7 @@ const LostPets = () => {
                           onChange={(e) => handleAddressChange(e.target.value)}
                           placeholder="Enter street address where you saw the pet"
                           onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                               e.preventDefault();
                               handleAddressSubmit();
                             }
@@ -1441,10 +1533,12 @@ const LostPets = () => {
                           disabled={!addressInput.trim() || isGeocoding}
                           className="geocode-button"
                         >
-                          {isGeocoding ? '...' : 'Find'}
+                          {isGeocoding ? "..." : "Find"}
                         </button>
                       </div>
-                      <small className="address-help">Type an address and click "Find", or click directly on the map</small>
+                      <small className="address-help">
+                        Type an address and click "Find", or click directly on the map
+                      </small>
                     </div>
 
                     <div className="form-group">
@@ -1452,7 +1546,7 @@ const LostPets = () => {
                       <input
                         type="datetime-local"
                         value={sightingForm.sightingTime}
-                        onChange={(e) => handleSightingFormChange('sightingTime', e.target.value)}
+                        onChange={(e) => handleSightingFormChange("sightingTime", e.target.value)}
                         required
                       />
                     </div>
@@ -1461,7 +1555,7 @@ const LostPets = () => {
                       <label>Description</label>
                       <textarea
                         value={sightingForm.description}
-                        onChange={(e) => handleSightingFormChange('description', e.target.value)}
+                        onChange={(e) => handleSightingFormChange("description", e.target.value)}
                         placeholder="Describe what you saw, pet's condition, behavior..."
                         rows={4}
                       />
@@ -1469,9 +1563,15 @@ const LostPets = () => {
 
                     {clickedCoordinates && (
                       <div className="location-info">
-                        <p><strong>Sighting Location:</strong></p>
-                        <p>{clickedCoordinates.lat.toFixed(6)}, {clickedCoordinates.lng.toFixed(6)}</p>
-                        <small>You can click on a different location on the map or enter a new address to change this.</small>
+                        <p>
+                          <strong>Sighting Location:</strong>
+                        </p>
+                        <p>
+                          {clickedCoordinates.lat.toFixed(6)}, {clickedCoordinates.lng.toFixed(6)}
+                        </p>
+                        <small>
+                          You can click on a different location on the map or enter a new address to change this.
+                        </small>
                       </div>
                     )}
                   </div>
@@ -1484,7 +1584,7 @@ const LostPets = () => {
                         type="file"
                         accept="image/jpeg,image/jpg,image/png,image/webp"
                         multiple
-                        onChange={(e) => handlePhotoSelect(e, 'sighting')}
+                        onChange={(e) => handlePhotoSelect(e, "sighting")}
                         disabled={isSubmitting}
                         className="photo-input"
                       />
@@ -1495,7 +1595,9 @@ const LostPets = () => {
 
                     {previewPhotos.length > 0 && (
                       <div className="photo-previews">
-                        <p><strong>Selected Photos:</strong></p>
+                        <p>
+                          <strong>Selected Photos:</strong>
+                        </p>
                         <div className="preview-grid">
                           {previewPhotos.map((preview, index) => (
                             <div key={index} className="preview-item">
@@ -1508,14 +1610,15 @@ const LostPets = () => {
                                   onClick={() => removePhoto(index)}
                                   disabled={isSubmitting}
                                   title="Remove photo"
-                                >✕</button>
+                                >
+                                  ✕
+                                </button>
                               </div>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
-
                   </div>
 
                   <div className="form-actions">
@@ -1523,7 +1626,7 @@ const LostPets = () => {
                       Cancel
                     </button>
                     <button type="submit" disabled={isSubmitting} className="submit-button">
-                      {isSubmitting ? 'Submitting...' : 'Submit Sighting'}
+                      {isSubmitting ? "Submitting..." : "Submit Sighting"}
                     </button>
                   </div>
                 </form>
@@ -1536,4 +1639,4 @@ const LostPets = () => {
   );
 };
 
-export default LostPets; 
+export default LostPets;

@@ -23,7 +23,7 @@ const PlaceDetails = () => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  
+
   // Track the actual current place ID (may differ from URL param after OSM->DB conversion)
   const [currentPlaceId, setCurrentPlaceId] = useState(id);
 
@@ -34,32 +34,35 @@ const PlaceDetails = () => {
   // Review likes state
   const [reviewLikes, setReviewLikes] = useState({});
 
-  // Barrage 
+  // Barrage
   const [barrageQueue, setBarrageQueue] = useState([]);
-  
+
   // Card notification popup state
   const [showCardNotification, setShowCardNotification] = useState(false);
-  const [cardType, setCardType] = useState('');
+  const [cardType, setCardType] = useState("");
 
   // Helper function to get barrage top position based on screen width
   const getBarrageTop = () => {
     let topRange, topOffset;
     const screenWidth = window.innerWidth;
-    if (screenWidth <= 768) {  // mid screen size, hero-placeholder height is 240px;
-      topRange = 180; topOffset = 15;
-    } else { // large screen size, hero-placeholder height is 300px;
-      topRange = 220; topOffset = 20;
+    if (screenWidth <= 768) {
+      // mid screen size, hero-placeholder height is 240px;
+      topRange = 180;
+      topOffset = 15;
+    } else {
+      // large screen size, hero-placeholder height is 300px;
+      topRange = 220;
+      topOffset = 20;
     }
     return Math.random() * topRange + topOffset;
   };
-
 
   useEffect(() => {
     if (!reviews || reviews.length === 0) return;
 
     const addReview = () => {
-      setBarrageQueue(prev => {
-        const available = reviews.filter(r => !prev.some(q => q._id === r._id));
+      setBarrageQueue((prev) => {
+        const available = reviews.filter((r) => !prev.some((q) => q._id === r._id));
         if (available.length === 0) return prev;
         const review = available[Math.floor(Math.random() * available.length)];
 
@@ -71,7 +74,7 @@ const PlaceDetails = () => {
           duration = 8;
           const containerHeight = 200;
           top = containerHeight - 50;
-          animationClass = 'barrage-mobile-vertical';
+          animationClass = "barrage-mobile-vertical";
         } else {
           duration = Math.random() * 6 + 8; // 8-14 seconds
           const minBuffer = 22; // Minimum buffer px between barrages, barrage font size is 18px;
@@ -80,25 +83,20 @@ const PlaceDetails = () => {
             // This need to be adjusted based on the height of the barrage container
             top = Math.round(getBarrageTop()); // Random number between 20 - 240 pixels. Container is set to fixed 300px height.
             attempts += 1;
-          } while (attempts < 10 && prev.some(existing => Math.abs(existing.top - top) < minBuffer));
-          animationClass = 'barrage-desktop-horizontal';
+          } while (attempts < 10 && prev.some((existing) => Math.abs(existing.top - top) < minBuffer));
+          animationClass = "barrage-desktop-horizontal";
         }
 
-        return [
-          ...prev,
-          { ...review, top, duration, animationClass, key: Date.now() + Math.random() }
-        ]
-      })
-    }
+        return [...prev, { ...review, top, duration, animationClass, key: Date.now() + Math.random() }];
+      });
+    };
 
     const interval = setInterval(() => {
       if (barrageQueue.length < 4) addReview(); // Current barrage limit is 4
     }, 2000);
 
     return () => clearInterval(interval);
-
   }, [reviews, barrageQueue]);
-
 
   // Image upload handlers
   const handleFileSelect = (e) => {
@@ -411,11 +409,10 @@ const PlaceDetails = () => {
   useEffect(() => {
     // Update current place ID when URL parameter changes
     setCurrentPlaceId(id);
-    
+
     const loadPlaceData = async () => {
       try {
         setLoading(true);
-        
 
         // Check if this is an OSM-based ID OR a numeric OSM node ID
         if (id.startsWith("osm-") || /^\d+$/.test(id)) {
@@ -449,21 +446,15 @@ const PlaceDetails = () => {
             // First, try to find if this place already exists in database by coordinates
             let existingPlace = null;
             try {
-              
-
               // Try to find place by coordinates (within ~100 meters)
               const places = await placeAPI.getAllPlaces();
               const tolerance = 0.001; // roughly 100 meters
-
-
 
               existingPlace = places.find((p) => {
                 if (!p.coordinates) return false;
                 const latDiff = Math.abs(p.coordinates.lat - osmLocation.latitude);
                 const lngDiff = Math.abs(p.coordinates.lng - osmLocation.longitude);
                 const matches = latDiff < tolerance && lngDiff < tolerance;
-
-
 
                 return matches;
               });
@@ -474,9 +465,7 @@ const PlaceDetails = () => {
                 navigate(`/place/${existingPlace._id}`, { replace: true });
                 return;
               }
-            } catch (coordError) {
-
-            }
+            } catch (coordError) {}
 
             // Create enhanced place object from OSM data
             const enhancedPlace = {
@@ -685,11 +674,11 @@ const PlaceDetails = () => {
       console.log("Place deleted successfully");
 
       // Navigate back to home with deletion info to update map state
-      navigate("/", { 
-        state: { 
+      navigate("/", {
+        state: {
           deletedPlaceId: place._id,
-          deletedPlaceName: place.name 
-        } 
+          deletedPlaceName: place.name,
+        },
       });
     } catch (error) {
       console.error("Error deleting place:", error);
@@ -795,7 +784,6 @@ const PlaceDetails = () => {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    
 
     // Check if user is logged in
     if (!mongoUser || !firebaseUser) {
@@ -805,7 +793,7 @@ const PlaceDetails = () => {
     }
 
     // First, upload images if any
-            const imageUrls = await uploadImages();
+    const imageUrls = await uploadImages();
 
     // Check if this is an OSM location that needs to be saved first
     if (id.startsWith("osm-") || /^\d+$/.test(id)) {
@@ -871,12 +859,11 @@ const PlaceDetails = () => {
           reviewData.animalShelterReview = reviewForm.animalShelterReview;
         }
 
-
         const createdReview = await reviewAPI.createReview(reviewData);
-        
+
         // Check if a card was triggered and show notification
         if (createdReview.cardTriggered) {
-          setCardType(createdReview.cardType || '');
+          setCardType(createdReview.cardType || "");
           setShowCardNotification(true);
         }
 
@@ -888,7 +875,7 @@ const PlaceDetails = () => {
         if (actualPlaceId !== id) {
           console.log("Updating URL to reflect database place ID:", actualPlaceId);
           // Use replace: true to update URL without adding to history or causing reload
-          window.history.replaceState(null, '', `/place/${actualPlaceId}`);
+          window.history.replaceState(null, "", `/place/${actualPlaceId}`);
           // Update current place ID for future operations
           setCurrentPlaceId(actualPlaceId);
         }
@@ -1002,7 +989,7 @@ const PlaceDetails = () => {
 
       // Check if a card was triggered and show notification
       if (createdReview.cardTriggered) {
-        setCardType(createdReview.cardType || '');
+        setCardType(createdReview.cardType || "");
         setShowCardNotification(true);
       }
 
@@ -1126,7 +1113,7 @@ const PlaceDetails = () => {
           const ho = dpReview.hoursOfOperation;
           if (ho.is24Hours !== undefined) tagCounts.hoursOfOperation.is24Hours[ho.is24Hours]++;
           if (ho.specificHours) {
-            tagCounts.hoursOfOperation.specificHours[ho.specificHours] = 
+            tagCounts.hoursOfOperation.specificHours[ho.specificHours] =
               (tagCounts.hoursOfOperation.specificHours[ho.specificHours] || 0) + 1;
           }
         }
@@ -1153,7 +1140,8 @@ const PlaceDetails = () => {
           const af = dpReview.amenitiesAndFacilities;
           if (af.seatingLevel) tagCounts.amenitiesAndFacilities.seatingLevel[af.seatingLevel]++;
           if (af.shadeAndCover) tagCounts.amenitiesAndFacilities.shadeAndCover[af.shadeAndCover]++;
-          if (af.biodegradableBags !== undefined) tagCounts.amenitiesAndFacilities.biodegradableBags[af.biodegradableBags]++;
+          if (af.biodegradableBags !== undefined)
+            tagCounts.amenitiesAndFacilities.biodegradableBags[af.biodegradableBags]++;
           if (af.waterAccess) tagCounts.amenitiesAndFacilities.waterAccess[af.waterAccess]++;
         }
 
@@ -1175,7 +1163,8 @@ const PlaceDetails = () => {
         if (dpReview.rulesPoliciesAndCommunity) {
           const rpc = dpReview.rulesPoliciesAndCommunity;
           if (rpc.leashPolicy) tagCounts.rulesPoliciesAndCommunity.leashPolicy[rpc.leashPolicy]++;
-          if (rpc.communityEnforcement) tagCounts.rulesPoliciesAndCommunity.communityEnforcement[rpc.communityEnforcement]++;
+          if (rpc.communityEnforcement)
+            tagCounts.rulesPoliciesAndCommunity.communityEnforcement[rpc.communityEnforcement]++;
         }
       }
     });
@@ -1191,10 +1180,10 @@ const PlaceDetails = () => {
 
     // Try both the value directly and string version for booleans
     let count = tagCounts[category][field][value] || 0;
-    if (typeof value === 'boolean') {
+    if (typeof value === "boolean") {
       count = count || tagCounts[category][field][String(value)] || 0;
     }
-    
+
     const totalReviews = reviews.length;
     const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
 
@@ -1212,7 +1201,12 @@ const PlaceDetails = () => {
       accessAndLocation: [
         { category: "accessAndLocation", field: "parkingDifficulty", value: "easy", label: "🚗 Easy Parking" },
         { category: "accessAndLocation", field: "parkingDifficulty", value: "moderate", label: "🚗 Moderate Parking" },
-        { category: "accessAndLocation", field: "parkingDifficulty", value: "difficult", label: "🚗 Difficult Parking" },
+        {
+          category: "accessAndLocation",
+          field: "parkingDifficulty",
+          value: "difficult",
+          label: "🚗 Difficult Parking",
+        },
       ],
       // 2. Hours of Operation - ALIGNED WITH BACKEND
       hoursOfOperation: [
@@ -1222,7 +1216,12 @@ const PlaceDetails = () => {
       // 3. Safety Level - ALIGNED WITH BACKEND
       safetyLevel: [
         { category: "safetyLevel", field: "fencingCondition", value: "fully_enclosed", label: "🚧 Fully Enclosed" },
-        { category: "safetyLevel", field: "fencingCondition", value: "partially_enclosed", label: "🚧 Partially Enclosed" },
+        {
+          category: "safetyLevel",
+          field: "fencingCondition",
+          value: "partially_enclosed",
+          label: "🚧 Partially Enclosed",
+        },
         { category: "safetyLevel", field: "fencingCondition", value: "not_enclosed", label: "🚧 Not Enclosed" },
         { category: "safetyLevel", field: "nightIllumination", value: true, label: "💡 Night Lighting" },
         { category: "safetyLevel", field: "firstAidStation", value: true, label: "🏥 First Aid Station" },
@@ -1247,42 +1246,117 @@ const PlaceDetails = () => {
         { category: "amenitiesAndFacilities", field: "seatingLevel", value: "gazebo", label: "🏗️ Gazebo Seating" },
         { category: "amenitiesAndFacilities", field: "seatingLevel", value: "no_seat", label: "🚫 No Seating" },
         { category: "amenitiesAndFacilities", field: "shadeAndCover", value: "trees", label: "🌳 Tree Shade" },
-        { category: "amenitiesAndFacilities", field: "shadeAndCover", value: "shade_structures", label: "⛱️ Shade Structures" },
+        {
+          category: "amenitiesAndFacilities",
+          field: "shadeAndCover",
+          value: "shade_structures",
+          label: "⛱️ Shade Structures",
+        },
         { category: "amenitiesAndFacilities", field: "shadeAndCover", value: "none", label: "☀️ No Shade" },
         { category: "amenitiesAndFacilities", field: "biodegradableBags", value: true, label: "🗑️ Biodegradable Bags" },
-        { category: "amenitiesAndFacilities", field: "waterAccess", value: "drinking_fountain", label: "⛲ Drinking Fountain" },
+        {
+          category: "amenitiesAndFacilities",
+          field: "waterAccess",
+          value: "drinking_fountain",
+          label: "⛲ Drinking Fountain",
+        },
         { category: "amenitiesAndFacilities", field: "waterAccess", value: "fire_hydrant", label: "🚒 Fire Hydrant" },
         { category: "amenitiesAndFacilities", field: "waterAccess", value: "pool", label: "🏊 Dog Pool" },
         { category: "amenitiesAndFacilities", field: "waterAccess", value: "none", label: "🚫 No Water Access" },
       ],
       // 6. Maintenance & Cleanliness - ALIGNED WITH BACKEND
       maintenanceAndCleanliness: [
-        { category: "maintenanceAndCleanliness", field: "overallCleanliness", value: "good", label: "🧽 Good Cleanliness" },
-        { category: "maintenanceAndCleanliness", field: "overallCleanliness", value: "neutral", label: "🧽 Fair Cleanliness" },
-        { category: "maintenanceAndCleanliness", field: "overallCleanliness", value: "bad", label: "🧽 Poor Cleanliness" },
-        { category: "maintenanceAndCleanliness", field: "equipmentCondition", value: "good", label: "🔧 Good Equipment" },
-        { category: "maintenanceAndCleanliness", field: "equipmentCondition", value: "fair", label: "🔧 Fair Equipment" },
-        { category: "maintenanceAndCleanliness", field: "equipmentCondition", value: "poor", label: "🔧 Poor Equipment" },
+        {
+          category: "maintenanceAndCleanliness",
+          field: "overallCleanliness",
+          value: "good",
+          label: "🧽 Good Cleanliness",
+        },
+        {
+          category: "maintenanceAndCleanliness",
+          field: "overallCleanliness",
+          value: "neutral",
+          label: "🧽 Fair Cleanliness",
+        },
+        {
+          category: "maintenanceAndCleanliness",
+          field: "overallCleanliness",
+          value: "bad",
+          label: "🧽 Poor Cleanliness",
+        },
+        {
+          category: "maintenanceAndCleanliness",
+          field: "equipmentCondition",
+          value: "good",
+          label: "🔧 Good Equipment",
+        },
+        {
+          category: "maintenanceAndCleanliness",
+          field: "equipmentCondition",
+          value: "fair",
+          label: "🔧 Fair Equipment",
+        },
+        {
+          category: "maintenanceAndCleanliness",
+          field: "equipmentCondition",
+          value: "poor",
+          label: "🔧 Poor Equipment",
+        },
       ],
       // 7. Crowd & Social Dynamics - ALIGNED WITH BACKEND
       crowdAndSocialDynamics: [
         { category: "crowdAndSocialDynamics", field: "overallCrowd", value: "crowded", label: "👥 Crowded" },
         { category: "crowdAndSocialDynamics", field: "overallCrowd", value: "moderate", label: "👥 Moderate Crowd" },
         { category: "crowdAndSocialDynamics", field: "overallCrowd", value: "quiet", label: "👥 Quiet" },
-        { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "very_friendly", label: "😊 Very Friendly" },
+        {
+          category: "crowdAndSocialDynamics",
+          field: "ownerFriendliness",
+          value: "very_friendly",
+          label: "😊 Very Friendly",
+        },
         { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "friendly", label: "🙂 Friendly" },
         { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "neutral", label: "😐 Neutral" },
         { category: "crowdAndSocialDynamics", field: "ownerFriendliness", value: "unfriendly", label: "😤 Unfriendly" },
       ],
       // 8. Rules, Policies & Community - ALIGNED WITH BACKEND
       rulesPoliciesAndCommunity: [
-        { category: "rulesPoliciesAndCommunity", field: "leashPolicy", value: "off_leash_allowed", label: "🦮 Off-Leash Allowed" },
-        { category: "rulesPoliciesAndCommunity", field: "leashPolicy", value: "leash_required", label: "🦮 Leash Required" },
+        {
+          category: "rulesPoliciesAndCommunity",
+          field: "leashPolicy",
+          value: "off_leash_allowed",
+          label: "🦮 Off-Leash Allowed",
+        },
+        {
+          category: "rulesPoliciesAndCommunity",
+          field: "leashPolicy",
+          value: "leash_required",
+          label: "🦮 Leash Required",
+        },
         { category: "rulesPoliciesAndCommunity", field: "leashPolicy", value: "mixed_areas", label: "🦮 Mixed Areas" },
-        { category: "rulesPoliciesAndCommunity", field: "communityEnforcement", value: "strict", label: "⚖️ Strict Enforcement" },
-        { category: "rulesPoliciesAndCommunity", field: "communityEnforcement", value: "moderate", label: "⚖️ Moderate Enforcement" },
-        { category: "rulesPoliciesAndCommunity", field: "communityEnforcement", value: "lenient", label: "⚖️ Lenient Enforcement" },
-        { category: "rulesPoliciesAndCommunity", field: "communityEnforcement", value: "none", label: "⚖️ No Enforcement" },
+        {
+          category: "rulesPoliciesAndCommunity",
+          field: "communityEnforcement",
+          value: "strict",
+          label: "⚖️ Strict Enforcement",
+        },
+        {
+          category: "rulesPoliciesAndCommunity",
+          field: "communityEnforcement",
+          value: "moderate",
+          label: "⚖️ Moderate Enforcement",
+        },
+        {
+          category: "rulesPoliciesAndCommunity",
+          field: "communityEnforcement",
+          value: "lenient",
+          label: "⚖️ Lenient Enforcement",
+        },
+        {
+          category: "rulesPoliciesAndCommunity",
+          field: "communityEnforcement",
+          value: "none",
+          label: "⚖️ No Enforcement",
+        },
       ],
     };
 
@@ -1322,14 +1396,14 @@ const PlaceDetails = () => {
 
   // Analyze vet clinic review tags - BACKEND ALIGNED
   const analyzeVetReviewTags = () => {
-    const vetReviews = reviews.filter(r => r.vetClinicReview).map(r => r.vetClinicReview);
+    const vetReviews = reviews.filter((r) => r.vetClinicReview).map((r) => r.vetClinicReview);
     const tagCounts = {
       accessAndLocation: {
         parkingDifficulty: { easy: 0, moderate: 0, difficult: 0, Easy: 0, Moderate: 0, Difficult: 0 },
-        publicTransportAccess: { true: 0, false: 0, "true": 0, "false": 0 },
+        publicTransportAccess: { true: 0, false: 0, true: 0, false: 0 },
       },
       hoursOfOperation: {
-        is24Hours: { true: 0, false: 0, "true": 0, "false": 0 },
+        is24Hours: { true: 0, false: 0, true: 0, false: 0 },
       },
       clinicEnvironmentAndFacilities: {
         cleanliness: { excellent: 0, good: 0, fair: 0, poor: 0 },
@@ -1337,8 +1411,8 @@ const PlaceDetails = () => {
       },
       costAndTransparency: {
         cost: { low: 0, moderate: 0, high: 0, very_high: 0 },
-        feesExplainedUpfront: { true: 0, false: 0, "true": 0, "false": 0 },
-        insuranceAccepted: { true: 0, false: 0, "true": 0, "false": 0 },
+        feesExplainedUpfront: { true: 0, false: 0, true: 0, false: 0 },
+        insuranceAccepted: { true: 0, false: 0, true: 0, false: 0 },
       },
       servicesAndSpecializations: {
         onSiteDiagnostics: { xray: 0, ultrasound: 0, bloodwork: 0, ecg: 0, none: 0 },
@@ -1346,9 +1420,9 @@ const PlaceDetails = () => {
         specializations: { cardiology: 0, dermatology: 0, oncology: 0, behavior: 0, exotic_animals: 0, none: 0 },
       },
       emergencyAndAfterHours: {
-        openWeekends: { true: 0, false: 0, "true": 0, "false": 0 },
-        openEvenings: { true: 0, false: 0, "true": 0, "false": 0 },
-        onCallEmergencyNumber: { true: 0, false: 0, "true": 0, "false": 0 },
+        openWeekends: { true: 0, false: 0, true: 0, false: 0 },
+        openEvenings: { true: 0, false: 0, true: 0, false: 0 },
+        onCallEmergencyNumber: { true: 0, false: 0, true: 0, false: 0 },
         emergencyTriageSpeed: { immediate: 0, within_30_min: 0, within_1_hour: 0, over_1_hour: 0 },
       },
       staffAndServiceQuality: {
@@ -1366,14 +1440,17 @@ const PlaceDetails = () => {
         // NEW SCHEMA: Access & Location
         if (vcReview.accessAndLocation) {
           const al = vcReview.accessAndLocation;
-          if (al.parkingDifficulty && tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty] !== undefined) {
+          if (
+            al.parkingDifficulty &&
+            tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty] !== undefined
+          ) {
             tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty]++;
           }
           if (al.publicTransportAccess !== undefined) {
             tagCounts.accessAndLocation.publicTransportAccess[al.publicTransportAccess]++;
           }
         }
-        
+
         // OLD SCHEMA: Try to map from old fields
         if (vcReview.environmentAndFacilities) {
           // Map wheelchair accessible to public transport access
@@ -1383,10 +1460,10 @@ const PlaceDetails = () => {
           // Map parking availability to parking difficulty
           if (vcReview.environmentAndFacilities.parkingAvailability) {
             const parkingMap = {
-              'excellent': 'easy',
-              'good': 'easy',
-              'limited': 'moderate',
-              'poor': 'difficult'
+              excellent: "easy",
+              good: "easy",
+              limited: "moderate",
+              poor: "difficult",
             };
             const mapped = parkingMap[vcReview.environmentAndFacilities.parkingAvailability];
             if (mapped && tagCounts.accessAndLocation.parkingDifficulty[mapped] !== undefined) {
@@ -1402,7 +1479,7 @@ const PlaceDetails = () => {
             tagCounts.hoursOfOperation.is24Hours[ho.is24Hours]++;
           }
         }
-        
+
         // OLD SCHEMA: Map from schedulingAndCommunication
         if (vcReview.schedulingAndCommunication) {
           // Map 24/7 availability to is24Hours
@@ -1414,47 +1491,47 @@ const PlaceDetails = () => {
         // NEW SCHEMA: Services & Specializations
         if (vcReview.servicesAndSpecializations) {
           const ss = vcReview.servicesAndSpecializations;
-          
+
           // Handle onSiteDiagnostics as an array (matching backend)
           if (ss.onSiteDiagnostics && Array.isArray(ss.onSiteDiagnostics)) {
-            ss.onSiteDiagnostics.forEach(diag => {
+            ss.onSiteDiagnostics.forEach((diag) => {
               if (tagCounts.servicesAndSpecializations.onSiteDiagnostics[diag] !== undefined) {
                 tagCounts.servicesAndSpecializations.onSiteDiagnostics[diag]++;
               }
             });
           }
-          
+
           // Handle surgery capabilities and specializations as arrays
           if (ss.surgeryCapabilities && Array.isArray(ss.surgeryCapabilities)) {
-            ss.surgeryCapabilities.forEach(surgery => {
+            ss.surgeryCapabilities.forEach((surgery) => {
               if (tagCounts.servicesAndSpecializations.surgeryCapabilities[surgery] !== undefined) {
                 tagCounts.servicesAndSpecializations.surgeryCapabilities[surgery]++;
               }
             });
           }
           if (ss.specializations && Array.isArray(ss.specializations)) {
-            ss.specializations.forEach(spec => {
+            ss.specializations.forEach((spec) => {
               if (tagCounts.servicesAndSpecializations.specializations[spec] !== undefined) {
                 tagCounts.servicesAndSpecializations.specializations[spec]++;
               }
             });
           }
         }
-        
+
         // OLD SCHEMA: Map from medicalStaffAndServices
         if (vcReview.medicalStaffAndServices) {
           const mss = vcReview.medicalStaffAndServices;
           // Map diagnostic equipment to onSiteDiagnostics
           if (mss.diagnosticEquipment) {
             const diagnosticMap = {
-              'xray_available': ['xray'],
-              'ultrasound_available': ['ultrasound'],
-              'full_lab': ['bloodwork', 'xray', 'ultrasound'],
-              'basic_lab': ['bloodwork'],
-              'limited_equipment': []
+              xray_available: ["xray"],
+              ultrasound_available: ["ultrasound"],
+              full_lab: ["bloodwork", "xray", "ultrasound"],
+              basic_lab: ["bloodwork"],
+              limited_equipment: [],
             };
             const diags = diagnosticMap[mss.diagnosticEquipment] || [];
-            diags.forEach(diag => {
+            diags.forEach((diag) => {
               if (tagCounts.servicesAndSpecializations.onSiteDiagnostics[diag] !== undefined) {
                 tagCounts.servicesAndSpecializations.onSiteDiagnostics[diag]++;
               }
@@ -1465,14 +1542,20 @@ const PlaceDetails = () => {
         // NEW SCHEMA: Staff & Service Quality
         if (vcReview.staffAndServiceQuality) {
           const ssq = vcReview.staffAndServiceQuality;
-          if (ssq.staffFriendliness && tagCounts.staffAndServiceQuality.staffFriendliness[ssq.staffFriendliness] !== undefined) {
+          if (
+            ssq.staffFriendliness &&
+            tagCounts.staffAndServiceQuality.staffFriendliness[ssq.staffFriendliness] !== undefined
+          ) {
             tagCounts.staffAndServiceQuality.staffFriendliness[ssq.staffFriendliness]++;
           }
-          if (ssq.veterinarianExperience && tagCounts.staffAndServiceQuality.veterinarianExperience[ssq.veterinarianExperience] !== undefined) {
+          if (
+            ssq.veterinarianExperience &&
+            tagCounts.staffAndServiceQuality.veterinarianExperience[ssq.veterinarianExperience] !== undefined
+          ) {
             tagCounts.staffAndServiceQuality.veterinarianExperience[ssq.veterinarianExperience]++;
           }
         }
-        
+
         // OLD SCHEMA: Map from medicalStaffAndServices
         if (vcReview.medicalStaffAndServices) {
           const mss = vcReview.medicalStaffAndServices;
@@ -1485,10 +1568,10 @@ const PlaceDetails = () => {
           // Map veterinarian competence to experience
           if (mss.veterinarianCompetence) {
             const expMap = {
-              'excellent': 'expert',
-              'good': 'experienced',
-              'fair': 'experienced',
-              'poor': 'novice'
+              excellent: "expert",
+              good: "experienced",
+              fair: "experienced",
+              poor: "novice",
             };
             const mapped = expMap[mss.veterinarianCompetence];
             if (mapped && tagCounts.staffAndServiceQuality.veterinarianExperience[mapped] !== undefined) {
@@ -1503,11 +1586,14 @@ const PlaceDetails = () => {
           if (cef.cleanliness && tagCounts.clinicEnvironmentAndFacilities.cleanliness[cef.cleanliness] !== undefined) {
             tagCounts.clinicEnvironmentAndFacilities.cleanliness[cef.cleanliness]++;
           }
-          if (cef.facilitySize && tagCounts.clinicEnvironmentAndFacilities.facilitySize[cef.facilitySize] !== undefined) {
+          if (
+            cef.facilitySize &&
+            tagCounts.clinicEnvironmentAndFacilities.facilitySize[cef.facilitySize] !== undefined
+          ) {
             tagCounts.clinicEnvironmentAndFacilities.facilitySize[cef.facilitySize]++;
           }
         }
-        
+
         // OLD SCHEMA: Map from environmentAndFacilities
         if (vcReview.environmentAndFacilities) {
           const ef = vcReview.environmentAndFacilities;
@@ -1517,10 +1603,10 @@ const PlaceDetails = () => {
           // Map comfort level to facility size
           if (ef.comfortLevel) {
             const sizeMap = {
-              'excellent': 'large',
-              'good': 'medium',
-              'fair': 'medium',
-              'poor': 'small'
+              excellent: "large",
+              good: "medium",
+              fair: "medium",
+              poor: "small",
             };
             const mapped = sizeMap[ef.comfortLevel];
             if (mapped && tagCounts.clinicEnvironmentAndFacilities.facilitySize[mapped] !== undefined) {
@@ -1539,8 +1625,6 @@ const PlaceDetails = () => {
             tagCounts.costAndTransparency.insuranceAccepted[ct.insuranceAccepted]++;
         }
 
-
-
         // Emergency & After-Hours - UPDATED FOR NEW BACKEND STRUCTURE
         if (vcReview.emergencyAndAfterHours) {
           const eah = vcReview.emergencyAndAfterHours;
@@ -1551,8 +1635,6 @@ const PlaceDetails = () => {
           if (eah.emergencyTriageSpeed)
             tagCounts.emergencyAndAfterHours.emergencyTriageSpeed[eah.emergencyTriageSpeed]++;
         }
-
-
       }
     });
 
@@ -1565,35 +1647,113 @@ const PlaceDetails = () => {
       accessAndLocation: [
         { category: "accessAndLocation", field: "parkingDifficulty", value: "easy", label: "🚗 Easy Parking" },
         { category: "accessAndLocation", field: "parkingDifficulty", value: "moderate", label: "🚗 Moderate Parking" },
-        { category: "accessAndLocation", field: "parkingDifficulty", value: "difficult", label: "🚗 Difficult Parking" },
-        { category: "accessAndLocation", field: "publicTransportAccess", value: true, label: "🚌 Public Transport Access" },
+        {
+          category: "accessAndLocation",
+          field: "parkingDifficulty",
+          value: "difficult",
+          label: "🚗 Difficult Parking",
+        },
+        {
+          category: "accessAndLocation",
+          field: "publicTransportAccess",
+          value: true,
+          label: "🚌 Public Transport Access",
+        },
       ],
-      hoursOfOperation: [
-        { category: "hoursOfOperation", field: "is24Hours", value: true, label: "🕐 24 Hours Open" },
-      ],
+      hoursOfOperation: [{ category: "hoursOfOperation", field: "is24Hours", value: true, label: "🕐 24 Hours Open" }],
       servicesAndSpecializations: [
-        { category: "servicesAndSpecializations", field: "onSiteDiagnostics", value: "xray", label: "🩻 X-ray Available" },
-        { category: "servicesAndSpecializations", field: "onSiteDiagnostics", value: "ultrasound", label: "📡 Ultrasound Available" },
-        { category: "servicesAndSpecializations", field: "onSiteDiagnostics", value: "bloodwork", label: "🩸 Bloodwork Available" },
+        {
+          category: "servicesAndSpecializations",
+          field: "onSiteDiagnostics",
+          value: "xray",
+          label: "🩻 X-ray Available",
+        },
+        {
+          category: "servicesAndSpecializations",
+          field: "onSiteDiagnostics",
+          value: "ultrasound",
+          label: "📡 Ultrasound Available",
+        },
+        {
+          category: "servicesAndSpecializations",
+          field: "onSiteDiagnostics",
+          value: "bloodwork",
+          label: "🩸 Bloodwork Available",
+        },
         { category: "servicesAndSpecializations", field: "onSiteDiagnostics", value: "ecg", label: "❤️ ECG Available" },
-        { category: "servicesAndSpecializations", field: "surgeryCapabilities", value: "routine_spay_neuter", label: "✂️ Routine Surgery" },
-        { category: "servicesAndSpecializations", field: "surgeryCapabilities", value: "orthopedic", label: "🦴 Orthopedic Surgery" },
-        { category: "servicesAndSpecializations", field: "surgeryCapabilities", value: "emergency", label: "🚨 Emergency Surgery" },
-        { category: "servicesAndSpecializations", field: "surgeryCapabilities", value: "dental", label: "🦷 Dental Surgery" },
-        { category: "servicesAndSpecializations", field: "specializations", value: "cardiology", label: "❤️ Cardiology" },
-        { category: "servicesAndSpecializations", field: "specializations", value: "dermatology", label: "🧴 Dermatology" },
+        {
+          category: "servicesAndSpecializations",
+          field: "surgeryCapabilities",
+          value: "routine_spay_neuter",
+          label: "✂️ Routine Surgery",
+        },
+        {
+          category: "servicesAndSpecializations",
+          field: "surgeryCapabilities",
+          value: "orthopedic",
+          label: "🦴 Orthopedic Surgery",
+        },
+        {
+          category: "servicesAndSpecializations",
+          field: "surgeryCapabilities",
+          value: "emergency",
+          label: "🚨 Emergency Surgery",
+        },
+        {
+          category: "servicesAndSpecializations",
+          field: "surgeryCapabilities",
+          value: "dental",
+          label: "🦷 Dental Surgery",
+        },
+        {
+          category: "servicesAndSpecializations",
+          field: "specializations",
+          value: "cardiology",
+          label: "❤️ Cardiology",
+        },
+        {
+          category: "servicesAndSpecializations",
+          field: "specializations",
+          value: "dermatology",
+          label: "🧴 Dermatology",
+        },
         { category: "servicesAndSpecializations", field: "specializations", value: "oncology", label: "🎗️ Oncology" },
         { category: "servicesAndSpecializations", field: "specializations", value: "behavior", label: "🧠 Behavior" },
-        { category: "servicesAndSpecializations", field: "specializations", value: "exotic_animals", label: "🦎 Exotic Animals" },
+        {
+          category: "servicesAndSpecializations",
+          field: "specializations",
+          value: "exotic_animals",
+          label: "🦎 Exotic Animals",
+        },
       ],
       staffAndServiceQuality: [
-        { category: "staffAndServiceQuality", field: "staffFriendliness", value: "excellent", label: "😊 Excellent Staff" },
+        {
+          category: "staffAndServiceQuality",
+          field: "staffFriendliness",
+          value: "excellent",
+          label: "😊 Excellent Staff",
+        },
         { category: "staffAndServiceQuality", field: "staffFriendliness", value: "good", label: "👍 Good Staff" },
         { category: "staffAndServiceQuality", field: "staffFriendliness", value: "fair", label: "😐 Fair Staff" },
         { category: "staffAndServiceQuality", field: "staffFriendliness", value: "poor", label: "😤 Poor Staff" },
-        { category: "staffAndServiceQuality", field: "veterinarianExperience", value: "expert", label: "🏆 Expert Vet" },
-        { category: "staffAndServiceQuality", field: "veterinarianExperience", value: "experienced", label: "👨‍⚕️ Experienced Vet" },
-        { category: "staffAndServiceQuality", field: "veterinarianExperience", value: "novice", label: "🆕 Novice Vet" },
+        {
+          category: "staffAndServiceQuality",
+          field: "veterinarianExperience",
+          value: "expert",
+          label: "🏆 Expert Vet",
+        },
+        {
+          category: "staffAndServiceQuality",
+          field: "veterinarianExperience",
+          value: "experienced",
+          label: "👨‍⚕️ Experienced Vet",
+        },
+        {
+          category: "staffAndServiceQuality",
+          field: "veterinarianExperience",
+          value: "novice",
+          label: "🆕 Novice Vet",
+        },
       ],
       clinicEnvironmentAndFacilities: [
         {
@@ -1650,10 +1810,30 @@ const PlaceDetails = () => {
       emergencyAndAfterHours: [
         { category: "emergencyAndAfterHours", field: "openWeekends", value: true, label: "📅 Weekend Hours" },
         { category: "emergencyAndAfterHours", field: "openEvenings", value: true, label: "🌙 Evening Hours" },
-        { category: "emergencyAndAfterHours", field: "onCallEmergencyNumber", value: true, label: "📱 Emergency On-Call" },
-        { category: "emergencyAndAfterHours", field: "emergencyTriageSpeed", value: "immediate", label: "⚡ Immediate Triage" },
-        { category: "emergencyAndAfterHours", field: "emergencyTriageSpeed", value: "within_30_min", label: "🚨 Fast Emergency Care" },
-        { category: "emergencyAndAfterHours", field: "emergencyTriageSpeed", value: "within_1_hour", label: "⏰ Quick Response" },
+        {
+          category: "emergencyAndAfterHours",
+          field: "onCallEmergencyNumber",
+          value: true,
+          label: "📱 Emergency On-Call",
+        },
+        {
+          category: "emergencyAndAfterHours",
+          field: "emergencyTriageSpeed",
+          value: "immediate",
+          label: "⚡ Immediate Triage",
+        },
+        {
+          category: "emergencyAndAfterHours",
+          field: "emergencyTriageSpeed",
+          value: "within_30_min",
+          label: "🚨 Fast Emergency Care",
+        },
+        {
+          category: "emergencyAndAfterHours",
+          field: "emergencyTriageSpeed",
+          value: "within_1_hour",
+          label: "⏰ Quick Response",
+        },
       ],
     };
 
@@ -1759,7 +1939,8 @@ const PlaceDetails = () => {
         if (psReview.servicesAndConveniences) {
           const sc = psReview.servicesAndConveniences;
           if (sc.grooming !== undefined) tagCounts.servicesAndConveniences.grooming[sc.grooming]++;
-          if (sc.veterinaryServices !== undefined) tagCounts.servicesAndConveniences.veterinaryServices[sc.veterinaryServices]++;
+          if (sc.veterinaryServices !== undefined)
+            tagCounts.servicesAndConveniences.veterinaryServices[sc.veterinaryServices]++;
           if (sc.petTraining !== undefined) tagCounts.servicesAndConveniences.petTraining[sc.petTraining]++;
           if (sc.onlineOrdering !== undefined) tagCounts.servicesAndConveniences.onlineOrdering[sc.onlineOrdering]++;
           if (sc.curbsidePickup !== undefined) tagCounts.servicesAndConveniences.curbsidePickup[sc.curbsidePickup]++;
@@ -1785,7 +1966,8 @@ const PlaceDetails = () => {
         if (psReview.staffKnowledgeAndService) {
           const sks = psReview.staffKnowledgeAndService;
           if (sks.petKnowledge) tagCounts.staffKnowledgeAndService.petKnowledge[sks.petKnowledge]++;
-          if (sks.trainingCertified !== undefined) tagCounts.staffKnowledgeAndService.trainingCertified[sks.trainingCertified]++;
+          if (sks.trainingCertified !== undefined)
+            tagCounts.staffKnowledgeAndService.trainingCertified[sks.trainingCertified]++;
         }
       }
     });
@@ -1800,7 +1982,12 @@ const PlaceDetails = () => {
       accessAndLocation: [
         { category: "accessAndLocation", field: "parkingDifficulty", value: "easy", label: "🚗 Easy Parking" },
         { category: "accessAndLocation", field: "parkingDifficulty", value: "moderate", label: "🚗 Moderate Parking" },
-        { category: "accessAndLocation", field: "parkingDifficulty", value: "difficult", label: "🚗 Difficult Parking" },
+        {
+          category: "accessAndLocation",
+          field: "parkingDifficulty",
+          value: "difficult",
+          label: "🚗 Difficult Parking",
+        },
       ],
       // 2. Hours of Operation - ALIGNED WITH BACKEND
       hoursOfOperation: [
@@ -1814,17 +2001,52 @@ const PlaceDetails = () => {
         { category: "servicesAndConveniences", field: "petTraining", value: true, label: "🎓 Pet Training" },
         { category: "servicesAndConveniences", field: "onlineOrdering", value: true, label: "💻 Online Ordering" },
         { category: "servicesAndConveniences", field: "curbsidePickup", value: true, label: "🚗 Curbside Pickup" },
-        { category: "servicesAndConveniences", field: "returnPolicy", value: "excellent", label: "↩️ Excellent Returns" },
+        {
+          category: "servicesAndConveniences",
+          field: "returnPolicy",
+          value: "excellent",
+          label: "↩️ Excellent Returns",
+        },
         { category: "servicesAndConveniences", field: "returnPolicy", value: "good", label: "↩️ Good Returns" },
       ],
       // 4. Product Selection & Quality - ALIGNED WITH BACKEND
       productSelectionAndQuality: [
-        { category: "productSelectionAndQuality", field: "foodBrandVariety", value: "excellent", label: "🥘 Excellent Food Variety" },
-        { category: "productSelectionAndQuality", field: "foodBrandVariety", value: "good", label: "🥘 Good Food Variety" },
-        { category: "productSelectionAndQuality", field: "toySelection", value: "excellent", label: "🧸 Excellent Toy Selection" },
-        { category: "productSelectionAndQuality", field: "toySelection", value: "good", label: "🧸 Good Toy Selection" },
-        { category: "productSelectionAndQuality", field: "productFreshness", value: "excellent", label: "🌟 Excellent Freshness" },
-        { category: "productSelectionAndQuality", field: "productFreshness", value: "good", label: "✨ Good Freshness" },
+        {
+          category: "productSelectionAndQuality",
+          field: "foodBrandVariety",
+          value: "excellent",
+          label: "🥘 Excellent Food Variety",
+        },
+        {
+          category: "productSelectionAndQuality",
+          field: "foodBrandVariety",
+          value: "good",
+          label: "🥘 Good Food Variety",
+        },
+        {
+          category: "productSelectionAndQuality",
+          field: "toySelection",
+          value: "excellent",
+          label: "🧸 Excellent Toy Selection",
+        },
+        {
+          category: "productSelectionAndQuality",
+          field: "toySelection",
+          value: "good",
+          label: "🧸 Good Toy Selection",
+        },
+        {
+          category: "productSelectionAndQuality",
+          field: "productFreshness",
+          value: "excellent",
+          label: "🌟 Excellent Freshness",
+        },
+        {
+          category: "productSelectionAndQuality",
+          field: "productFreshness",
+          value: "good",
+          label: "✨ Good Freshness",
+        },
       ],
       // 5. Pricing & Value - ALIGNED WITH BACKEND
       pricingAndValue: [
@@ -1835,7 +2057,12 @@ const PlaceDetails = () => {
       ],
       // 6. Staff Knowledge & Service - ALIGNED WITH BACKEND
       staffKnowledgeAndService: [
-        { category: "staffKnowledgeAndService", field: "petKnowledge", value: "excellent", label: "🧠 Expert Pet Knowledge" },
+        {
+          category: "staffKnowledgeAndService",
+          field: "petKnowledge",
+          value: "excellent",
+          label: "🧠 Expert Pet Knowledge",
+        },
         { category: "staffKnowledgeAndService", field: "petKnowledge", value: "good", label: "👍 Good Pet Knowledge" },
         { category: "staffKnowledgeAndService", field: "petKnowledge", value: "fair", label: "😐 Fair Pet Knowledge" },
         { category: "staffKnowledgeAndService", field: "trainingCertified", value: true, label: "🎓 Certified Staff" },
@@ -1887,7 +2114,7 @@ const PlaceDetails = () => {
         parkingDifficulty: { easy: 0, moderate: 0, difficult: 0 },
       },
       hoursOfOperation: {
-        is24Hours: { true: 0, false: 0, "true": 0, "false": 0 },
+        is24Hours: { true: 0, false: 0, true: 0, false: 0 },
         specificHours: {},
       },
       animalTypeSelection: {
@@ -1901,12 +2128,12 @@ const PlaceDetails = () => {
       adoptionProcessAndSupport: {
         applicationProcess: { easy: 0, moderate: 0, difficult: 0 },
         processingTime: { same_day: 0, within_week: 0, "1_2_weeks": 0, over_2_weeks: 0 },
-        homeVisitRequired: { true: 0, false: 0, "true": 0, "false": 0 },
+        homeVisitRequired: { true: 0, false: 0, true: 0, false: 0 },
       },
       staffAndVolunteerQuality: {
         staffKnowledge: { excellent: 0, good: 0, fair: 0, poor: 0 },
         customerService: { excellent: 0, good: 0, fair: 0, poor: 0 },
-        volunteerProgram: { true: 0, false: 0, "true": 0, "false": 0 },
+        volunteerProgram: { true: 0, false: 0, true: 0, false: 0 },
       },
     };
 
@@ -1919,7 +2146,7 @@ const PlaceDetails = () => {
         if (asReview.accessAndLocation) {
           const al = asReview.accessAndLocation;
           if (al.parkingDifficulty) tagCounts.accessAndLocation.parkingDifficulty[al.parkingDifficulty]++;
-          
+
           // Handle old schema fields by mapping to new ones
           if (al.parkingAndAccessibility) {
             const parkingMap = { excellent: "easy", good: "easy", limited: "moderate", poor: "difficult" };
@@ -1994,9 +2221,7 @@ const PlaceDetails = () => {
           label: "🚗 Difficult Parking",
         },
       ],
-      hoursOfOperation: [
-        { category: "hoursOfOperation", field: "is24Hours", value: true, label: "🕐 24 Hours Open" },
-      ],
+      hoursOfOperation: [{ category: "hoursOfOperation", field: "is24Hours", value: true, label: "🕐 24 Hours Open" }],
       animalTypeSelection: [
         { category: "animalTypeSelection", field: "availableAnimalTypes", value: "dogs", label: "🐕 Dogs Available" },
         { category: "animalTypeSelection", field: "availableAnimalTypes", value: "cats", label: "🐱 Cats Available" },
@@ -2030,11 +2255,21 @@ const PlaceDetails = () => {
           value: "same_day",
           label: "⚡ Same Day Processing",
         },
-        { category: "adoptionProcessAndSupport", field: "homeVisitRequired", value: false, label: "🏠 No Home Visit Required" },
+        {
+          category: "adoptionProcessAndSupport",
+          field: "homeVisitRequired",
+          value: false,
+          label: "🏠 No Home Visit Required",
+        },
       ],
       staffAndVolunteerQuality: [
         { category: "staffAndVolunteerQuality", field: "staffKnowledge", value: "excellent", label: "🧠 Expert Staff" },
-        { category: "staffAndVolunteerQuality", field: "customerService", value: "excellent", label: "⭐ Excellent Service" },
+        {
+          category: "staffAndVolunteerQuality",
+          field: "customerService",
+          value: "excellent",
+          label: "⭐ Excellent Service",
+        },
         { category: "staffAndVolunteerQuality", field: "volunteerProgram", value: true, label: "👥 Volunteer Program" },
       ],
     };
@@ -2108,15 +2343,19 @@ const PlaceDetails = () => {
             ← BACK
           </button>
           {/* Delete button - only show for place creator */}
-          {mongoUser && place.addedBy && String(place.addedBy) === String(mongoUser._id) && !place.isOSMLocation && place.creationSource === "user_created" && (
-            <button
-              className="delete-place-button"
-              onClick={() => setShowDeleteConfirm(true)}
-              title="Delete this place"
-            >
-              DELETE PLACE
-            </button>
-          )}
+          {mongoUser &&
+            place.addedBy &&
+            String(place.addedBy) === String(mongoUser._id) &&
+            !place.isOSMLocation &&
+            place.creationSource === "user_created" && (
+              <button
+                className="delete-place-button"
+                onClick={() => setShowDeleteConfirm(true)}
+                title="Delete this place"
+              >
+                DELETE PLACE
+              </button>
+            )}
         </div>
         <div className="place-title-inline">
           <h1>{place.name}</h1>
@@ -2138,78 +2377,77 @@ const PlaceDetails = () => {
       {/* Hero Image Section */}
       <div className="hero-image-section">
         <div className="hero-placeholder">
-
-          {place.type === 'dog park' || place.type === 'dog_park' ? (
-            <img 
-              src="/dog-park-hero.png" 
-              alt="Dog Park Scene" 
+          {place.type === "dog park" || place.type === "dog_park" ? (
+            <img
+              src="/dog-park-hero.png"
+              alt="Dog Park Scene"
               className="hero-background-image"
               style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center center',
-                position: 'absolute',
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center center",
+                position: "absolute",
                 top: 0,
                 left: 0,
-                zIndex: 1
+                zIndex: 1,
               }}
-              onLoad={() => console.log('Dog park image loaded successfully')}
-              onError={(e) => console.error('Dog park image failed to load:', e)}
+              onLoad={() => console.log("Dog park image loaded successfully")}
+              onError={(e) => console.error("Dog park image failed to load:", e)}
             />
-          ) : place.type === 'veterinary' || place.type === 'vet' ? (
-            <img 
-              src="/vet.png" 
-              alt="Veterinary Clinic Scene" 
+          ) : place.type === "veterinary" || place.type === "vet" ? (
+            <img
+              src="/vet.png"
+              alt="Veterinary Clinic Scene"
               className="hero-background-image"
               style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center center',
-                position: 'absolute',
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center center",
+                position: "absolute",
                 top: 0,
                 left: 0,
-                zIndex: 1
+                zIndex: 1,
               }}
-              onLoad={() => console.log('Vet image loaded successfully')}
-              onError={(e) => console.error('Vet image failed to load:', e)}
+              onLoad={() => console.log("Vet image loaded successfully")}
+              onError={(e) => console.error("Vet image failed to load:", e)}
             />
-          ) : place.type === 'animal shelter' || place.type === 'animal_shelter' || place.type === 'shelter' ? (
-            <img 
-              src="/shelter.png" 
-              alt="Animal Shelter Scene" 
+          ) : place.type === "animal shelter" || place.type === "animal_shelter" || place.type === "shelter" ? (
+            <img
+              src="/shelter.png"
+              alt="Animal Shelter Scene"
               className="hero-background-image"
               style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center center',
-                position: 'absolute',
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center center",
+                position: "absolute",
                 top: 0,
                 left: 0,
-                zIndex: 1
+                zIndex: 1,
               }}
-              onLoad={() => console.log('Shelter image loaded successfully')}
-              onError={(e) => console.error('Shelter image failed to load:', e)}
+              onLoad={() => console.log("Shelter image loaded successfully")}
+              onError={(e) => console.error("Shelter image failed to load:", e)}
             />
-          ) : place.type === 'pet store' || place.type === 'pet_store' || place.type === 'petstore' ? (
-            <img 
-              src="/petstore.png" 
-              alt="Pet Store Scene" 
+          ) : place.type === "pet store" || place.type === "pet_store" || place.type === "petstore" ? (
+            <img
+              src="/petstore.png"
+              alt="Pet Store Scene"
               className="hero-background-image"
               style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center center',
-                position: 'absolute',
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center center",
+                position: "absolute",
                 top: 0,
                 left: 0,
-                zIndex: 1
+                zIndex: 1,
               }}
-              onLoad={() => console.log('Pet store image loaded successfully')}
-              onError={(e) => console.error('Pet store image failed to load:', e)}
+              onLoad={() => console.log("Pet store image loaded successfully")}
+              onError={(e) => console.error("Pet store image failed to load:", e)}
             />
           ) : (
             <>
@@ -2221,17 +2459,16 @@ const PlaceDetails = () => {
           {barrageQueue.map((review, _) => (
             <div
               key={review.key}
-              className={`barrage-review ${review.animationClass || 'barrage-desktop-horizontal'}`} // default to hotizontal
+              className={`barrage-review ${review.animationClass || "barrage-desktop-horizontal"}`} // default to hotizontal
               style={{
                 top: `${review.top}px`,
-                animationDuration: `${review.duration}s`
+                animationDuration: `${review.duration}s`,
               }}
-              onAnimationEnd={() => setBarrageQueue(queue => queue.filter(q => q.key !== review.key))}
+              onAnimationEnd={() => setBarrageQueue((queue) => queue.filter((q) => q.key !== review.key))}
             >
               {review.comment}
             </div>
           ))}
-
         </div>
       </div>
 
@@ -2254,28 +2491,36 @@ const PlaceDetails = () => {
             <div className="category-section">
               <h3>Access & Location</h3>
 
-              <div className="feature-tags">{renderSmartDogParkCategoryTags("accessAndLocation", analyzeDogParkReviewTags())}</div>
+              <div className="feature-tags">
+                {renderSmartDogParkCategoryTags("accessAndLocation", analyzeDogParkReviewTags())}
+              </div>
             </div>
 
             {/* 2. Hours of Operation */}
             <div className="category-section">
               <h3>Hours of Operation</h3>
 
-              <div className="feature-tags">{renderSmartDogParkCategoryTags("hoursOfOperation", analyzeDogParkReviewTags())}</div>
+              <div className="feature-tags">
+                {renderSmartDogParkCategoryTags("hoursOfOperation", analyzeDogParkReviewTags())}
+              </div>
             </div>
 
             {/* 3. Safety Level */}
             <div className="category-section">
               <h3>Safety Level</h3>
 
-              <div className="feature-tags">{renderSmartDogParkCategoryTags("safetyLevel", analyzeDogParkReviewTags())}</div>
+              <div className="feature-tags">
+                {renderSmartDogParkCategoryTags("safetyLevel", analyzeDogParkReviewTags())}
+              </div>
             </div>
 
             {/* 4. Size & Layout */}
             <div className="category-section">
               <h3>Size & Layout</h3>
 
-              <div className="feature-tags">{renderSmartDogParkCategoryTags("sizeAndLayout", analyzeDogParkReviewTags())}</div>
+              <div className="feature-tags">
+                {renderSmartDogParkCategoryTags("sizeAndLayout", analyzeDogParkReviewTags())}
+              </div>
             </div>
 
             {/* 5. Amenities & Facilities */}
@@ -2336,67 +2581,63 @@ const PlaceDetails = () => {
               return (
                 <>
                   {/* 1. Access & Location - BACKEND ALIGNED */}
-            <div className="category-section">
+                  <div className="category-section">
                     <h3>Access & Location</h3>
 
-              <div className="feature-tags">
-                      {renderSmartVetCategoryTags("accessAndLocation", vetTagCounts)}
-              </div>
-            </div>
+                    <div className="feature-tags">{renderSmartVetCategoryTags("accessAndLocation", vetTagCounts)}</div>
+                  </div>
 
                   {/* 2. Hours of Operation - BACKEND ALIGNED */}
-            <div className="category-section">
+                  <div className="category-section">
                     <h3>Hours of Operation</h3>
 
-              <div className="feature-tags">
-                      {renderSmartVetCategoryTags("hoursOfOperation", vetTagCounts)}
-              </div>
-            </div>
+                    <div className="feature-tags">{renderSmartVetCategoryTags("hoursOfOperation", vetTagCounts)}</div>
+                  </div>
 
                   {/* 3. Clinic Environment & Facilities - BACKEND ALIGNED */}
-            <div className="category-section">
+                  <div className="category-section">
                     <h3>Clinic Environment & Facilities</h3>
 
-              <div className="feature-tags">
+                    <div className="feature-tags">
                       {renderSmartVetCategoryTags("clinicEnvironmentAndFacilities", vetTagCounts)}
-              </div>
-            </div>
+                    </div>
+                  </div>
 
                   {/* 4. Cost & Transparency - BACKEND ALIGNED */}
-            <div className="category-section">
+                  <div className="category-section">
                     <h3>Cost & Transparency</h3>
 
-              <div className="feature-tags">
+                    <div className="feature-tags">
                       {renderSmartVetCategoryTags("costAndTransparency", vetTagCounts)}
-              </div>
-            </div>
+                    </div>
+                  </div>
 
                   {/* 5. Services & Specializations - BACKEND ALIGNED */}
-            <div className="category-section">
+                  <div className="category-section">
                     <h3>Services & Specializations</h3>
 
-              <div className="feature-tags">
+                    <div className="feature-tags">
                       {renderSmartVetCategoryTags("servicesAndSpecializations", vetTagCounts)}
-              </div>
-            </div>
+                    </div>
+                  </div>
 
                   {/* 6. Emergency & After-Hours Care - BACKEND ALIGNED */}
-            <div className="category-section">
+                  <div className="category-section">
                     <h3>Emergency & After-Hours Care</h3>
 
-              <div className="feature-tags">
+                    <div className="feature-tags">
                       {renderSmartVetCategoryTags("emergencyAndAfterHours", vetTagCounts)}
-              </div>
-            </div>
+                    </div>
+                  </div>
 
                   {/* 7. Staff & Service Quality - BACKEND ALIGNED */}
-            <div className="category-section">
+                  <div className="category-section">
                     <h3>Staff & Service Quality</h3>
 
-              <div className="feature-tags">
+                    <div className="feature-tags">
                       {renderSmartVetCategoryTags("staffAndServiceQuality", vetTagCounts)}
-              </div>
-            </div>
+                    </div>
+                  </div>
                 </>
               );
             })()}
@@ -2939,7 +3180,7 @@ const PlaceDetails = () => {
                   {/* 5. Amenities & Facilities */}
                   <div className="form-section">
                     <h5>🎾 Amenities & Facilities</h5>
-                    
+
                     <div className="form-group">
                       <label>Water Access</label>
                       <select
@@ -2964,7 +3205,7 @@ const PlaceDetails = () => {
                         <option value="none">None</option>
                       </select>
                     </div>
-                    
+
                     <div className="form-group">
                       <label>Seating Level</label>
                       <select
@@ -2988,7 +3229,7 @@ const PlaceDetails = () => {
                         <option value="no_seat">No Seat</option>
                       </select>
                     </div>
-                    
+
                     <div className="form-group">
                       <label>Shade and Cover</label>
                       <select
@@ -3012,7 +3253,7 @@ const PlaceDetails = () => {
                         <option value="none">None</option>
                       </select>
                     </div>
-                    
+
                     <div className="checkbox-group">
                       <label>
                         <input
@@ -3459,16 +3700,19 @@ const PlaceDetails = () => {
                           <label key={diagnostic}>
                             <input
                               type="checkbox"
-                              checked={reviewForm.vetClinicReview.servicesAndSpecializations.onSiteDiagnostics.includes(diagnostic)}
+                              checked={reviewForm.vetClinicReview.servicesAndSpecializations.onSiteDiagnostics.includes(
+                                diagnostic
+                              )}
                               onChange={(e) => {
-                                const currentArray = reviewForm.vetClinicReview.servicesAndSpecializations.onSiteDiagnostics || [];
+                                const currentArray =
+                                  reviewForm.vetClinicReview.servicesAndSpecializations.onSiteDiagnostics || [];
                                 const newArray = e.target.checked
                                   ? [...currentArray, diagnostic]
-                                  : currentArray.filter(item => item !== diagnostic);
-                          setReviewForm({
-                            ...reviewForm,
-                            vetClinicReview: {
-                              ...reviewForm.vetClinicReview,
+                                  : currentArray.filter((item) => item !== diagnostic);
+                                setReviewForm({
+                                  ...reviewForm,
+                                  vetClinicReview: {
+                                    ...reviewForm.vetClinicReview,
                                     servicesAndSpecializations: {
                                       ...reviewForm.vetClinicReview.servicesAndSpecializations,
                                       onSiteDiagnostics: newArray,
@@ -3477,28 +3721,31 @@ const PlaceDetails = () => {
                                 });
                               }}
                             />
-                            {diagnostic.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                            {diagnostic.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
                           </label>
                         ))}
-                    </div>
+                      </div>
                     </div>
                     <div className="form-group">
                       <label>Surgery Capabilities</label>
-                    <div className="checkbox-group">
+                      <div className="checkbox-group">
                         {["routine_spay_neuter", "orthopedic", "emergency", "dental"].map((surgery) => (
                           <label key={surgery}>
-                        <input
-                          type="checkbox"
-                              checked={reviewForm.vetClinicReview.servicesAndSpecializations.surgeryCapabilities.includes(surgery)}
+                            <input
+                              type="checkbox"
+                              checked={reviewForm.vetClinicReview.servicesAndSpecializations.surgeryCapabilities.includes(
+                                surgery
+                              )}
                               onChange={(e) => {
-                                const currentArray = reviewForm.vetClinicReview.servicesAndSpecializations.surgeryCapabilities || [];
+                                const currentArray =
+                                  reviewForm.vetClinicReview.servicesAndSpecializations.surgeryCapabilities || [];
                                 const newArray = e.target.checked
                                   ? [...currentArray, surgery]
-                                  : currentArray.filter(item => item !== surgery);
-                            setReviewForm({
-                              ...reviewForm,
-                              vetClinicReview: {
-                                ...reviewForm.vetClinicReview,
+                                  : currentArray.filter((item) => item !== surgery);
+                                setReviewForm({
+                                  ...reviewForm,
+                                  vetClinicReview: {
+                                    ...reviewForm.vetClinicReview,
                                     servicesAndSpecializations: {
                                       ...reviewForm.vetClinicReview.servicesAndSpecializations,
                                       surgeryCapabilities: newArray,
@@ -3507,39 +3754,44 @@ const PlaceDetails = () => {
                                 });
                               }}
                             />
-                            {surgery.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </label>
+                            {surgery.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                          </label>
                         ))}
+                      </div>
                     </div>
-                  </div>
                     <div className="form-group">
                       <label>Specializations</label>
                       <div className="checkbox-group">
-                        {["cardiology", "dermatology", "oncology", "behavior", "exotic_animals"].map((specialization) => (
-                          <label key={specialization}>
-                            <input
-                              type="checkbox"
-                              checked={reviewForm.vetClinicReview.servicesAndSpecializations.specializations.includes(specialization)}
-                              onChange={(e) => {
-                                const currentArray = reviewForm.vetClinicReview.servicesAndSpecializations.specializations || [];
-                                const newArray = e.target.checked
-                                  ? [...currentArray, specialization]
-                                  : currentArray.filter(item => item !== specialization);
-                          setReviewForm({
-                            ...reviewForm,
-                            vetClinicReview: {
-                              ...reviewForm.vetClinicReview,
-                                    servicesAndSpecializations: {
-                                      ...reviewForm.vetClinicReview.servicesAndSpecializations,
-                                      specializations: newArray,
+                        {["cardiology", "dermatology", "oncology", "behavior", "exotic_animals"].map(
+                          (specialization) => (
+                            <label key={specialization}>
+                              <input
+                                type="checkbox"
+                                checked={reviewForm.vetClinicReview.servicesAndSpecializations.specializations.includes(
+                                  specialization
+                                )}
+                                onChange={(e) => {
+                                  const currentArray =
+                                    reviewForm.vetClinicReview.servicesAndSpecializations.specializations || [];
+                                  const newArray = e.target.checked
+                                    ? [...currentArray, specialization]
+                                    : currentArray.filter((item) => item !== specialization);
+                                  setReviewForm({
+                                    ...reviewForm,
+                                    vetClinicReview: {
+                                      ...reviewForm.vetClinicReview,
+                                      servicesAndSpecializations: {
+                                        ...reviewForm.vetClinicReview.servicesAndSpecializations,
+                                        specializations: newArray,
+                                      },
                                     },
-                                  },
-                                });
-                              }}
-                            />
-                            {specialization.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          </label>
-                        ))}
+                                  });
+                                }}
+                              />
+                              {specialization.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                            </label>
+                          )
+                        )}
                       </div>
                     </div>
                   </div>
@@ -3610,18 +3862,18 @@ const PlaceDetails = () => {
                       <label>Emergency Triage Speed</label>
                       <select
                         value={reviewForm.vetClinicReview.emergencyAndAfterHours.emergencyTriageSpeed}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              vetClinicReview: {
-                                ...reviewForm.vetClinicReview,
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            vetClinicReview: {
+                              ...reviewForm.vetClinicReview,
                               emergencyAndAfterHours: {
                                 ...reviewForm.vetClinicReview.emergencyAndAfterHours,
                                 emergencyTriageSpeed: e.target.value,
-                                },
                               },
-                            })
-                          }
+                            },
+                          })
+                        }
                       >
                         <option value="">Select...</option>
                         <option value="immediate">Immediate</option>
@@ -3663,18 +3915,18 @@ const PlaceDetails = () => {
                       <label>Veterinarian Experience</label>
                       <select
                         value={reviewForm.vetClinicReview.staffAndServiceQuality.veterinarianExperience}
-                          onChange={(e) =>
-                            setReviewForm({
-                              ...reviewForm,
-                              vetClinicReview: {
-                                ...reviewForm.vetClinicReview,
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            vetClinicReview: {
+                              ...reviewForm.vetClinicReview,
                               staffAndServiceQuality: {
                                 ...reviewForm.vetClinicReview.staffAndServiceQuality,
                                 veterinarianExperience: e.target.value,
-                                },
                               },
-                            })
-                          }
+                            },
+                          })
+                        }
                       >
                         <option value="">Select...</option>
                         <option value="novice">Novice</option>
@@ -4197,9 +4449,12 @@ const PlaceDetails = () => {
                         <label key={type}>
                           <input
                             type="checkbox"
-                            checked={reviewForm.animalShelterReview.animalTypeSelection.availableAnimalTypes.includes(type)}
+                            checked={reviewForm.animalShelterReview.animalTypeSelection.availableAnimalTypes.includes(
+                              type
+                            )}
                             onChange={(e) => {
-                              const currentTypes = reviewForm.animalShelterReview.animalTypeSelection.availableAnimalTypes;
+                              const currentTypes =
+                                reviewForm.animalShelterReview.animalTypeSelection.availableAnimalTypes;
                               const newTypes = e.target.checked
                                 ? [...currentTypes, type]
                                 : currentTypes.filter((t) => t !== type);
@@ -4539,7 +4794,7 @@ const PlaceDetails = () => {
       )}
 
       {/* Card Notification Popup */}
-      <CardNotificationPopup 
+      <CardNotificationPopup
         show={showCardNotification}
         cardType={cardType}
         onClose={() => setShowCardNotification(false)}
