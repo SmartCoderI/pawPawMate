@@ -21,12 +21,12 @@ const CardsList = ({ isAuthenticated = true }) => {
           // Fetch all community cards for non-authenticated users
           response = await api.get(`/cards/all`);
         }
-        
+
         const cardsData = response.data;
         setCards(cardsData);
       } catch (err) {
         console.error("Error fetching cards:", err);
-        const errorMessage = isAuthenticated 
+        const errorMessage = isAuthenticated
           ? "Failed to load your cards. Please try again later."
           : "Failed to load community cards. Please try again later.";
         setError(errorMessage);
@@ -92,7 +92,7 @@ const CardsList = ({ isAuthenticated = true }) => {
           </ul>
         </div>
       )}
-      
+
       <div className="cards-list-header">
         <h1>{isAuthenticated ? "🏆 My Reward Cards" : "🏆 Community Reward Cards"}</h1>
         <p className="cards-count">
@@ -126,11 +126,7 @@ const CardsList = ({ isAuthenticated = true }) => {
       ) : (
         <div className="cards-grid">
           {cards.map((card) => (
-            <Card 
-              key={card._id} 
-              card={card} 
-              onHelpfulClick={isAuthenticated ? handleHelpfulClick : null} 
-            />
+            <Card key={card._id} card={card} onHelpfulClick={isAuthenticated ? handleHelpfulClick : null} />
           ))}
         </div>
       )}

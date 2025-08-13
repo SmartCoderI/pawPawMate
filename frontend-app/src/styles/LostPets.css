@@ -34,19 +34,23 @@
 }
 
 .report-button {
-  border: 3px solid #1f2937;
-  padding: 0.75rem 1.5rem; /* Restored original padding */
-  font-weight: bold;
-  font-size: 1rem; /* Restored original size */
+  border: 4px solid #000000; /* Match Home button border */
+  padding: 1rem 1.5rem; /* Neo-brutalist padding */
+  font-weight: 900;
+  font-size: 1rem;
+  font-family: 'Arial Black', Arial, sans-serif;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.1s ease;
   text-transform: uppercase;
-  color: white;
+  letter-spacing: 0.0625rem;
+  color: #000000;
+  border-radius: 0.75rem; /* Match Home rounded corners */
+  box-shadow: 0.5rem 0.5rem 0px #000000; /* Match Home shadow */
 }
 
 .report-button:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0px #1f2937;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.25rem 0.25rem 0px #000000;
 }
 
 .lost-button {
@@ -72,6 +76,28 @@
   gap: 0.5rem; /* Reduced from 1rem */
 }
 
+/* Collapse toggle button (reuse Home style) */
+.filter-toggle {
+  display: none;
+  margin-bottom: 0.5rem;
+}
+.filter-toggle-button {
+  padding: 0.5rem 0.75rem;
+  background-color: #FFE500;
+  color: #000000;
+  border: 4px solid #000000;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.0625rem;
+  border-radius: 0.5rem;
+}
+
+.filter-section.collapsed .filter-group,
+.filter-section.collapsed .location-count-display {
+  display: none;
+}
+
 .filter-group {
   display: flex;
   flex-direction: column;
@@ -92,30 +118,35 @@
 }
 
 .filter-button {
-  background: white;
-  color: #1f2937;
-  border: 2px solid #d1d5db;
-  padding: 0.5rem 1rem; /* Restored original padding */
-  font-weight: 600;
-  font-size: 0.9rem; /* Restored original size */
+  background: #F5F5DC; /* Beige like Home */
+  color: #000000;
+  border: 2px solid #000000; /* Black border like Home */
+  padding: 0.625rem 0.875rem; /* Compact, consistent */
+  font-weight: 900;
+  font-size: 0.9rem;
+  font-family: 'Arial Black', Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.03rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.1s ease;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.375rem;
+  border-radius: 0.5rem; /* Rounded corners */
+  box-shadow: 0.25rem 0.25rem 0px #000000; /* Home shadow */
 }
 
 .filter-button:hover {
-  border-color: #1f2937;
-  transform: translate(-1px, -1px);
-  box-shadow: 2px 2px 0px #1f2937;
+  background: #DDD8C7;
+  transform: translate(0.0625rem, 0.0625rem);
+  box-shadow: 0.1875rem 0.1875rem 0px #000000;
 }
 
 .filter-button.active {
-  background: #1f2937;
-  color: white;
-  border-color: #1f2937;
-  box-shadow: 2px 2px 0px #4b5563;
+  background: #FF965B; /* Orange like Home active */
+  color: #000000;
+  border-color: #000000;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
 }
 
 /* Status-specific button colors */
@@ -145,10 +176,15 @@
   display: flex;
   align-items: center;
   gap: 0.25rem; /* Reduced from 0.5rem */
-  font-weight: bold;
-  color: #4b5563;
-  font-size: 0.85rem; /* Slightly smaller */
+  font-weight: 900;
+  color: #000000;
+  font-size: 0.9rem; /* Slightly larger */
   margin-top: 0.25rem; /* Reduced from 0.5rem */
+  background: #E8E8E8; /* Match Home count chip */
+  padding: 0.25rem 0.5rem;
+  border: 2px solid #000000;
+  box-shadow: 0.125rem 0.125rem 0px #000000;
+  border-radius: 0.25rem;
 }
 
 .location-count-spinner {
@@ -244,13 +280,46 @@
 .pet-popup {
   font-family: inherit;
   max-width: 400px;
+  max-height: 70vh; /* don't exceed viewport height */
+  overflow-y: auto; /* scroll inside popup instead of blocking map */
+  padding-bottom: 2.5rem; /* extra bottom space for Report button */
+}
+
+/* Centered modal for small screens when viewing pet details */
+.pet-detail-modal {
+  background: #FFFFFF;
+  border: 4px solid #000000;
+  border-radius: 12px;
+  box-shadow: 8px 8px 0px #000000;
+  width: 90vw;
+  max-width: 420px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 0.75rem;
+}
+
+.detail-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #FF6B6B;
+  color: #FFFFFF;
+  border: 3px solid #000000;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 3px 3px 0px #000000;
 }
 
 .pet-popup-header {
   padding: 5px 1.5rem 5px 1rem;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; /* vertically center items */
   margin-bottom: 0.5rem; /* Reduced from 1rem */
   padding-bottom: 0.25rem; /* Reduced from 0.5rem */
   border-bottom: 2px solid #e5e7eb;
@@ -258,37 +327,41 @@
 
 .pet-popup-header h3 {
   margin: 0;
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.0625rem;
+}
+
+/* Leave space between status badge and mapbox close button */
+.pet-popup-header .status-badge {
+  margin-right: 2.75rem; /* shift left to avoid overlap with close X */
 }
 
 .status-badge {
   padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: bold;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 900;
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  border: 3px solid #000000;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  color: #000000;
 }
 
 .status-badge.status-missing {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
+  background: #FF9F9F;
 }
 
 .status-badge.status-seen {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fcd34d;
+  background: #FFF066;
 }
 
 .status-badge.status-found {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #86efac;
+  background: #B8FF9F;
 }
 
 .pet-popup-photo {
@@ -302,9 +375,9 @@
 }
 
 .pet-popup-details > p {
-  margin: 0.25rem 0; /* Reduced from 0.5rem */
-  font-size: 0.85rem; /* Slightly smaller */
-  color: #374151;
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+  color: #000000;
   line-height: 1.5;
   display: flex;
   align-items: flex-start;
@@ -316,27 +389,30 @@
 }
 
 .location-time-info {
-  background: #f9fafb;
+  background: #F3E8FF; /* Light violet to differentiate from contact */
   padding: 0.75rem;
-  border-radius: 6px;
+  border-radius: 0.75rem;
   margin: 0.75rem 0;
-  border-left: 4px solid #3b82f6;
+  border: 3px solid #000000; /* Black frame to match others */
+  box-shadow: 0.25rem 0.25rem 0px #000000;
 }
 
 .contact-info {
-  background: #f0f9ff;
+  background: #E8F5FF;
   padding: 0.75rem;
-  border-radius: 6px;
+  border-radius: 0.75rem;
   margin: 0.75rem 0;
-  border-left: 4px solid #0ea5e9;
+  border: 3px solid #000000;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
 }
 
 .reward-info {
-  background: #fef7cd;
+  background: #FFF066;
   padding: 0.75rem;
-  border-radius: 6px;
+  border-radius: 0.75rem;
   margin: 0.75rem 0;
-  border-left: 4px solid #eab308;
+  border: 3px solid #000000;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
 }
 
 .sightings-info {
@@ -351,43 +427,42 @@
   display: flex;
   gap: 0.5rem;
   margin-top: 1rem;
-  padding: 0.5rem;
+  padding: 0.75rem 0.5rem 0.5rem 0.5rem;
   border-top: 2px solid #e5e7eb;
 }
 
 .sighting-button, .found-button {
   flex: 1;
-  padding: 0.5rem 1rem;
-  font-weight: bold;
-  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+  font-weight: 900;
+  font-size: 0.95rem;
   cursor: pointer;
-  border: 2px solid;
-  transition: all 0.2s;
-  border-radius: 6px;
+  border: 4px solid #000000;
+  transition: all 0.1s ease;
+  border-radius: 0.5rem;
+  box-shadow: 0.5rem 0.5rem 0px #000000;
 }
 
 .sighting-button {
-  background: #fbbf24;
-  color: #1f2937;
-  border-color: #f59e0b;
+  background: #32CD32;
+  color: #000000;
 }
 
 .sighting-button:hover {
-  background: #f59e0b;
-  transform: translate(-1px, -1px);
-  box-shadow: 2px 2px 0px #d97706;
+  background: #228B22;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.25rem 0.25rem 0px #000000;
 }
 
 .found-button {
-  background: #34d399;
-  color: #1f2937;
-  border-color: #10b981;
+  background: #B8FF9F;
+  color: #000000;
 }
 
 .found-button:hover {
-  background: #10b981;
-  transform: translate(-1px, -1px);
-  box-shadow: 2px 2px 0px #059669;
+  background: #9dfc7c;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.25rem 0.25rem 0px #000000;
 }
 
 /* Modal Styles */
@@ -458,6 +533,15 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .filter-toggle { display: block; }
+  .filter-section.collapsed .filter-group,
+  .filter-section.collapsed .location-count-display {
+    display: none;
+  }
+  .pet-popup {
+    max-width: 360px;
+    padding: 0.25rem;
+  }
   .controls-header {
     flex-direction: column;
     gap: 1rem;
@@ -502,6 +586,9 @@
 }
 
 @media (max-width: 480px) {
+  .pet-popup {
+    max-width: 320px;
+  }
   .map-controls {
     padding: 0.75rem;
   }
@@ -535,20 +622,37 @@
 /* Mapbox popup overrides */
 .mapboxgl-popup-content {
   padding: 0 !important;
-  border-radius: 8px !important;
-  border: 2px solid #1f2937 !important;
-  box-shadow: 4px 4px 0px rgba(31, 41, 55, 0.3) !important;
+  border-radius: 12px !important;
+  border: 4px solid #000000 !important;
+  box-shadow: 0.5rem 0.5rem 0px #000000 !important;
+  pointer-events: auto !important; /* allow interaction but don't block map when outside */
+  max-height: 85vh !important; /* fit viewport */
+  overflow-y: auto !important;  /* scroll to reach bottom */
+  padding-bottom: 90px !important; /* ensure bottom buttons not hidden */
 }
 
 .mapboxgl-popup-close-button {
-  font-size: 18px !important;
-  padding: 8px !important;
-  color: #6b7280 !important;
+  font-size: 20px !important; /* match auth close size */
+  padding: 0 !important;
+  color: #FFFFFF !important; /* white X for contrast */
+  border: 3px solid #000000 !important;
+  border-radius: 50% !important; /* circle */
+  background: #FF6B6B !important; /* requested color */
+  box-shadow: 3px 3px 0px #000000 !important; /* auth shadow */
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  top: 8px !important; /* better vertical centering in header */
+  right: 8px !important;
 }
 
 .mapboxgl-popup-close-button:hover {
-  background: #f3f4f6 !important;
-  color: #1f2937 !important;
+  background: #ff4757 !important; /* hover variant */
+  color: #FFFFFF !important;
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0px #000000 !important;
 }
 
 .mapboxgl-popup-tip {

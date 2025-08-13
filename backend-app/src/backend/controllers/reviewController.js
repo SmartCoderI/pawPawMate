@@ -284,7 +284,7 @@ const validateVetClinicReview = (vetClinicReview) => {
   // 5. Validate servicesAndSpecializations
   if (vetClinicReview.servicesAndSpecializations) {
     const { onSiteDiagnostics, surgeryCapabilities, specializations } = vetClinicReview.servicesAndSpecializations;
-    
+
     if (onSiteDiagnostics && Array.isArray(onSiteDiagnostics)) {
       const validDiagnostics = ["xray", "ultrasound", "bloodwork", "ecg", "none"];
       const invalidDiagnostics = onSiteDiagnostics.filter((d) => !validDiagnostics.includes(d));
@@ -292,7 +292,7 @@ const validateVetClinicReview = (vetClinicReview) => {
         errors.push("Invalid onSiteDiagnostics values: " + invalidDiagnostics.join(", "));
       }
     }
-    
+
     if (surgeryCapabilities && Array.isArray(surgeryCapabilities)) {
       const validSurgeries = ["routine_spay_neuter", "orthopedic", "emergency", "dental", "none"];
       const invalidSurgeries = surgeryCapabilities.filter((s) => !validSurgeries.includes(s));
@@ -300,7 +300,7 @@ const validateVetClinicReview = (vetClinicReview) => {
         errors.push("Invalid surgeryCapabilities values: " + invalidSurgeries.join(", "));
       }
     }
-    
+
     if (specializations && Array.isArray(specializations)) {
       const validSpecializations = ["cardiology", "dermatology", "oncology", "behavior", "exotic_animals", "none"];
       const invalidSpecializations = specializations.filter((s) => !validSpecializations.includes(s));
@@ -313,7 +313,7 @@ const validateVetClinicReview = (vetClinicReview) => {
   // 6. Validate emergencyAndAfterHours
   if (vetClinicReview.emergencyAndAfterHours) {
     const { emergencyTriageSpeed } = vetClinicReview.emergencyAndAfterHours;
-    
+
     if (
       emergencyTriageSpeed &&
       !["immediate", "within_30_min", "within_1_hour", "over_1_hour"].includes(emergencyTriageSpeed)
@@ -326,7 +326,7 @@ const validateVetClinicReview = (vetClinicReview) => {
   // 7. Validate staffAndServiceQuality
   if (vetClinicReview.staffAndServiceQuality) {
     const { staffFriendliness, veterinarianExperience } = vetClinicReview.staffAndServiceQuality;
-    
+
     if (staffFriendliness && !["excellent", "good", "fair", "poor"].includes(staffFriendliness)) {
       errors.push("Invalid staffFriendliness value");
     }
@@ -707,7 +707,7 @@ exports.addReview = async (req, res) => {
 
         // Check existing cards to prevent duplicates
         const existingCards = await Card.find({ earnedBy: userId });
-        
+
         // First review reward (welcome card)
         if (userReviewCount === 1) {
           const hasFirstReviewCard = existingCards.some((card) => card.contributionType === "first_review");
@@ -723,12 +723,12 @@ exports.addReview = async (req, res) => {
         else if (userReviewCount % 3 === 0) {
           // User just reached a multiple of 3 reviews (3, 6, 9, 12, etc.)
           const cardNumber = userReviewCount / 3; // 1st milestone card, 2nd milestone card, etc.
-          
+
           // Check if they already have a card for this milestone
-          const hasCardForThisMilestone = existingCards.some((card) => 
-            card.contributionType === `milestone_${userReviewCount}_reviews`
+          const hasCardForThisMilestone = existingCards.some(
+            (card) => card.contributionType === `milestone_${userReviewCount}_reviews`
           );
-          
+
           if (!hasCardForThisMilestone) {
             shouldGenerateCard = true;
             contributionType = `milestone_${userReviewCount}_reviews`;
@@ -774,7 +774,7 @@ exports.addReview = async (req, res) => {
       ...review.toObject(),
       placeId: finalPlaceId, // Ensure we return the actual place ID used
       cardTriggered: cardTriggered, // Flag to show card notification popup
-      cardType: cardType // Type of card being generated (for future use)
+      cardType: cardType, // Type of card being generated (for future use)
     };
 
     res.status(201).json(responseData);
@@ -935,7 +935,8 @@ exports.getDogParkReviewStats = async (req, res) => {
 
         // 3. Safety Level - ALIGNED WITH MODEL
         if (dogParkReview.safetyLevel) {
-          const { fencingCondition, nightIllumination, firstAidStation, surveillanceCameras } = dogParkReview.safetyLevel;
+          const { fencingCondition, nightIllumination, firstAidStation, surveillanceCameras } =
+            dogParkReview.safetyLevel;
           if (fencingCondition) {
             categoryStats.safetyLevel.fencingCondition[fencingCondition] =
               (categoryStats.safetyLevel.fencingCondition[fencingCondition] || 0) + 1;
@@ -949,8 +950,7 @@ exports.getDogParkReviewStats = async (req, res) => {
         if (dogParkReview.sizeAndLayout) {
           const { dogSize, runningSpace, drainagePerformance } = dogParkReview.sizeAndLayout;
           if (dogSize) {
-            categoryStats.sizeAndLayout.dogSize[dogSize] =
-              (categoryStats.sizeAndLayout.dogSize[dogSize] || 0) + 1;
+            categoryStats.sizeAndLayout.dogSize[dogSize] = (categoryStats.sizeAndLayout.dogSize[dogSize] || 0) + 1;
           }
           if (runningSpace) {
             categoryStats.sizeAndLayout.runningSpace[runningSpace] =
@@ -973,7 +973,8 @@ exports.getDogParkReviewStats = async (req, res) => {
             categoryStats.amenitiesAndFacilities.shadeAndCover[shadeAndCover] =
               (categoryStats.amenitiesAndFacilities.shadeAndCover[shadeAndCover] || 0) + 1;
           }
-          if (biodegradableBags !== undefined) categoryStats.amenitiesAndFacilities.biodegradableBags[biodegradableBags]++;
+          if (biodegradableBags !== undefined)
+            categoryStats.amenitiesAndFacilities.biodegradableBags[biodegradableBags]++;
           if (waterAccess) {
             categoryStats.amenitiesAndFacilities.waterAccess[waterAccess] =
               (categoryStats.amenitiesAndFacilities.waterAccess[waterAccess] || 0) + 1;
@@ -1145,8 +1146,7 @@ exports.getVetClinicReviewStats = async (req, res) => {
           const { cost, feesExplainedUpfront, insuranceAccepted } = vetClinicReview.costAndTransparency;
 
           if (cost) {
-            categoryStats.costAndTransparency.cost[cost] =
-              (categoryStats.costAndTransparency.cost[cost] || 0) + 1;
+            categoryStats.costAndTransparency.cost[cost] = (categoryStats.costAndTransparency.cost[cost] || 0) + 1;
           }
           if (feesExplainedUpfront !== undefined) {
             categoryStats.costAndTransparency.feesExplainedUpfront[feesExplainedUpfront]++;
@@ -1196,8 +1196,9 @@ exports.getVetClinicReviewStats = async (req, res) => {
 
         // 5. Services & Specializations
         if (vetClinicReview.servicesAndSpecializations) {
-          const { onSiteDiagnostics, surgeryCapabilities, specializations } = vetClinicReview.servicesAndSpecializations;
-          
+          const { onSiteDiagnostics, surgeryCapabilities, specializations } =
+            vetClinicReview.servicesAndSpecializations;
+
           if (onSiteDiagnostics && Array.isArray(onSiteDiagnostics)) {
             onSiteDiagnostics.forEach((diagnostic) => {
               categoryStats.servicesAndSpecializations.onSiteDiagnostics[diagnostic] =
@@ -1220,7 +1221,7 @@ exports.getVetClinicReviewStats = async (req, res) => {
 
         // 6. Emergency & After-Hours Care
         if (vetClinicReview.emergencyAndAfterHours) {
-          const { openWeekends, openEvenings, onCallEmergencyNumber, emergencyTriageSpeed } = 
+          const { openWeekends, openEvenings, onCallEmergencyNumber, emergencyTriageSpeed } =
             vetClinicReview.emergencyAndAfterHours;
 
           if (openWeekends !== undefined) {
@@ -1241,7 +1242,7 @@ exports.getVetClinicReviewStats = async (req, res) => {
         // 7. Staff & Service Quality
         if (vetClinicReview.staffAndServiceQuality) {
           const { staffFriendliness, veterinarianExperience } = vetClinicReview.staffAndServiceQuality;
-          
+
           if (staffFriendliness) {
             categoryStats.staffAndServiceQuality.staffFriendliness[staffFriendliness] =
               (categoryStats.staffAndServiceQuality.staffFriendliness[staffFriendliness] || 0) + 1;
@@ -1352,10 +1353,11 @@ exports.getPetStoreReviewStats = async (req, res) => {
 
         // 3. Services & Conveniences - ALIGNED WITH MODEL
         if (petStoreReview.servicesAndConveniences) {
-          const { grooming, veterinaryServices, petTraining, onlineOrdering, curbsidePickup, returnPolicy } = 
+          const { grooming, veterinaryServices, petTraining, onlineOrdering, curbsidePickup, returnPolicy } =
             petStoreReview.servicesAndConveniences;
           if (grooming !== undefined) categoryStats.servicesAndConveniences.grooming[grooming]++;
-          if (veterinaryServices !== undefined) categoryStats.servicesAndConveniences.veterinaryServices[veterinaryServices]++;
+          if (veterinaryServices !== undefined)
+            categoryStats.servicesAndConveniences.veterinaryServices[veterinaryServices]++;
           if (petTraining !== undefined) categoryStats.servicesAndConveniences.petTraining[petTraining]++;
           if (onlineOrdering !== undefined) categoryStats.servicesAndConveniences.onlineOrdering[onlineOrdering]++;
           if (curbsidePickup !== undefined) categoryStats.servicesAndConveniences.curbsidePickup[curbsidePickup]++;
@@ -1399,7 +1401,8 @@ exports.getPetStoreReviewStats = async (req, res) => {
             categoryStats.staffKnowledgeAndService.petKnowledge[petKnowledge] =
               (categoryStats.staffKnowledgeAndService.petKnowledge[petKnowledge] || 0) + 1;
           }
-          if (trainingCertified !== undefined) categoryStats.staffKnowledgeAndService.trainingCertified[trainingCertified]++;
+          if (trainingCertified !== undefined)
+            categoryStats.staffKnowledgeAndService.trainingCertified[trainingCertified]++;
         }
       }
     });
@@ -1535,7 +1538,8 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
 
         // 5. Adoption Process & Support - ALIGNED WITH MODEL
         if (animalShelterReview.adoptionProcessAndSupport) {
-          const { applicationProcess, processingTime, homeVisitRequired } = animalShelterReview.adoptionProcessAndSupport;
+          const { applicationProcess, processingTime, homeVisitRequired } =
+            animalShelterReview.adoptionProcessAndSupport;
           if (applicationProcess) {
             categoryStats.adoptionProcessAndSupport.applicationProcess[applicationProcess] =
               (categoryStats.adoptionProcessAndSupport.applicationProcess[applicationProcess] || 0) + 1;
@@ -1544,7 +1548,8 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
             categoryStats.adoptionProcessAndSupport.processingTime[processingTime] =
               (categoryStats.adoptionProcessAndSupport.processingTime[processingTime] || 0) + 1;
           }
-          if (homeVisitRequired !== undefined) categoryStats.adoptionProcessAndSupport.homeVisitRequired[homeVisitRequired]++;
+          if (homeVisitRequired !== undefined)
+            categoryStats.adoptionProcessAndSupport.homeVisitRequired[homeVisitRequired]++;
         }
 
         // 6. Staff & Volunteer Quality - ALIGNED WITH MODEL
@@ -1558,7 +1563,8 @@ exports.getAnimalShelterReviewStats = async (req, res) => {
             categoryStats.staffAndVolunteerQuality.customerService[customerService] =
               (categoryStats.staffAndVolunteerQuality.customerService[customerService] || 0) + 1;
           }
-          if (volunteerProgram !== undefined) categoryStats.staffAndVolunteerQuality.volunteerProgram[volunteerProgram]++;
+          if (volunteerProgram !== undefined)
+            categoryStats.staffAndVolunteerQuality.volunteerProgram[volunteerProgram]++;
         }
       }
     });
@@ -1748,38 +1754,36 @@ exports.likeReview = async (req, res) => {
       // Only check for card generation when liking (not unliking) and when reaching 5+ likes
       if (liked && updatedReview.likeCount >= 5) {
         console.log(`Review reached ${updatedReview.likeCount} likes, checking for popular review card...`);
-        
+
         // Check if the review author already has a popular review card for this specific review
-        const existingPopularCard = await Card.findOne({ 
+        const existingPopularCard = await Card.findOne({
           reviewId: reviewId,
-          contributionType: "popular_review"
+          contributionType: "popular_review",
         });
-        
+
         if (!existingPopularCard) {
           // Get the review author and place info for card generation
           const reviewAuthorId = updatedReview.userId;
           const placeId = updatedReview.placeId;
-          
+
           // Get place name for the card
           const place = await Place.findById(placeId);
           const locationName = place ? place.name : "Unknown Location";
-          
+
           // Generate popular review card asynchronously in background - don't await to avoid blocking response
-          generateRewardCard(
-            reviewAuthorId, 
-            reviewId, 
-            placeId, 
-            locationName, 
-            "popular_review"
-          )
+          generateRewardCard(reviewAuthorId, reviewId, placeId, locationName, "popular_review")
             .then(() => {
-              console.log(`✅ Popular review card generated for user ${reviewAuthorId} - review with ${updatedReview.likeCount} likes`);
+              console.log(
+                `✅ Popular review card generated for user ${reviewAuthorId} - review with ${updatedReview.likeCount} likes`
+              );
             })
             .catch((cardError) => {
               console.error("Error generating popular review card in background:", cardError);
             });
-          
-          console.log(`🎯 Popular review card generation started in background for user ${reviewAuthorId} - review with ${updatedReview.likeCount} likes`);
+
+          console.log(
+            `🎯 Popular review card generation started in background for user ${reviewAuthorId} - review with ${updatedReview.likeCount} likes`
+          );
         } else {
           console.log(`User already has a popular review card for this review`);
         }

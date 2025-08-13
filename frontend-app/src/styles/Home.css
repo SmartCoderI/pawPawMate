@@ -102,6 +102,34 @@
   border-radius: 1rem; /* Rounded corners for map controls */
 }
 
+/* Filter collapse toggle */
+.filter-toggle {
+  display: none; /* Show only on mobile via media query */
+  margin-bottom: 0.5rem;
+}
+
+.filter-toggle-button {
+  background-color: #FFE500;
+  color: #000000;
+  border: 3px solid #000000;
+  box-shadow: 0.25rem 0.25rem 0px #000000;
+  font-size: 0.875rem;
+  font-weight: 900;
+  font-family: 'Arial Black', Arial, sans-serif;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.0625rem;
+  transition: all 0.1s ease;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.filter-toggle-button:hover {
+  background-color: #FFD400;
+  transform: translate(0.125rem, 0.125rem);
+  box-shadow: 0.125rem 0.125rem 0px #000000;
+}
+
 .search-container {
   position: relative;
   margin-bottom: 1rem;
@@ -236,7 +264,7 @@
   min-height: 0; /* Allow map to shrink */
   border: 4px solid #000000;
   box-shadow: 0.5rem 0.5rem 0px #000000;
-  background: #20B2AA; /* Teal background for map area */
+  background: transparent; /* Let the map fill the area */
   border-radius: 1rem; /* Rounded corners for map boundary */
   display: flex;
 }
@@ -575,19 +603,23 @@
 
   .filter-section {
     gap: 4px;
-    flex-wrap: nowrap; /* Keep items on same line */
-    align-items: center; /* Center align items */
+    flex-wrap: nowrap;
+    align-items: center;
   }
 
+  .filter-toggle { display: block; }
+  .filter-section.collapsed .filter-buttons { display: none; }
+
   .filter-buttons {
-    gap: 2px; /* Reduced gap for mobile */
-    flex-wrap: nowrap; /* Never wrap - keep in one row */
-    flex: 1; /* Take available space */
-    margin-bottom: 0; /* Remove bottom margin */
-    overflow-x: auto; /* Allow horizontal scrolling if needed */
+    display: grid; /* Force a single row of five buttons */
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    flex: 1;
+    margin-bottom: 0;
+    overflow: visible;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Hide scrollbar on Firefox */
-    -ms-overflow-style: none; /* Hide scrollbar on IE/Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   .filter-buttons::-webkit-scrollbar {
@@ -595,28 +627,36 @@
   }
 
   .filter-button {
-    padding: 6px 8px; /* Reduced padding for mobile */
-    font-size: 10px; /* Smaller font for mobile */
+    padding: 4px 4px; /* Compact to fit 5 per row */
+    font-size: 9.5px;
     letter-spacing: 0.3px;
-    min-height: 32px; /* Touch-friendly height */
-    flex-shrink: 0; /* Never shrink */
-    min-width: auto; /* Allow natural width */
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 0;
+    box-sizing: border-box;
     text-align: center;
     border: 2px solid #000000;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .location-count-display {
     font-size: 11px;
-    padding: 6px 8px; /* Reduced padding to fit better */
+    padding: 6px 8px;
     letter-spacing: 0.3px;
-    min-height: 32px; /* Match filter button height */
+    min-height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0; /* Don't shrink */
+    grid-column: 1 / -1; /* Occupy entire row below */
+    justify-self: center;
+    margin: 6px auto 0; /* Center horizontally */
     border: 2px solid #000000;
-    white-space: nowrap; /* Keep text on one line */
+    white-space: nowrap;
   }
 
   .map-wrapper {
@@ -624,14 +664,21 @@
     border: 2px solid #000000;
     flex: 1;
     min-height: 0;
+    background: transparent;
   }
 
   /* Make markers slightly larger on mobile for easier interaction */
   .marker {
     width: 3.25em;
     height: 3.25em;
-    border: none;
-    border-radius: 14px;
+    border: 3px solid #000000;
+    border-radius: 0.5rem;
+    box-shadow: 0.1875rem 0.1875rem 0px #000000;
+  }
+
+  .marker:hover {
+    transform: scale(1.06);
+    box-shadow: 0.25rem 0.25rem 0px #000000;
   }
 
   .marker-icon {
@@ -654,19 +701,26 @@
     margin: 4px;
   }
 
+  .filter-toggle { display: block; }
+  .filter-section.collapsed .filter-buttons { display: none; }
+
   .filter-buttons {
-    gap: 1px; /* Even smaller gap for very small screens */
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px; /* Tighter spacing on very small screens */
+    overflow: visible;
   }
 
   .filter-button {
-    font-size: 9px; /* Even smaller font */
-    padding: 5px 6px; /* Reduced padding */
-    min-width: auto;
-    min-height: 30px;
-    flex-shrink: 0;
-    letter-spacing: 0.2px;
+    font-size: 8.5px;
+    padding: 3px 4px; /* Very compact */
+    width: 100%;
+    min-width: 0;
+    min-height: 26px;
+    box-sizing: border-box;
+    letter-spacing: 0.1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .search-input {
@@ -685,11 +739,15 @@
   .location-count-display {
     font-size: 10px;
     padding: 6px 8px;
-    min-height: 32px;
+    min-height: 28px;
+    grid-column: 1 / -1;
+    justify-self: center;
+    margin: 6px auto 0;
   }
   
   .map-wrapper {
     margin: 0 4px 16px 4px; /* Ensure bottom spacing on small screens */
+    background: transparent;
   }
 
   .welcome-content h1 {
@@ -709,7 +767,14 @@
   .marker {
     width: 3.5em;
     height: 3.5em;
-    border-radius: 16px;
+    border: 3px solid #000000;
+    border-radius: 0.5rem;
+    box-shadow: 0.1875rem 0.1875rem 0px #000000;
+  }
+
+  .marker:hover {
+    transform: scale(1.06);
+    box-shadow: 0.25rem 0.25rem 0px #000000;
   }
 
   .marker-icon {
